@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="pageTitle">Nastavení – Alza Price Insight</title>
+    <style>
+      :root {
+        --blue: #0094e7;
+        --text: #212121;
+        --muted: #757575;
+        --line: #ececec;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 13px;
+        color: var(--text);
+        background: #f3f5f7;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      /* Odkaz na nápovědu vpravo v hlavičce – vzhledem jako tlačítka */
+      .help-link {
+        margin-left: auto;
+        padding: 5px 12px;
+        border: 1px solid #d2d2d2;
+        border-radius: 6px;
+        background: #fff;
+        color: inherit;
+        font-size: 13px;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .help-link:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      header img {
+        width: 36px;
+        height: 36px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .version {
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      section {
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+
+      h2 {
+        margin: 0 0 4px;
+        font-size: 14px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 36px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .row:last-of-type {
+        border-bottom: none;
+      }
+
+      .row .controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+      }
+
+      .controls.disabled {
+        opacity: 0.45;
+      }
+
+      input[type="number"] {
+        width: 52px;
+      }
+
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input[type="number"],
+      input[type="time"],
+      select {
+        padding: 2px 4px;
+        border: 1px solid #d2d2d2;
+        border-radius: 4px;
+        background: #fff;
+      }
+
+      /* Přepínač místo zaškrtávátka */
+      .switch {
+        appearance: none;
+        position: relative;
+        width: 32px;
+        height: 18px;
+        margin: 0;
+        border-radius: 9px;
+        background: #cfcfcf;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.15s;
+      }
+
+      .switch:checked {
+        background: var(--blue);
+      }
+
+      .switch:checked::after {
+        transform: translateX(14px);
+      }
+
+      .label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .info {
+        position: relative;
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #bdbdbd;
+        border-radius: 50%;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: help;
+      }
+
+      .info:hover,
+      .info:focus-visible {
+        border-color: var(--blue);
+        color: var(--blue);
+        outline: none;
+      }
+
+      .info::after {
+        content: attr(data-tip);
+        position: absolute;
+        top: calc(100% + 8px);
+        left: -10px;
+        z-index: 20;
+        width: 300px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #263238;
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+        font-size: 12.5px;
+        font-weight: 400;
+        line-height: 1.45;
+        text-align: left;
+        white-space: normal;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .info:hover::after,
+      .info:focus::after {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .note {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .saved {
+        min-height: 16px;
+        font-size: 12px;
+        color: #2e7d32;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 6px 0;
+      }
+
+      button {
+        padding: 4px 10px;
+        cursor: pointer;
+        border: 1px solid #d2d2d2;
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      button:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      th:first-child,
+      td:first-child {
+        width: 100%;
+        max-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
+
+      th {
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      td a {
+        color: #1653a4;
+      }
+
+      td button {
+        padding: 1px 8px;
+        font-size: 12px;
+      }
+
+      .reached {
+        font-weight: 600;
+        color: #2e7d32;
+      }
+
+      .empty {
+        margin: 6px 0;
+        color: var(--muted);
+      }
+
+      .danger {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed #d2d2d2;
+      }
+
+      .danger summary {
+        cursor: pointer;
+        color: #c62828;
+        font-weight: 600;
+      }
+
+      .action-error {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        max-width: 420px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #c62828;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+        z-index: 100;
+      }
+
+      #wipeConfirm {
+        width: 120px;
+        padding: 2px 6px;
+        border: 1px solid #d2d2d2;
+        border-radius: 4px;
+        font: inherit;
+      }
+
+      button:disabled {
+        cursor: default;
+        border-color: #e0e0e0;
+        color: #9e9e9e;
+      }
+
+      .danger-button:not(:disabled) {
+        border-color: #c62828;
+        color: #c62828;
+      }
+
+      .stored {
+        margin-top: 12px;
+      }
+
+      input[type="search"] {
+        flex: 1;
+        min-width: 200px;
+        padding: 3px 8px;
+        border: 1px solid #d2d2d2;
+        border-radius: 6px;
+      }
+
+      .stored select {
+        padding: 3px 4px;
+      }
+
+      /* Důvod uložení: seznam / detail / cílová cena; nehlídané šedě */
+      .tracked-by {
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .untracked td {
+        color: var(--muted);
+      }
+
+      /* Záložky pod nastavením – jedna sekce najednou */
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        padding: 0 8px;
+      }
+
+      .tab {
+        padding: 8px 14px;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        border-radius: 8px 8px 0 0;
+        background: transparent;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .tab[aria-selected="true"] {
+        border-bottom-color: var(--blue);
+        background: #fff;
+        color: var(--text);
+      }
+
+      .tab-count {
+        font-weight: 400;
+        color: var(--muted);
+      }
+
+      .tab-panel,
+      .tab-panel.stored {
+        margin-top: 0;
+      }
+
+      /* Rozbalovací řádek (seznamy, log běhů) – klik rozbalí pod ním detail */
+      .expandable {
+        cursor: pointer;
+      }
+
+      .expandable:hover td {
+        background: #f8fafc;
+      }
+
+      .row-title {
+        font-weight: 600;
+      }
+
+      .expand {
+        margin-right: 6px;
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      /* Detail přes všechny sloupce – bez zkracování první buňky */
+      .detail-row > td:first-child {
+        max-width: none;
+        padding: 0 0 10px 28px;
+        white-space: normal;
+        background: #fafbfc;
+      }
+
+      .detail-row table th {
+        font-size: 12px;
+      }
+
+      .watch-problem td {
+        color: #c62828;
+      }
+
+      /* Návrh čistky (modré číslo na ikoně) */
+      .cleanup-banner {
+        margin: 0 0 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        box-shadow: inset 4px 0 0 #1976d2;
+        background: #e3f2fd;
+        color: #0d47a1;
+      }
+
+      /* Řazení kliknutím na záhlaví sloupce */
+      th.sortable {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      th.sortable:hover,
+      th.sorted {
+        color: var(--blue);
+      }
+
+      .pager {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        color: var(--muted);
+      }
+
+      .pager .spacer {
+        flex: 1;
+      }
+
+      /* Log běhů – detail běhu */
+      .watch-log-entry,
+      .watch-log-note {
+        margin: 4px 0 0 16px;
+      }
+
+      .watch-log-entry a {
+        color: #1653a4;
+      }
+
+      .watch-log-change {
+        color: #2e7d32;
+      }
+
+      .watch-log-note {
+        color: var(--muted);
+      }
+
+      .watch-problem {
+        color: #c62828;
+      }
+
+      /* 📈 před názvem produktu – dialog historie cen (stejný jako na Alze) */
+      .history-button {
+        margin-right: 4px;
+        padding: 0 3px;
+        border: none;
+        background: none;
+        font-size: 13px;
+        line-height: 1;
+      }
+    </style>
+    <!-- Dialog historie cen z content scriptu (třídy alza-price-tracker-…) -->
+    <link rel="stylesheet" href="../../css/main.css" />
+  </head>
+
+  <body>
+    <header>
+      <img src="../../img/icon-48.png" alt="" />
+      <div>
+        <h1>Alza Price Insight</h1>
+        <span class="version" id="version"></span>
+      </div>
+      <a class="help-link" href="../help/help.html" target="_blank" data-i18n="helpLink" data-i18n-title="helpLinkTitle">❓ Nápověda</a>
+    </header>
+
+    <!-- Texty: data-i18n (text), data-i18n-title, data-i18n-tip (bublina „?“ + aria-label), data-i18n-placeholder –
+         slovník v options-texts.js; čeština tady jen do spuštění skriptu (shodu s cz hlídá tests/i18n.test.js) -->
+    <form id="settings" class="grid">
+      <section>
+        <h2 data-i18n="tracking">📈 Sledování cen</h2>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="checkSchedule">Kontrola hlídaných produktů</span> <span class="info" tabindex="0" role="note" data-i18n-tip="checkScheduleTip">?</span></span
+          >
+          <span class="controls"
+            ><select name="checkSchedule">
+              <option value="1h" data-i18n="schedule1h">každou hodinu</option>
+              <option value="3h" data-i18n="schedule3h">každé 3 hodiny</option>
+              <option value="6h" data-i18n="schedule6h">každých 6 hodin</option>
+              <option value="12h" data-i18n="schedule12h">každých 12 hodin</option>
+              <option value="daily" data-i18n="scheduleDaily">jednou denně v</option>
+            </select>
+            <input type="time" name="checkTime" hidden
+          /></span>
+        </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="saveBrowsing">Ukládat ceny z procházení</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="saveBrowsingTip">?</span></span
+          >
+          <span class="controls"><input type="checkbox" class="switch" name="saveBrowsing" /></span>
+        </div>
+
+        <h2 style="margin-top: 8px" data-i18n="notifications">🔔 Notifikace</h2>
+        <div class="row">
+          <span class="label"><span data-i18n="drops">Zlevnění</span> <span class="info" tabindex="0" role="note" data-i18n-tip="dropsTip">?</span></span>
+          <span class="controls"
+            ><span class="controls" id="dropRow"
+              ><span data-i18n="dropFrom">od</span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span
+            >
+            <input type="checkbox" class="switch" name="notifyDrops"
+          /></span>
+        </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="newPrices">Nová cena (akce, kód, cashback)</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="newPricesTip">?</span></span
+          >
+          <span class="controls"><input type="checkbox" class="switch" name="notifyNewPrices" /></span>
+        </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="availability">Dostupnost</span> <span class="info" tabindex="0" role="note" data-i18n-tip="availabilityTip">?</span></span
+          >
+          <span class="controls">
+            <select name="notifyAvailability">
+              <option value="all" data-i18n="availabilityAll">každá změna</option>
+              <option value="inStock" data-i18n="availabilityInStock">jen naskladnění</option>
+              <option value="off" data-i18n="availabilityOff">neoznamovat</option>
+            </select>
+          </span>
+        </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="quietHours">Tiché hodiny</span> <span class="info" tabindex="0" role="note" data-i18n-tip="quietHoursTip">?</span></span
+          >
+          <span class="controls"
+            ><span class="controls" id="quietRow"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
+            <input type="checkbox" class="switch" name="quietHours"
+          /></span>
+        </div>
+        <div class="buttons">
+          <button type="button" id="testNotifications" data-i18n="testNotifications" data-i18n-title="testNotificationsTitle">🔔 Vyzkoušet notifikace</button>
+        </div>
+
+        <h2 style="margin-top: 8px" data-i18n="categories">🛒 Výpisy kategorií</h2>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="unitPrice">Skutečná cena za jednotku</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="unitPriceTip">?</span></span
+          >
+          <span class="controls"><input type="checkbox" class="switch" name="categoryUnitPrice" /></span>
+        </div>
+
+        <div class="saved" data-saved></div>
+      </section>
+
+      <section>
+        <h2 data-i18n="language">🌐 Jazyk</h2>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="uiLanguage">Jazyk rozšíření</span> <span class="info" tabindex="0" role="note" data-i18n-tip="uiLanguageTip">?</span></span
+          >
+          <span class="controls">
+            <select name="uiLanguage">
+              <option value="auto" data-i18n="languageAuto">automaticky</option>
+              <option value="cs" lang="cs">Čeština</option>
+              <option value="sk" lang="sk">Slovenčina</option>
+              <option value="hu" lang="hu">Magyar</option>
+              <option value="en" lang="en">English</option>
+            </select>
+          </span>
+        </div>
+        <div class="saved" data-saved></div>
+
+        <h2 style="margin-top: 8px">
+          <span class="label"
+            ><span data-i18n="backup">💾 Záloha dat</span> <span class="info" tabindex="0" role="note" data-i18n-tip="backupNote">?</span></span
+          >
+        </h2>
+        <div class="buttons">
+          <button type="button" id="exportJson" data-i18n="exportJson">⬇️ Záloha (JSON)</button>
+          <button type="button" id="exportCsv" data-i18n="exportCsv">⬇️ Historie (CSV)</button>
+          <button type="button" id="importJson" data-i18n="importJson">⬆️ Obnovit ze zálohy…</button>
+          <button type="button" id="pruneData" data-i18n="pruneData">🧹 Uklidit stará data…</button>
+        </div>
+        <div class="saved" id="backupInfo"></div>
+
+        <h2 style="margin-top: 8px">
+          <span class="label"
+            ><span data-i18n="diagnostics">🩺 Diagnostika</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="diagnosticsNote">?</span></span
+          >
+        </h2>
+        <p class="note" id="errorSummary"></p>
+        <div class="buttons">
+          <button type="button" id="exportDiagnostics" data-i18n="exportDiagnostics">⬇️ Stáhnout diagnostiku</button>
+          <button type="button" id="clearErrorLog" data-i18n="clearErrorLog">Vymazat log chyb</button>
+        </div>
+
+        <details class="danger">
+          <summary data-i18n="wipeSummary">⚠️ Smazat všechna data…</summary>
+          <p class="note">
+            <span data-i18n="wipeNote"
+              >Smaže historii cen, uložené ceny, hlídané seznamy a produkty i cílové ceny (nastavení zůstane). Nejdřív se stáhne záloha, ze
+              které jde vše obnovit – smažete až druhým klepnutím, když je uložená. Pro potvrzení napište</span
+            >
+            <strong data-i18n="wipeWord">SMAZAT</strong><span data-i18n="wipeNoteEnd">:</span>
+          </p>
+          <div class="buttons">
+            <input type="text" id="wipeConfirm" autocomplete="off" spellcheck="false" placeholder="SMAZAT" data-i18n-placeholder="wipeWord" />
+            <button type="button" id="wipeData" class="danger-button" disabled>🗑️ Smazat</button>
+          </div>
+        </details>
+      </section>
+    </form>
+    <input type="file" id="importFile" accept=".json,application/json" hidden />
+
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="lists">
+        <span data-i18n="tabLists">📋 Hlídané seznamy</span> <span class="tab-count" id="countLists"></span>
+      </button>
+      <button type="button" class="tab" role="tab" data-tab="products">
+        <span data-i18n="tabProducts">🔔 Hlídané produkty</span> <span class="tab-count" id="countProducts"></span>
+      </button>
+      <button type="button" class="tab" role="tab" data-tab="data">
+        <span data-i18n="tabData">📦 Uložená data</span> <span class="tab-count" id="countData"></span>
+      </button>
+      <button type="button" class="tab" role="tab" data-tab="log">
+        <span data-i18n="tabLog">📜 Logy běhů</span> <span class="tab-count" id="countLog"></span>
+      </button>
+    </nav>
+
+    <section class="tab-panel" id="tab-lists" role="tabpanel">
+      <p class="note" style="margin: 0 0 6px" data-i18n="listsNote">
+        Nákupní seznamy, které se kontrolují na pozadí. Hlídání se zapíná v popupu na otevřeném seznamu. Kliknutím na řádek seznamu
+        uvidíte jeho produkty.
+      </p>
+      <div id="lists"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-products" role="tabpanel" hidden>
+      <p class="note" style="margin: 0 0 6px" data-i18n="productsNote">
+        Jednotlivé produkty hlídané i bez nákupního seznamu: na detailu produktu na Alze klikněte na „🔔 Hlídat na pozadí“ v kartě
+        rozšíření pod fotkami. Patří sem i produkty s cílovou cenou (nastavuje se v dialogu historie). Produkty z hlídaných seznamů
+        tu nejsou.
+      </p>
+      <div id="products"></div>
+    </section>
+
+    <section class="tab-panel stored" id="tab-data" role="tabpanel" hidden>
+      <p class="note" style="margin: 0 0 6px" data-i18n="dataNote">
+        Všechny produkty, o kterých rozšíření něco ví – historie cen a ceny z nákupních seznamů – a proč se ukládají. Nehlídaný produkt se
+        uloží při otevření nákupního seznamu a se zapnutým „Ukládat ceny z procházení“ i při procházení Alzy (👀 – výpisy kategorií,
+        vyhledávání, detail, karusely, úvodní stránka).
+      </p>
+      <div class="cleanup-banner" id="cleanupBanner" hidden>
+        <span data-i18n="cleanupBannerStart">🧹 Navrženo ke smazání:</span> <strong id="cleanupCount"></strong>
+        <span data-i18n="cleanupBannerEnd"
+          >produktů. Nehlídáte je (nejsou v hlídaném seznamu, nehlídáte je z detailu, nemají cílovou cenu) a přes 3 měsíce se
+          nekontrolovaly ani neotevřely – uložené při procházení přes rok. Smaže se jejich historie cen a uložené ceny.</span
+        >
+        <div class="buttons">
+          <button type="button" id="cleanupShow" data-i18n="cleanupShow">Zobrazit navržené</button>
+          <button type="button" id="cleanupDelete" class="danger-button" data-i18n="cleanupDelete">🗑️ Smazat navržené…</button>
+          <span class="saved" id="cleanupInfo"></span>
+        </div>
+      </div>
+      <div class="buttons">
+        <input type="search" id="dataSearch" placeholder="Hledat název nebo adresu…" data-i18n-placeholder="dataSearch" />
+        <select id="dataFilter">
+          <option value="all" data-i18n="filterAll">všechny</option>
+          <option value="tracked" data-i18n="filterTracked">hlídané</option>
+          <option value="untracked" data-i18n="filterUntracked">nehlídané</option>
+          <option value="target" data-i18n="filterTarget">s cílovou cenou</option>
+          <option value="browsed" data-i18n="filterBrowsed">z procházení</option>
+          <!-- Text s počtem doplní renderCleanupBanner (filterStaleCount) -->
+          <option value="stale" data-i18n="filterStale">navržené ke smazání</option>
+        </select>
+      </div>
+      <div class="note" id="dataSummary"></div>
+      <div id="storedProducts"></div>
+      <div class="pager" id="dataPager"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-log" role="tabpanel" hidden>
+      <p class="note" style="margin: 0 0 6px" data-i18n="logNote">
+        Posledních 50 kontrol na pozadí i ručních. Kliknutím na řádek běhu uvidíte, co se u kterého produktu změnilo nebo co se
+        nepovedlo.
+      </p>
+      <div id="watchLog" class="watch-log"></div>
+    </section>
+
+    <script src="../shared/core.js"></script>
+    <script src="../shared/store.js"></script>
+    <!-- Kvůli dialogu historie cen (AlzaPriceTracker.openHistoryDialog) – mimo Alzu se content script sám nespustí.
+         Stejné soubory a pořadí jako content_scripts v manifestu (hlídá tests/content-scripts.test.js) -->
+    <script src="../content/texts.js"></script>
+    <script src="../content.js"></script>
+    <script src="../content/variants.js"></script>
+    <script src="../content/cart-warning.js"></script>
+    <script src="../content/history.js"></script>
+    <script src="../content/targets.js"></script>
+    <script src="../content/list-toolbar.js"></script>
+    <script src="../content/insights.js"></script>
+    <script src="../content/history-chart.js"></script>
+    <script src="../content/product-panel.js"></script>
+    <script src="../content/watch.js"></script>
+    <script src="../content/start.js"></script>
+    <script src="options-texts.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

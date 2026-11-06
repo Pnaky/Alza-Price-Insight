@@ -1,0 +1,63 @@
+Alza Price Insight – price history, smart watching and the real unit price for Alza
+
+Do you shop on alza.cz, alza.sk or alza.hu? Alza Price Insight tells you whether today's price is really a good deal – right in your shopping lists, on product pages and in category listings.
+
+PRICE HISTORY
+• Every price of a product in one place: regular, sale, AlzaPlus+, discount code, cashback, trade-in, benefit/B2B and Black Friday
+• Chart of all price types with availability, all-time low, highest selling price and lowest price in the last 30 days
+• Table of every price and availability change
+• Works in shopping lists and on product pages
+
+IS THE PRICE REALLY GOOD?
+• Usual price – what the product sold for most of the last 180 days, so a short sale doesn't distort it
+• Clear rating: lowest in X days / X % below usual / at the usual price / X % above usual – shown as ▼ and ▲ arrows in your lists
+• Suspicious discounts: a warning when the product was cheaper in the last 30 days than its current "sale" price
+• Made-up strikethrough prices: a warning when the product never actually sold at the crossed-out price
+
+TARGET PRICE
+• Set the price you want to pay and get a notification as soon as the price drops to it – even with Alza closed
+• Target per piece for multipacks, e.g. 2.40 Kč per piece
+
+BACKGROUND WATCHING
+• Watch whole shopping lists or individual products – checked every hour, or just once a day at a time you choose
+• Notifications for price drops (with an optional minimum %), new prices (sale, code, cashback) and availability changes
+• Quiet hours, number of changes on the extension icon, overview of changes in the popup
+
+REAL PRICE PER PIECE
+• Alza calculates the unit price without AlzaPlus+ and discount codes. The extension shows the real price per piece in categories, search results, shopping lists and on product pages
+• The pack size selector shows the price per piece for every size and highlights the best value
+• Sort a whole category by the real unit price – ideal for stocking up during sales
+
+SMARTER SHOPPING LISTS
+• Summary bar: what you pay including volume discounts, cashback shown separately, savings, items that got cheaper or more expensive since last time
+• Filters: cheaper since last time, on sale, below usual price, worth waiting, volume discount, cheaper in another condition, in stock, target reached, suspicious discount
+• Sale rhythm: how often the product goes on sale and when the next sale is due – "worth waiting"
+• The same product cheaper unpacked or like new
+• Sorting: cheapest, cheapest per piece, most expensive, biggest discount, furthest below usual price, biggest drop
+
+YOUR DATA UNDER YOUR CONTROL
+• Backup and restore (JSON), price history export to CSV for Excel
+• Suggestions to clean up old products you no longer follow
+• A diagnostics file you can send to the author if something goes wrong
+
+LANGUAGES
+Czech, Slovak, Hungarian and English. You can change the extension's language in the settings – otherwise it follows your browser and the language of the Alza site.
+
+HOW TO START
+1. Log in to Alza and keep prices shown including VAT. Prices differ per account, so they are saved only when you are logged in.
+2. Open one of your shopping lists – the extension loads all prices and starts recording their history.
+3. Turn on watching in the extension popup, or set a target price on a product page.
+The built-in help (question mark in the popup) explains everything step by step.
+
+The price rating and the strikethrough-price check need at least 14 days of recorded history for a product.
+
+PRIVACY
+All data (prices, history, settings) is stored only locally in your browser. The extension communicates only with Alza websites and sends nothing anywhere else. No account, no tracking, no ads.
+
+PERMISSIONS
+• Access to alza.cz, alza.sk and alza.hu – to show prices on Alza pages and load product prices
+• Storage – to keep price history and settings in your browser
+• Alarms – to check watched products regularly in the background (every hour up to once a day)
+• Notifications – to tell you about price changes and reached target prices
+
+Unofficial project. This extension is not affiliated with, endorsed or sponsored by Alza.cz a.s. "Alza" is a trademark of its owner and is used only to identify the website the extension works with.

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alza Price Insight</title>
+    <style>
+      body {
+        width: 400px; /* Řádek změny „Akční cena: 24 542 Kč → 24 537 Kč (-5 Kč, -0,1 %)“ se vejde na jeden řádek */
+        margin: 0;
+        padding: 10px 12px;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 13px;
+        color: #212121;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .logo {
+        flex: none;
+        width: 32px;
+        height: 32px;
+      }
+
+      .brand {
+        flex: 1;
+        min-width: 0;
+      }
+
+      h1 {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      /* Odkaz na Alzu: její favicona v rámečku jako tlačítko vedle ⚙️ (bez načtené ikony text domény) */
+      .alza-link {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-width: 34px; /* Stejně velké jako ⚙️ (.icon-button); bez ikony je širší o text domény */
+        height: 30px;
+        padding: 0 6px;
+        border: 1px solid #d2d2d2;
+        border-radius: 4px;
+        background: linear-gradient(180deg, #fff, #efefef);
+        color: #1653a4;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .alza-link:hover {
+        border-color: #1653a4;
+      }
+
+      .alza-link img {
+        width: 20px;
+        height: 20px;
+      }
+
+      button {
+        padding: 6px 8px;
+        cursor: pointer;
+        color: #000;
+        border: 1px solid #d2d2d2;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 13px;
+        background: linear-gradient(180deg, #fff, #efefef);
+      }
+
+      button:hover {
+        background: linear-gradient(180deg, #f8f8f8, #efefef);
+      }
+
+      button:disabled {
+        cursor: default;
+        color: #9e9e9e;
+      }
+
+      .icon-button {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 34px;
+        height: 30px;
+        padding: 0;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .actions {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+
+      .actions button {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .watch-info {
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: #505050;
+      }
+
+      .watch-info.error {
+        color: #c62828;
+      }
+
+      .watch-problem {
+        color: #c62828;
+      }
+
+      .watch-lists {
+        list-style: none;
+        margin: 0 0 8px;
+        padding: 0;
+      }
+
+      .watch-lists li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 0;
+        border-bottom: 1px solid #efefef;
+      }
+
+      .watch-lists a {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #1653a4;
+      }
+
+      /* Shrnutí seznamu: kolik produktů za 7 dní zlevnilo / zdražilo */
+      .watch-summary {
+        flex: none;
+        font-size: 12px;
+        color: #9e9e9e;
+        cursor: help;
+      }
+
+      .watch-summary .down {
+        color: #2e7d32;
+        font-weight: 600;
+      }
+
+      .watch-summary .up {
+        color: #c62828;
+        font-weight: 600;
+      }
+
+      .watch-lists li {
+        flex-wrap: wrap;
+      }
+
+      /* Rozbalovací šipka u seznamu – vypadá jako text, ne jako tlačítko */
+      .watch-lists .expand {
+        flex: none;
+        width: 16px;
+        padding: 0;
+        border: none;
+        background: none;
+        color: #757575;
+        font-size: 10px;
+      }
+
+      .watch-products {
+        flex-basis: 100%;
+        max-height: 220px;
+        overflow-y: auto;
+        margin: 2px 0 4px 22px;
+      }
+
+      .watch-product {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 0;
+        font-size: 12px;
+      }
+
+      .watch-product img {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+      }
+
+      .watch-product a {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .watch-product-price {
+        flex: none;
+        font-weight: 600;
+      }
+
+      /* Návrh čistky (modré číslo na ikoně) */
+      .cleanup {
+        margin-bottom: 10px;
+        padding: 6px 8px;
+        border-radius: 4px;
+        box-shadow: inset 3px 0 0 #1976d2;
+        background: #e3f2fd;
+        font-size: 12px;
+        color: #0d47a1;
+        cursor: help;
+      }
+
+      .cleanup-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .cleanup-actions button {
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+
+      /* Přehled změn cen (číslo na ikoně = nové položky) */
+      .changes {
+        margin-bottom: 10px;
+      }
+
+      .changes h2 {
+        margin: 0 0 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #505050;
+      }
+
+      .changes-list {
+        max-height: 280px;
+        overflow-y: auto;
+        border-top: 1px solid #efefef;
+      }
+
+      .change {
+        display: flex;
+        gap: 8px;
+        padding: 6px 4px;
+        border-bottom: 1px solid #efefef;
+      }
+
+      /* Podbarvení podle změny: zlevnění (a naskladnění, nová akce, cílová cena) zeleně, zdražení červeně,
+         nedostupnost / konec prodeje šedě – jen nové změny (číslo na ikoně), viděné jsou bílé */
+      .change--down {
+        background: #f1f8e9;
+      }
+
+      .change--up {
+        background: #fdecea;
+      }
+
+      .change--off {
+        background: #f5f5f5;
+      }
+
+      .change img {
+        flex: none;
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+
+      .change-body {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .change-title {
+        display: flex;
+        gap: 6px;
+        align-items: baseline;
+      }
+
+      .change-title a {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #1653a4;
+        font-weight: 600;
+      }
+
+      .change-price {
+        flex: none;
+        font-weight: 700;
+      }
+
+      .change-line {
+        font-size: 12px;
+        color: #505050;
+      }
+
+      .change-line--down {
+        color: #2e7d32;
+      }
+
+      .change-line--up {
+        color: #c62828;
+      }
+
+      .change-line--off {
+        color: #757575;
+      }
+
+      .change-line--warning {
+        color: #e65100;
+      }
+
+      .change-meta {
+        font-size: 11px;
+        color: #9e9e9e;
+      }
+
+      .change-meta a {
+        color: #9e9e9e;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <img class="logo" src="../../img/icon-32.png" alt="" />
+      <div class="brand">
+        <h1 data-i18n="title">Alza Price Insight</h1>
+      </div>
+      <a id="openAlza" class="alza-link" href="https://www.alza.cz/" target="_blank"></a>
+      <button id="openOptions" class="icon-button" data-i18n-title="openOptionsTitle" title="Nastavení, hlídané produkty, cílové ceny, záloha">⚙️</button>
+    </header>
+
+    <div id="cleanupNotice" class="cleanup" hidden>
+      <div id="cleanupText"></div>
+      <div class="cleanup-actions">
+        <button id="cleanupReview" data-i18n="cleanupReview">🧹 Prohlédnout a smazat</button>
+        <button id="cleanupSnooze" data-i18n="cleanupSnooze">Připomenout za měsíc</button>
+      </div>
+    </div>
+
+    <section id="changes" class="changes" hidden>
+      <h2 id="changesTitle" data-i18n="changes">Změny cen</h2>
+      <div id="changesList" class="changes-list"></div>
+    </section>
+
+    <div class="actions">
+      <button id="toggleWatch" disabled data-i18n="watchList">🔔 Hlídat seznam</button>
+      <button id="runWatchNow" data-i18n="runNow" data-i18n-title="runNowTitle" title="Zkontrolovat hlídané produkty teď">▶️ Zkontrolovat</button>
+    </div>
+    <ul id="watchLists" class="watch-lists"></ul>
+    <div id="watchStatus" class="watch-info"></div>
+
+    <script src="../shared/core.js"></script>
+    <script src="../shared/store.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

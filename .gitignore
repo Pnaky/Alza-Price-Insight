@@ -1,0 +1,5 @@
+*.stackdump
+
+# Vygenerované stránky nástroje na snímky do Chrome Web Store
+tools/store-screenshots/pages/
+__pycache__/

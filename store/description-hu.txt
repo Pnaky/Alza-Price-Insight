@@ -1,0 +1,63 @@
+Alza Price Insight – árelőzmények, okos figyelés és valós darabár az Alzához
+
+Az alza.hu, alza.cz vagy alza.sk oldalon vásárol? Az Alza Price Insight megmutatja, hogy a mai ár tényleg jó ajánlat-e – közvetlenül a bevásárlólistákban, a termékoldalon és a kategóriák listáiban.
+
+ÁRELŐZMÉNYEK
+• A termék minden ára egy helyen: normál, akciós, AlzaPlus+, kuponkódos, cashback, beszámítás, benefit/B2B és Black Friday ár
+• Az összes ártípus grafikonja az elérhetőséggel, a legalacsonyabb ár, a legmagasabb eladási ár és az elmúlt 30 nap legalacsonyabb ára
+• Az árak és az elérhetőség minden változásának táblázata
+• Működik a bevásárlólistákban és a termékoldalon is
+
+TÉNYLEG JÓ AZ ÁR?
+• Szokásos ár – amennyiért a termék az elmúlt 180 napban a legtovább volt kapható, így egy rövid akció nem torzítja
+• Egyértelmű értékelés: legalacsonyabb X nap alatt / X %-kal a szokásos ár alatt / szokásos áron / X %-kal a szokásos ár felett – a listákban ▼ és ▲ nyilakként
+• Gyanús kedvezmények: figyelmeztetés, ha a termék az elmúlt 30 napban olcsóbb volt, mint most „akcióban”
+• Kitalált áthúzott árak: figyelmeztetés, ha a termék soha nem volt kapható az áthúzott áron
+
+CÉLÁR
+• Adja meg, mennyit szeretne fizetni, és amint az ár a célárra csökken, értesítést kap – akkor is, ha az Alza nincs megnyitva
+• Darabonkénti cél kiszereléses termékeknél, pl. 60 Ft/db
+
+HÁTTÉRFIGYELÉS
+• Figyelje a teljes bevásárlólistákat és az egyes termékeket – ellenőrzés óránként, vagy akár csak naponta egyszer a megadott időpontban
+• Értesítések árcsökkenésről (akár egy megadott százaléktól), új árakról (akció, kód, cashback) és az elérhetőség változásáról
+• Csendes órák, a változások száma a bővítmény ikonján, a változások áttekintése a felugró ablakban
+
+VALÓS DARABÁR
+• Az Alza a darabárat AlzaPlus+ és kuponkódok nélkül számolja. A bővítmény megmutatja a valós darabárat a kategóriákban, a keresésben, a bevásárlólistákban és a termékoldalon
+• A kiszerelés kiválasztásakor darabár minden méretnél, a legelőnyösebb kiemelve
+• Az egész kategória rendezése valós egységár szerint – ideális készletezéshez akciók idején
+
+OKOSABB BEVÁSÁRLÓLISTÁK
+• Összesítő sáv: mennyit fizet mennyiségi kedvezménnyel együtt, a cashback külön, megtakarítás, mi lett olcsóbb vagy drágább legutóbb óta
+• Szűrők: olcsóbb lett, akciós, szokásos ár alatt, érdemes várni, mennyiségi kedvezmény, más állapotban olcsóbb, raktáron, célár elérve, gyanús kedvezmény
+• Akciók ritmusa: milyen gyakran akciós a termék, és mikor várható a következő – „érdemes várni“
+• Ugyanaz a termék olcsóbban kibontva vagy újszerű állapotban
+• Rendezés: legolcsóbb, legolcsóbb darabár, legdrágább, legnagyobb kedvezmény, leginkább a szokásos ár alatt, legnagyobb árcsökkenés
+
+AZ ADATAI AZ ÖN KEZÉBEN
+• Biztonsági mentés és visszaállítás (JSON), árelőzmények exportja CSV-be Excelhez
+• Javaslat a már nem követett régi termékek törlésére
+• Diagnosztikai fájl, amelyet elküldhet a szerzőnek, ha valami nem működik
+
+NYELVEK
+Magyar, cseh, szlovák és angol. A bővítmény nyelve a beállításokban módosítható – egyébként a böngészőhöz és az adott Alza nyelvéhez igazodik.
+
+HOGYAN KEZDJEN HOZZÁ
+1. Jelentkezzen be az Alzán, és az árak ÁFA-val jelenjenek meg. Az árak fiókonként eltérnek, ezért csak bejelentkezett felhasználónál mentődnek.
+2. Nyissa meg valamelyik bevásárlólistát – a bővítmény betölti az összes árat, és elkezdi vezetni az előzményeket.
+3. A bővítmény felugró ablakában kapcsolja be a figyelést, vagy a termékoldalon állítson be célárat.
+A beépített súgó (kérdőjel a felugró ablakban) mindent lépésről lépésre elmagyaráz.
+
+Az ár értékeléséhez és az áthúzott ár ellenőrzéséhez a terméknél legalább 14 napnyi rögzített előzmény szükséges.
+
+ADATVÉDELEM
+Minden adat (árak, előzmények, beállítások) csak helyben, az Ön böngészőjében tárolódik. A bővítmény kizárólag az Alza weboldalaival kommunikál, máshová semmit sem küld. Nincs fiók, nincs követés, nincsenek hirdetések.
+
+ENGEDÉLYEK
+• Hozzáférés az alza.hu, alza.cz és alza.sk oldalakhoz – az árak megjelenítése az Alza oldalain és a termékárak betöltése
+• Tárhely – árelőzmények és beállítások az Ön böngészőjében
+• Riasztások – a figyelt termékek rendszeres háttérellenőrzése (óránként vagy akár naponta egyszer)
+• Értesítések – figyelmeztetés árváltozásokról és elért célárakról
+
+Nem hivatalos projekt. A bővítmény nem áll kapcsolatban az Alza.cz a.s. társasággal, és az nem támogatja vagy szponzorálja. Az „Alza” név a tulajdonosa védjegye, és csak annak a weboldalnak a megjelölésére szolgál, amellyel a bővítmény együttműködik.

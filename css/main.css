@@ -1,0 +1,1294 @@
+/* Společné animace */
+@keyframes alza-price-tracker-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Společné třídy */
+.alza-price-tracker-hidden {
+  display: none !important;
+}
+
+/* Tečkované podtržení (zkrácený text dostupnosti s tooltipem) */
+.alza-price-tracker-dotted-underline {
+  cursor: help !important;
+  text-decoration: underline !important;
+  text-decoration-style: dotted !important;
+  display: inline-block !important;
+}
+
+/* Kontejner spinneru – absolutně vpravo ZA cenami, bez vlivu na layout */
+.alza-price-tracker-spinner-container {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 6px; /* malý odstup za cenou */
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spinner pro položky */
+.alza-price-tracker-spinner {
+  position: static;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #0094e7;
+  animation: alza-price-tracker-spin 1s linear infinite;
+  margin: 0;
+}
+
+/* Spinner v notifikaci */
+.alza-price-tracker-notification-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: alza-price-tracker-spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+/* Stav načítání pro položky */
+.alza-price-tracker-loading-item {
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+/* Notifikace */
+.alza-price-tracker-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #0094e7;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  font-size: 14px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+/* Pozastavené ukládání (nepřihlášen, ceny bez DPH) – nad notifikací načítání */
+.alza-price-tracker-notification--warning {
+  bottom: 76px;
+  max-width: 440px;
+  background-color: #f26b1d;
+  cursor: pointer;
+}
+
+.alza-price-tracker-notification.fade-out {
+  opacity: 0;
+}
+
+.alza-price-tracker-notification .progress-text {
+  font-weight: normal;
+}
+
+/* Základní třída pro cenu */
+.alza-price-tracker-price {
+  display: inline-block;
+  padding: 10px 12px !important;
+  border-radius: 4px !important;
+  margin-right: 10px !important;
+}
+
+.alza-price-tracker-price:last-child {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Ceny s boxem si pravý padding ponechají i jako poslední prvek */
+.alza-price-tracker-price-discount:last-child,
+.alza-price-tracker-price-scrappage:last-child,
+.alza-price-tracker-price-cashback:last-child,
+.alza-price-tracker-price-applus:last-child,
+.alza-price-tracker-price-benefit:last-child,
+.alza-price-tracker-price-b2b:last-child,
+.alza-price-tracker-price-blackfriday:last-child {
+  padding-right: 12px !important;
+}
+
+/* Specifické styly podle typu ceny */
+.alza-price-tracker-price-special {
+  padding-right: 0 !important;
+}
+
+.alza-price-tracker-price-discount {
+  background: #fff9d7 !important;
+  border: 1px dashed #ffd538 !important;
+}
+
+.alza-price-tracker-price-scrappage,
+.alza-price-tracker-price-cashback {
+  background: #f2fde5 !important;
+  border: 1px dashed #689700 !important;
+}
+
+.alza-price-tracker-price-applus {
+  background: #fff3ec !important;
+  border: 1px dashed #f29400 !important;
+}
+
+.alza-price-tracker-price-benefit {
+  background: #dbe6f4 !important;
+  border: 1px dashed #84a4cf !important;
+}
+
+.alza-price-tracker-price-b2b {
+  background: #c2ede3 !important;
+  border: 1px dashed #43bd9e !important;
+}
+
+.alza-price-tracker-price-blackfriday {
+  background: #3a3a3a !important;
+  border: 1px dashed #000000 !important;
+  color: #fee956 !important;
+}
+
+.alza-price-tracker-price-original {
+  text-decoration: line-through !important;
+  color: red !important;
+}
+
+/* Podezřelá cena (možná chyba čtení) – ukáže se, ale s výstrahou; vysvětlení v title */
+.alza-price-tracker-price--suspicious {
+  outline: 2px dashed #e65100 !important;
+  outline-offset: 1px !important;
+  cursor: help !important;
+}
+
+.alza-price-tracker-price--suspicious::before {
+  content: "⚠️";
+  margin-right: 2px;
+}
+
+/* Ikony cen */
+.alza-price-tracker-price-change-icon {
+  height: 16px !important;
+  width: 16px !important;
+  vertical-align: middle !important;
+  margin-right: 10px !important;
+}
+
+.alza-price-tracker-price-icon {
+  height: 16px !important;
+  width: 16px !important;
+  vertical-align: middle !important;
+  margin-right: 5px !important;
+}
+
+.alza-price-tracker-arrow {
+  display: inline-block !important;
+  vertical-align: -2px !important;
+}
+
+.alza-price-tracker-price-change-icon-increased {
+  color: red !important;
+}
+
+.alza-price-tracker-price-change-icon-decreased {
+  color: #a1c900 !important;
+}
+
+/* Zvýraznění změn cen */
+.alza-price-tracker-price-increased {
+  background: #ffeeee !important;
+}
+
+.alza-price-tracker-price-decreased {
+  background: #f2fde5 !important;
+}
+
+/* Historie cen – spouštěč na nejvyšší ceně */
+.alza-price-tracker-history-trigger {
+  cursor: pointer !important;
+}
+
+.alza-price-tracker-history-trigger:hover {
+  opacity: 0.75;
+}
+
+/* Historie cen – dialog */
+.alza-price-tracker-history {
+  width: min(880px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100vh - 48px);
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  background: #fff;
+  color: #212121;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.alza-price-tracker-history::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.alza-price-tracker-history-body {
+  padding: 20px 24px 24px;
+}
+
+.alza-price-tracker-history-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.alza-price-tracker-history-image {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: contain;
+  padding: 4px;
+  box-sizing: border-box;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.alza-price-tracker-history-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.alza-price-tracker-history-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #757575;
+}
+
+.alza-price-tracker-history-product {
+  display: block;
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #212121 !important;
+  text-decoration: none !important;
+}
+
+.alza-price-tracker-history-product:hover {
+  color: #0094e7 !important;
+  text-decoration: underline !important;
+}
+
+.alza-price-tracker-history-close {
+  align-self: flex-start;
+  appearance: none !important;
+  width: auto !important;
+  padding: 0 4px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #555 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  cursor: pointer;
+}
+
+.alza-price-tracker-history-close:hover {
+  color: #000 !important;
+}
+
+.alza-price-tracker-history-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 8px;
+  margin: 16px 0 14px;
+}
+
+.alza-price-tracker-history-stat {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f6f7f8;
+}
+
+.alza-price-tracker-history-stat[title],
+.alza-price-tracker-product-stat[title] {
+  cursor: help;
+}
+
+.alza-price-tracker-history-stat-label,
+.alza-price-tracker-history-stat-sub,
+.alza-price-tracker-product-stat-label,
+.alza-price-tracker-product-stat-sub {
+  font-size: 12px;
+  color: #757575;
+}
+
+.alza-price-tracker-history-stat-value,
+.alza-price-tracker-product-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Historie cen – cílová cena */
+.alza-price-tracker-history-warning {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #f5c2a0;
+  border-left: 4px solid #e65100;
+  border-radius: 8px;
+  background: #fff3e0;
+  color: #8a3a00;
+  font-weight: 600;
+}
+
+.alza-price-tracker-history-target {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #ffe0c2;
+  border-radius: 8px;
+  background: #fff8f1;
+}
+
+.alza-price-tracker-history-target-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.alza-price-tracker-history-target-label {
+  margin: 0 4px 0 0 !important;
+  font-weight: 700;
+  color: #212121;
+}
+
+.alza-price-tracker-history-target-input {
+  width: 120px !important;
+  height: 32px !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  border: 1px solid #cfcfcf !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  font: inherit !important;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Jednotka cíle (Kč / Kč/ks) – jen u produktů se známým počtem kusů v balení */
+select.alza-price-tracker-history-target-currency {
+  width: auto !important;
+  height: 32px !important;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  border: 1px solid #cfcfcf !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  font: inherit !important;
+  cursor: pointer;
+}
+
+.alza-price-tracker-history-target-button {
+  height: 32px !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: #ef6c00 !important;
+  color: #fff !important;
+  font: inherit !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.alza-price-tracker-history-target-button:hover {
+  background: #d65f00 !important;
+}
+
+.alza-price-tracker-history-target-button--secondary {
+  border: 1px solid #cfcfcf !important;
+  background: #fff !important;
+  color: #424242 !important;
+}
+
+.alza-price-tracker-history-target-button--secondary:hover {
+  background: #f2f2f2 !important;
+}
+
+.alza-price-tracker-history-target-status {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #616161;
+}
+
+.alza-price-tracker-history-target-status--reached {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.alza-price-tracker-history-target-status--error {
+  color: #c62828;
+}
+
+/* Detail produktu – karta v levém sloupci pod fotkami */
+.alza-price-tracker-product {
+  clear: both;
+  margin: 16px 0 8px;
+  padding: 14px 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #212121;
+}
+
+.alza-price-tracker-product-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.alza-price-tracker-product-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.alza-price-tracker-product-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.alza-price-tracker-product-stat {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f6f7f8;
+}
+
+.alza-price-tracker-product-spark {
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.alza-price-tracker-product-spark:hover {
+  opacity: 0.85;
+}
+
+.alza-price-tracker-product-spark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.alza-price-tracker-product-spark text {
+  font-size: 11px;
+  fill: #757575;
+}
+
+.alza-price-tracker-product-spark-line {
+  fill: none;
+  stroke: #0094e7;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.alza-price-tracker-product-spark-area {
+  fill: rgba(0, 148, 231, 0.08);
+  stroke: none;
+}
+
+.alza-price-tracker-product-note {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #616161;
+}
+
+.alza-price-tracker-product-note--warning {
+  font-weight: 600;
+  color: #e65100;
+  cursor: help;
+}
+
+.alza-price-tracker-product-note--reached {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.alza-price-tracker-product-note--wait {
+  font-weight: 600;
+  color: #0b6bcb;
+}
+
+.alza-price-tracker-product-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.alza-price-tracker-product--floating {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9998;
+  max-width: 420px;
+  margin: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.alza-price-tracker-product-button {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  border: 1px solid #d2d2d2 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #212121 !important;
+  font: inherit !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.alza-price-tracker-product-button:hover:not(:disabled) {
+  border-color: #0094e7 !important;
+  color: #0094e7 !important;
+}
+
+.alza-price-tracker-product-button:disabled {
+  cursor: default;
+  color: #616161 !important;
+  font-weight: 400 !important;
+}
+
+.alza-price-tracker-product-head .alza-price-tracker-product-button {
+  font-weight: 400 !important;
+  font-size: 13px !important;
+}
+
+/* Lišta nad seznamem – souhrn, filtry, řazení */
+.alza-price-tracker-toolbar {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: #212121;
+}
+
+.alza-price-tracker-toolbar-summary {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+
+.alza-price-tracker-toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.alza-price-tracker-toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.alza-price-tracker-toolbar-chip {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 4px 12px !important;
+  border: 1px solid #d2d2d2 !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  color: #424242 !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  cursor: pointer;
+}
+
+.alza-price-tracker-toolbar-chip:hover {
+  border-color: #0094e7 !important;
+}
+
+.alza-price-tracker-toolbar-chip--active {
+  border-color: #0094e7 !important;
+  background: #0094e7 !important;
+  color: #fff !important;
+}
+
+.alza-price-tracker-toolbar-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 !important;
+  font-size: 13px;
+  color: #616161;
+}
+
+.alza-price-tracker-toolbar-sort select {
+  padding: 3px 6px;
+  border: 1px solid #d2d2d2;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  color: #212121;
+}
+
+/* Řazení přes CSS order – rodič položek musí být flex */
+.alza-price-tracker-sorted {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Ikony u ceny v seznamu – mimo tok, vlevo od cen v mezeře za dostupností (vpravo je košík);
+   šířka sloupce s cenou se nemění, takže se řádek nezalamuje */
+.alza-price-tracker-price-container {
+  position: relative !important;
+}
+
+.alza-price-tracker-indicators {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 10px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.alza-price-tracker-indicators:empty {
+  display: none;
+}
+
+/* Bez kroužku: dosažený cíl barevně, nedosažený šedě */
+.alza-price-tracker-indicators .alza-price-tracker-target-marker--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-size: 15px;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.alza-price-tracker-indicators .alza-price-tracker-target-marker--reached {
+  filter: none;
+  opacity: 1;
+}
+
+/* Šipka u ceny – aktuální cena pod / nad obvyklou cenou */
+.alza-price-tracker-verdict-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: help;
+}
+
+.alza-price-tracker-verdict-marker--good {
+  color: #2e7d32;
+}
+
+.alza-price-tracker-verdict-marker--high {
+  color: #c62828;
+}
+
+/* Vyplatí se počkat – další akce se čeká brzy */
+.alza-price-tracker-verdict-marker--wait {
+  font-size: 13px;
+}
+
+/* Cílová cena v seznamu – za cenami */
+.alza-price-tracker-target-marker {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border: 1px solid #ffcc99;
+  border-radius: 10px;
+  background: #fff8f1;
+  color: #ef6c00;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.alza-price-tracker-target-marker--reached {
+  border-color: #a5d6a7;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.alza-price-tracker-history-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.alza-price-tracker-history-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alza-price-tracker-history-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.alza-price-tracker-history-swatch-band {
+  width: 10px;
+  height: 10px;
+}
+
+.alza-price-tracker-history-empty {
+  color: #666;
+  padding: 16px 0;
+  margin: 0;
+}
+
+/* Historie cen – graf */
+.alza-price-tracker-history-chart {
+  position: relative;
+}
+
+.alza-price-tracker-history-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.alza-price-tracker-history-chart text {
+  font-size: 11px;
+  fill: #6b6b6b;
+}
+
+.alza-price-tracker-history-grid {
+  stroke: #ececec;
+  stroke-width: 1;
+}
+
+.alza-price-tracker-history-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.alza-price-tracker-history-milestone {
+  stroke-width: 1.25;
+  stroke-dasharray: 6 4;
+}
+
+.alza-price-tracker-history-chart .alza-price-tracker-history-milestone-label,
+.alza-price-tracker-product-spark .alza-price-tracker-history-milestone-label {
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.alza-price-tracker-history-cursor {
+  stroke: #9e9e9e;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.alza-price-tracker-history-tooltip {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  display: none;
+  z-index: 1;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.alza-price-tracker-history-tooltip-date {
+  color: #6b6b6b;
+  margin-bottom: 4px;
+}
+
+.alza-price-tracker-history-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alza-price-tracker-history-tooltip-row strong {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+/* Historie cen – tabulka změn */
+.alza-price-tracker-history-table-wrap {
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 16px;
+}
+
+.alza-price-tracker-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.alza-price-tracker-history-table th,
+.alza-price-tracker-history-table td {
+  padding: 5px 8px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid #f0f0f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.alza-price-tracker-history-table th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  font-weight: 600;
+  border-bottom-color: #e2e2e2;
+}
+
+.alza-price-tracker-history-table th:nth-child(-n + 2),
+.alza-price-tracker-history-table td:nth-child(-n + 2) {
+  text-align: left;
+  color: #555;
+}
+
+.alza-price-tracker-history-table td[title] {
+  cursor: help;
+}
+
+.alza-price-tracker-history-up,
+.alza-price-tracker-history-down {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.alza-price-tracker-history-up {
+  color: #d32f2f;
+}
+
+.alza-price-tracker-history-down {
+  color: #4c8c00;
+}
+
+/* Zajistit správné umístění tooltipů */
+.alza-price-tracker-price[title],
+.alza-price-tracker-price-change-marker[title] {
+  position: relative;
+  cursor: help;
+}
+
+/* Hlídání seznamu na pozadí – zvoneček v otevřené záložce seznamu. Jen ::after, žádný vložený
+   prvek (React by při hydrataci překreslil celý seznam). Pozice musí odpovídat config.watchBell v content.js */
+.alza-price-tracker-watch-tab {
+  position: relative !important;
+  padding-right: 32px !important;
+}
+
+.alza-price-tracker-watch-tab::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background-color: #a4a4a4;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.alza-price-tracker-watch-tab:hover::after {
+  background-color: #0094e7;
+}
+
+.alza-price-tracker-watch-tab.alza-price-tracker-watched-tab::after {
+  background-color: #0094e7;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z'/%3E%3C/svg%3E");
+}
+
+/* Hlídaný seznam – linka pod záložkou (i když není otevřený) */
+.alza-price-tracker-watched-tab {
+  box-shadow: inset 0 -3px 0 #0094e7 !important;
+}
+
+/* Cena za jednotku ve výpisu kategorie – přepočet z ceny s AlzaPlus+ nebo slevovým kódem (category.js).
+   Štítek před Alzinou cenou za jednotku, stejný tvar jako její, barva slevy */
+.alza-price-tracker-unit-price {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: #fd7528; /* oranžová AlzaPlus+ */
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.alza-price-tracker-unit-price--withCode {
+  background: #0094e7;
+}
+
+/* Oba štítky na jednom řádku – přesahují pod tlačítko "Do košíku", kde je volno */
+.unit-price:has(.alza-price-tracker-unit-price) {
+  white-space: nowrap;
+}
+
+/* Blok ceny má u Alzy pevnou výšku – s benefitní cenou (přeškrtnutá cena pod ní) se nevejde a cena za
+   jednotku přetéká přes "Skladem" */
+#boxes .price--with-unit-price {
+  height: auto !important;
+  min-height: 100px;
+}
+
+/* Lišta nad výpisem kategorie – řazení podle skutečné ceny za jednotku (category.js) */
+.alza-price-tracker-unit-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 8px 0 12px;
+  scroll-margin-top: 90px; /* Po seřazení se na lištu posune stránka – nesmí zajet pod lepicí hlavičku Alzy */
+}
+
+.alza-price-tracker-unit-toolbar .alza-price-tracker-toolbar-chip:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.alza-price-tracker-unit-toolbar-status {
+  color: #2e7d32;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Neviditelné přečtení výběru velikosti při načtení detailu – rozbalený seznam se na okamžik otevře, ale není vidět */
+.alza-price-tracker-variant-probe [role="tooltip"]:has([role="listbox"]) {
+  visibility: hidden !important;
+}
+
+/* Výběr velikosti na detailu: cena za jednotku ve sloupci vpravo, nejvýhodnější zeleně, nejdražší červeně */
+.alza-price-tracker-variant-unit {
+  margin-left: auto;
+  padding: 0 12px 0 8px;
+  align-self: center;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 400;
+  color: #616161;
+  white-space: nowrap;
+}
+
+.alza-price-tracker-variant-unit--best {
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.alza-price-tracker-variant-unit--worst {
+  color: #c62828;
+}
+
+/* Více kusů v seznamu: sloupec „3 ks celkem / částka“ vlevo od cen v prázdném místě řádku (mimo tok – ceny ani
+   řádek se nepohnou); nativní „cena / ks“ Alzy schovat (ceny rozšíření jsou za kus) */
+.alza-price-tracker-multi [data-testid="shoppingListItem_price"] {
+  position: relative;
+}
+
+/* První v ukazatelích vlevo od cen (před šipkami) – s nimi se nepřekrývá */
+.alza-price-tracker-quantity-total {
+  margin-right: 8px;
+  text-align: right;
+  white-space: nowrap;
+  line-height: 1.25;
+  cursor: help;
+}
+
+.alza-price-tracker-quantity-total--hidden {
+  visibility: hidden;
+}
+
+.alza-price-tracker-quantity-total-label {
+  display: block;
+  font-size: 12px;
+  color: #757575;
+}
+
+.alza-price-tracker-quantity-total-value {
+  display: block;
+  font-size: 14px; /* stejně jako ceny */
+  font-weight: 400;
+  color: #212121;
+}
+
+/* Nativní „cena / ks“ schovat v každé položce s cenami rozšíření – i v okamžiku, kdy ji React po zvýšení počtu
+   vloží a rozšíření ještě nestihlo položku označit (jinak by řádek na chvíli problikl) */
+.alza-price-tracker-multi [data-testid="shoppingListItem_pricePerPiece"],
+[data-testid="shoppingListItem"]:has(.alza-price-tracker-price) [data-testid="shoppingListItem_pricePerPiece"] {
+  display: none !important;
+}
+
+/* Upozornění na podmíněnou nejnižší cenu při vložení do košíku ze seznamu */
+.alza-price-tracker-cart-warning {
+  position: absolute;
+  z-index: 2147483000;
+  width: min(380px, calc(100vw - 16px));
+  box-sizing: border-box;
+  padding: 16px;
+  background: #fff;
+  color: #212121;
+  border: 1px solid #e3e6ea;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.16), 0 2px 6px rgba(17, 24, 39, 0.08);
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  animation: alza-price-tracker-pop 0.14s ease-out;
+}
+
+@keyframes alza-price-tracker-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.alza-price-tracker-cart-warning-arrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  transform: rotate(45deg);
+}
+
+.alza-price-tracker-cart-warning--below .alza-price-tracker-cart-warning-arrow {
+  top: -8px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.alza-price-tracker-cart-warning--above .alza-price-tracker-cart-warning-arrow {
+  bottom: -8px;
+  border-left: none;
+  border-top: none;
+}
+
+.alza-price-tracker-cart-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.alza-price-tracker-cart-warning-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff3cd;
+  color: #a15c00;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.alza-price-tracker-cart-warning-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.alza-price-tracker-cart-warning-x {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #757575;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.alza-price-tracker-cart-warning-x:hover {
+  background: #f2f3f5;
+  color: #212121;
+}
+
+.alza-price-tracker-cart-warning-list {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.alza-price-tracker-cart-warning-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.alza-price-tracker-cart-warning-item + .alza-price-tracker-cart-warning-item {
+  margin-top: 8px;
+}
+
+.alza-price-tracker-cart-warning-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+.alza-price-tracker-cart-warning-prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 8px 0 6px;
+}
+
+.alza-price-tracker-cart-warning-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid #e3e6ea;
+  border-radius: 999px;
+  background: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.alza-price-tracker-cart-warning-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.alza-price-tracker-cart-warning-regular {
+  color: #616161;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.alza-price-tracker-cart-warning-text {
+  color: #424242;
+  font-size: 13px;
+}
+
+.alza-price-tracker-cart-warning-detail {
+  display: inline-block;
+  margin-top: 6px;
+  color: #0b6bcb;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.alza-price-tracker-cart-warning-detail:hover {
+  text-decoration: underline;
+}
+
+.alza-price-tracker-cart-warning-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.alza-price-tracker-cart-warning-actions button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #424242;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alza-price-tracker-cart-warning-actions button:hover {
+  background: #f2f3f5;
+}
+
+.alza-price-tracker-cart-warning-actions .alza-price-tracker-cart-warning-proceed {
+  background: #0b6bcb;
+  color: #fff;
+}
+
+.alza-price-tracker-cart-warning-actions .alza-price-tracker-cart-warning-proceed:hover {
+  background: #0959aa;
+}
+
+.alza-price-tracker-cart-warning button:focus-visible,
+.alza-price-tracker-cart-warning a:focus-visible {
+  outline: 2px solid #0b6bcb;
+  outline-offset: 2px;
+}

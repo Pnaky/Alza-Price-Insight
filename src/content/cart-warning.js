@@ -1,0 +1,140 @@
+// Content script (část AlzaPriceTracker): Upozornění před vložením do košíku ze seznamu, když nejnižší cena platí jen za podmínky.
+// Načítá se po content.js a před content/start.js (manifest) – metody sdílí objekt AlzaPriceTracker
+Object.assign(AlzaPriceTracker, {
+  // === Upozornění při vložení do košíku ze seznamu ===
+  // Nejnižší cena se slevovým kódem, s AlzaPlus+ nebo po cashbacku / výkupu platí jen za podmínky akce –
+  // vložením ze seznamu se nemusí uplatnit. Před vložením upozornit a nechat volbu.
+
+  // { type, price, regular } podmíněné nejnižší ceny (regular = nejnižší cena bez podmínky, null = není);
+  // null = nejnižší cena platí bez podmínek
+  getConditionalLowest(priceMap) {
+    const entries = Object.entries(priceMap || {}).filter(([, price]) => price > 0);
+    if (entries.length === 0) return null;
+    const [type, price] = entries.reduce((lowest, entry) => (entry[1] < lowest[1] ? entry : lowest));
+    if (!this.conditionalPriceTypes.includes(type)) return null;
+    const regular = entries.filter(([other]) => !this.conditionalPriceTypes.includes(other)).map(([, value]) => value);
+    return { type, price, regular: regular.length > 0 ? Math.min(...regular) : null };
+  },
+
+  setupCartWarnings() {
+    if (this.state.cartWarningsReady) return;
+    this.state.cartWarningsReady = true;
+    // Zachytávací fáze na dokumentu – dřív než posluchač Reactu na kořeni stránky
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (this.state.cartWarningBypass) return;
+        const button = event.target.closest?.(`${this.selectors.addToCartButton}, ${this.selectors.buyAllButton}`);
+        if (!button) return;
+        const items = button.matches(this.selectors.buyAllButton)
+          ? [...document.querySelectorAll(this.selectors.listItem)]
+          : [button.closest(this.selectors.listItem)].filter(Boolean);
+        const conditional = items
+          .map((item) => ({ item, condition: this.getConditionalLowest(this.state.itemData.get(item)?.priceMap) }))
+          .filter(({ condition }) => condition);
+        if (conditional.length === 0) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.showCartWarning(button, conditional);
+      },
+      true
+    );
+  },
+
+  showCartWarning(button, conditional) {
+    this.state.closeCartWarning?.();
+    const box = this.createEl("div", "alza-price-tracker-cart-warning");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", this.translate("cartWarningTitle"));
+
+    const header = this.createEl("div", "alza-price-tracker-cart-warning-header");
+    const closeIcon = this.createEl("button", "alza-price-tracker-cart-warning-x", "×");
+    closeIcon.type = "button";
+    closeIcon.setAttribute("aria-label", this.translate("cartWarningClose"));
+    header.append(
+      this.createEl("span", "alza-price-tracker-cart-warning-icon", "!"),
+      this.createEl("span", "alza-price-tracker-cart-warning-title", this.translate("cartWarningTitle")),
+      closeIcon
+    );
+    box.appendChild(header);
+
+    const list = this.createEl("ul", "alza-price-tracker-cart-warning-list");
+    conditional.forEach(({ item, condition }) => {
+      const productLink = item.querySelector(this.selectors.productLink);
+      const row = this.createEl("li", "alza-price-tracker-cart-warning-item");
+      row.appendChild(this.createEl("div", "alza-price-tracker-cart-warning-name", productLink?.textContent.trim() || ""));
+
+      const prices = this.createEl("div", "alza-price-tracker-cart-warning-prices");
+      const chip = this.createEl("span", "alza-price-tracker-cart-warning-chip");
+      const dot = this.createEl("span", "alza-price-tracker-cart-warning-dot");
+      dot.style.background = this.getHistoryColor(condition.type);
+      chip.append(dot, `${this.translate(`type_${condition.type}`)} · ${this.formatPrice(condition.price)}`);
+      prices.appendChild(chip);
+      if (condition.regular) {
+        prices.appendChild(this.createEl("span", "alza-price-tracker-cart-warning-regular", this.translate("cartWarningRegular", this.formatPrice(condition.regular))));
+      }
+      row.appendChild(prices);
+      row.appendChild(this.createEl("div", "alza-price-tracker-cart-warning-text", this.translate(`cartCondition_${condition.type}`)));
+      if (productLink?.href) {
+        const detail = this.createEl("a", "alza-price-tracker-cart-warning-detail", `${this.translate("cartWarningDetail")} ↗`);
+        detail.href = productLink.href;
+        detail.target = "_blank";
+        detail.rel = "noopener";
+        row.appendChild(detail);
+      }
+      list.appendChild(row);
+    });
+    box.appendChild(list);
+
+    const actions = this.createEl("div", "alza-price-tracker-cart-warning-actions");
+    const closeButton = this.createEl("button", "alza-price-tracker-cart-warning-close", this.translate("cartWarningClose"));
+    const proceedButton = this.createEl("button", "alza-price-tracker-cart-warning-proceed", this.translate("cartWarningProceed"));
+    closeButton.type = proceedButton.type = "button";
+    actions.append(closeButton, proceedButton);
+    box.appendChild(actions);
+
+    const onOutside = (event) => {
+      if (!box.contains(event.target)) close();
+    };
+    const onKey = (event) => {
+      if (event.key === "Escape") close();
+    };
+    const close = () => {
+      box.remove();
+      document.removeEventListener("mousedown", onOutside, true);
+      document.removeEventListener("keydown", onKey, true);
+      this.state.closeCartWarning = null;
+    };
+    this.state.closeCartWarning = close;
+    closeButton.addEventListener("click", close);
+    closeIcon.addEventListener("click", close);
+    proceedButton.addEventListener("click", () => {
+      close();
+      this.state.cartWarningBypass = true;
+      try {
+        button.click();
+      } finally {
+        this.state.cartWarningBypass = false;
+      }
+    });
+    document.addEventListener("mousedown", onOutside, true);
+    document.addEventListener("keydown", onKey, true);
+
+    // Pod tlačítkem (nad ním, když se dolů nevejde), celé v okně, šipka míří na tlačítko. Souřadnice stránky –
+    // okno se posouvá spolu se seznamem
+    const arrow = this.createEl("span", "alza-price-tracker-cart-warning-arrow");
+    box.appendChild(arrow);
+    document.body.appendChild(box);
+    const rect = button.getBoundingClientRect();
+    const { offsetWidth: width, offsetHeight: height } = box;
+    const left = Math.max(8, Math.min(rect.right + 12 - width, window.innerWidth - width - 8));
+    const below = rect.bottom + 12 + height <= window.innerHeight;
+    const top = below ? rect.bottom + 12 : Math.max(8, rect.top - height - 12);
+    const origin = getComputedStyle(document.body).position === "static" ? { left: -window.scrollX, top: -window.scrollY } : document.body.getBoundingClientRect();
+    box.style.left = `${left - origin.left}px`;
+    box.style.top = `${top - origin.top}px`;
+    box.classList.add(below ? "alza-price-tracker-cart-warning--below" : "alza-price-tracker-cart-warning--above");
+    arrow.style.left = `${Math.max(16, Math.min(rect.left + rect.width / 2 - left - 7, width - 30))}px`;
+    proceedButton.focus();
+  },
+});

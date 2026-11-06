@@ -1,0 +1,63 @@
+Alza Price Insight – historie cen, chytré hlídání a skutečná cena za kus pro Alzu
+
+Nakupujete na alza.cz, alza.sk nebo alza.hu? Alza Price Insight vám řekne, jestli je dnešní cena opravdu výhodná – přímo v nákupních seznamech, na detailu produktu i ve výpisech kategorií.
+
+HISTORIE CEN
+• Všechny ceny produktu na jednom místě: běžná, akční, AlzaPlus+, se slevovým kódem, cashback, výkup, benefit/B2B i Black Friday
+• Graf všech typů cen s dostupností, historické minimum, nejvyšší prodejní cena a nejnižší cena za posledních 30 dní
+• Tabulka všech změn cen a dostupnosti
+• Funguje v nákupních seznamech i na detailu produktu
+
+JE CENA OPRAVDU DOBRÁ?
+• Obvyklá cena – za kolik se produkt za posledních 180 dní prodával nejdéle, takže ji krátká akce nezkreslí
+• Rytmus akcí: jak často bývá produkt ve slevě a kdy se dá čekat další – „vyplatí se počkat“
+• Stejný produkt levněji rozbalený nebo zánovní
+• Jasné hodnocení: nejnižší za X dní / o X % pod obvyklou cenou / obvyklá cena / o X % nad obvyklou cenou – v seznamech jako šipky ▼ a ▲
+• Podezřelé slevy: upozornění, když byl produkt za posledních 30 dní levnější než teď „ve slevě“
+• Vymyšlené přeškrtnuté ceny: upozornění, když se produkt za přeškrtnutou cenu nikdy neprodával
+
+CÍLOVÁ CENA
+• Zadejte, kolik chcete zaplatit, a jakmile cena klesne na cílovou, přijde notifikace – i se zavřenou Alzou
+• Cíl za kus u balení, např. 2,40 Kč/ks
+
+HLÍDÁNÍ NA POZADÍ
+• Hlídejte celé nákupní seznamy i jednotlivé produkty – kontrola každou hodinu, nebo třeba jen jednou denně ve zvolený čas
+• Notifikace o zlevnění (volitelně až od zadaného procenta), nových cenách (akce, kód, cashback) a změnách dostupnosti
+• Tiché hodiny, počet změn na ikoně rozšíření, přehled změn v popupu
+
+SKUTEČNÁ CENA ZA KUS
+• Alza počítá cenu za kus bez AlzaPlus+ a slevových kódů. Rozšíření ukáže skutečnou cenu za kus v kategoriích, ve vyhledávání, v nákupních seznamech i na detailu produktu
+• Ve výběru velikosti balení cena za kus u každé velikosti a nejvýhodnější zvýrazněná
+• Seřazení celé kategorie podle skutečné ceny za jednotku – ideální pro nákup do zásoby během akcí
+
+CHYTŘEJŠÍ NÁKUPNÍ SEZNAMY
+• Lišta se souhrnem: kolik zaplatíte i s množstevní slevou, cashback zvlášť, úspora, co od minula zlevnilo nebo zdražilo
+• Filtry: zlevněné od minula, ve slevě, pod obvyklou cenou, vyplatí se počkat, množstevní sleva, jiný stav levněji, skladem, cíl dosažen, podezřelá sleva
+• Řazení: nejlevnější, nejlevnější za kus, nejdražší, největší sleva, nejvíc pod obvyklou cenou, největší zlevnění
+
+VAŠE DATA POD VAŠÍ KONTROLOU
+• Záloha a obnova (JSON), export historie cen do CSV pro Excel
+• Návrh úklidu starých produktů, které už nesledujete
+• Diagnostický soubor, který můžete poslat autorovi, když něco nefunguje
+
+JAZYKY
+Čeština, slovenština, maďarština a angličtina. Jazyk rozšíření si můžete změnit v nastavení – jinak se řídí prohlížečem a jazykem dané Alzy.
+
+JAK ZAČÍT
+1. Přihlaste se na Alze a mějte zapnuté ceny s DPH. Ceny se liší podle účtu, proto se ukládají jen přihlášeným.
+2. Otevřete některý nákupní seznam – rozšíření načte všechny ceny a začne si vést jejich historii.
+3. V popupu rozšíření zapněte hlídání, nebo na detailu produktu nastavte cílovou cenu.
+Vestavěná nápověda (otazník v popupu) vše vysvětlí krok za krokem.
+
+Hodnocení ceny a kontrola přeškrtnuté ceny potřebují u produktu aspoň 14 dní zaznamenané historie.
+
+SOUKROMÍ
+Všechna data (ceny, historie, nastavení) se ukládají jen lokálně ve vašem prohlížeči. Rozšíření komunikuje pouze s weby Alzy a nikam jinam nic neodesílá. Žádný účet, žádné sledování, žádné reklamy.
+
+OPRÁVNĚNÍ
+• Přístup k alza.cz, alza.sk a alza.hu – zobrazení cen na stránkách Alzy a načítání cen produktů
+• Úložiště – historie cen a nastavení ve vašem prohlížeči
+• Alarmy – pravidelná kontrola hlídaných produktů na pozadí (každou hodinu až jednou denně)
+• Notifikace – upozornění na změny cen a dosažené cílové ceny
+
+Neoficiální projekt. Rozšíření nemá žádnou vazbu na Alza.cz a.s. a není jí podporováno ani sponzorováno. Název „Alza“ je ochranná známka svého vlastníka a je použit jen k označení webu, se kterým rozšíření pracuje.

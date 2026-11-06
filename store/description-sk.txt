@@ -1,0 +1,63 @@
+Alza Price Insight – história cien, chytré sledovanie a skutočná cena za kus pre Alzu
+
+Nakupujete na alza.sk, alza.cz alebo alza.hu? Alza Price Insight vám povie, či je dnešná cena naozaj výhodná – priamo v nákupných zoznamoch, na detaile produktu aj vo výpisoch kategórií.
+
+HISTÓRIA CIEN
+• Všetky ceny produktu na jednom mieste: bežná, akciová, AlzaPlus+, so zľavovým kódom, cashback, výkup, benefit/B2B aj Black Friday
+• Graf všetkých typov cien s dostupnosťou, historické minimum, najvyššia predajná cena a najnižšia cena za posledných 30 dní
+• Tabuľka všetkých zmien cien a dostupnosti
+• Funguje v nákupných zoznamoch aj na detaile produktu
+
+JE CENA NAOZAJ DOBRÁ?
+• Obvyklá cena – za koľko sa produkt za posledných 180 dní predával najdlhšie, takže ju krátka akcia neskreslí
+• Rytmus akcií: ako často býva produkt v zľave a kedy sa dá čakať ďalšia – „oplatí sa počkať“
+• Rovnaký produkt lacnejšie rozbalený alebo zánovný
+• Jasné hodnotenie: najnižšia za X dní / o X % pod obvyklou cenou / obvyklá cena / o X % nad obvyklou cenou – v zoznamoch ako šípky ▼ a ▲
+• Podozrivé zľavy: upozornenie, keď bol produkt za posledných 30 dní lacnejší ako teraz „v zľave“
+• Vymyslené prečiarknuté ceny: upozornenie, keď sa produkt za prečiarknutú cenu nikdy nepredával
+
+CIEĽOVÁ CENA
+• Zadajte, koľko chcete zaplatiť, a keď cena klesne na cieľovú, príde notifikácia – aj so zatvorenou Alzou
+• Cieľ za kus pri baleniach, napr. 0,16 €/ks
+
+SLEDOVANIE NA POZADÍ
+• Sledujte celé nákupné zoznamy aj jednotlivé produkty – kontrola každú hodinu, alebo napríklad len raz denne vo zvolenom čase
+• Notifikácie o zlacnení (voliteľne až od zadaného percenta), nových cenách (akcia, kód, cashback) a zmenách dostupnosti
+• Tiché hodiny, počet zmien na ikone rozšírenia, prehľad zmien v popupe
+
+SKUTOČNÁ CENA ZA KUS
+• Alza počíta cenu za kus bez AlzaPlus+ a zľavových kódov. Rozšírenie ukáže skutočnú cenu za kus v kategóriách, vo vyhľadávaní, v nákupných zoznamoch aj na detaile produktu
+• Vo výbere veľkosti balenia cena za kus pri každej veľkosti a najvýhodnejšia zvýraznená
+• Zoradenie celej kategórie podľa skutočnej ceny za jednotku – ideálne na nákup do zásoby počas akcií
+
+ŠIKOVNEJŠIE NÁKUPNÉ ZOZNAMY
+• Lišta so súhrnom: koľko zaplatíte aj s množstevnou zľavou, cashback zvlášť, úspora, čo od minula zlacnelo alebo zdražilo
+• Filtre: zlacnené od minula, v zľave, pod obvyklou cenou, oplatí sa počkať, množstevná zľava, iný stav lacnejšie, skladom, cieľ dosiahnutý, podozrivá zľava
+• Zoradenie: najlacnejšie, najlacnejšie za kus, najdrahšie, najväčšia zľava, najviac pod obvyklou cenou, najväčšie zlacnenie
+
+VAŠE DÁTA POD VAŠOU KONTROLOU
+• Záloha a obnova (JSON), export histórie cien do CSV pre Excel
+• Návrh na upratanie starých produktov, ktoré už nesledujete
+• Diagnostický súbor, ktorý môžete poslať autorovi, keď niečo nefunguje
+
+JAZYKY
+Slovenčina, čeština, maďarčina a angličtina. Jazyk rozšírenia si môžete zmeniť v nastaveniach – inak sa riadi prehliadačom a jazykom danej Alzy.
+
+AKO ZAČAŤ
+1. Prihláste sa na Alze a majte zapnuté ceny s DPH. Ceny sa líšia podľa účtu, preto sa ukladajú len prihláseným.
+2. Otvorte niektorý nákupný zoznam – rozšírenie načíta všetky ceny a začne si viesť ich históriu.
+3. V popupe rozšírenia zapnite sledovanie alebo na detaile produktu nastavte cieľovú cenu.
+Vstavaná nápoveda (otáznik v popupe) všetko vysvetlí krok za krokom.
+
+Hodnotenie ceny a kontrola prečiarknutej ceny potrebujú pri produkte aspoň 14 dní zaznamenanej histórie.
+
+SÚKROMIE
+Všetky dáta (ceny, história, nastavenia) sa ukladajú len lokálne vo vašom prehliadači. Rozšírenie komunikuje iba s webmi Alzy a nikam inam nič neodosiela. Žiadny účet, žiadne sledovanie, žiadne reklamy.
+
+OPRÁVNENIA
+• Prístup k alza.sk, alza.cz a alza.hu – zobrazenie cien na stránkach Alzy a načítanie cien produktov
+• Úložisko – história cien a nastavenia vo vašom prehliadači
+• Alarmy – pravidelná kontrola sledovaných produktov na pozadí (každú hodinu až raz denne)
+• Notifikácie – upozornenia na zmeny cien a dosiahnuté cieľové ceny
+
+Neoficiálny projekt. Rozšírenie nemá žiadne prepojenie so spoločnosťou Alza.cz a.s. a nie je ňou podporované ani sponzorované. Názov „Alza“ je ochranná známka svojho vlastníka a je použitý len na označenie webu, s ktorým rozšírenie pracuje.

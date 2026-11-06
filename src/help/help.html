@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nápověda – Alza Price Insight</title>
+    <link rel="stylesheet" href="help.css" />
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <img src="../../img/icon-48.png" alt="" />
+        <div>
+          <h1>Nápověda</h1>
+          <p>Alza Price Insight – historie cen, hlídání a skutečná cena za kus na alza.cz, alza.sk a alza.hu</p>
+        </div>
+        <div class="languages">
+          <strong>CZ</strong><a href="help-sk.html" lang="sk">SK</a><a href="help-hu.html" lang="hu">HU</a><a href="help-en.html" lang="en">EN</a>
+        </div>
+      </header>
+
+      <nav>
+        <a href="#zaciname">Začínáme</a>
+        <a href="#seznam">Nákupní seznam</a>
+        <a href="#detail">Detail produktu</a>
+        <a href="#historie">Historie cen</a>
+        <a href="#dobra-cena">Je cena dobrá?</a>
+        <a href="#cil">Cílová cena</a>
+        <a href="#hlidani">Hlídání a notifikace</a>
+        <a href="#za-kus">Cena za kus</a>
+        <a href="#nastaveni">Nastavení a data</a>
+        <a href="#faq">Časté otázky</a>
+      </nav>
+
+      <section id="zaciname">
+        <h2>🚀 Začínáme</h2>
+        <ol>
+          <li><strong>Přihlaste se na Alze.</strong> Ceny se ukládají jen přihlášeným – Alza ukazuje každému jiné ceny (AlzaPlus+, benefity, B2B).</li>
+          <li><strong>Mějte zapnuté ceny s DPH.</strong> S volbou „Zobrazovat ceny bez DPH“ se ceny neukládají, aby se nepomíchaly.</li>
+          <li><strong>Otevřete nákupní seznam</strong> (Můj účet → Nákupní seznamy). Rozšíření u každé položky načte všechny ceny a začne si vést historii.</li>
+          <li><strong>Zapněte hlídání</strong> – rozšíření pak seznam pravidelně kontroluje (výchozí každou hodinu) i se zavřenou Alzou a ozve se, když něco zlevní.</li>
+        </ol>
+        <p class="tip">
+          Historie se ukládá u produktů z nákupních seznamů, u produktů, které hlídáte, a s volbou „Ukládat ceny z procházení“ (zapnutá ve výchozím
+          stavu) i u produktů, které uvidíte při procházení Alzy – ve výpisech kategorií, ve vyhledávání, na detailu, v karuselech a na úvodní stránce.
+          Čím déle rozšíření používáte, tím víc umí říct – hodnocení ceny a kontrola přeškrtnuté ceny potřebují aspoň 14 dní historie.
+        </p>
+      </section>
+
+      <section id="seznam">
+        <h2>📋 Nákupní seznam</h2>
+        <ul>
+          <li><strong>Všechny ceny u položky</strong> – vedle běžné ceny i akční cena, cena se slevovým kódem, s AlzaPlus+, cashback… seřazené od nejnižší.</li>
+          <li><strong>Klik na cenu nebo dostupnost</strong> otevře historii cen produktu.</li>
+          <li><strong>Šipky u ceny:</strong> <span class="badge good">▼</span> je teď levněji než obvykle, <span class="badge high">▲</span> dráž než obvykle (podrobnosti po najetí myší). 🎯 = máte nastavenou cílovou cenu, zeleně = je dosažená.</li>
+          <li><strong>Změny od minula</strong> – u položek, které od posledního načtení zlevnily nebo zdražily, je původní cena a rozdíl.</li>
+          <li><strong>Více kusů</strong> – ceny zůstávají za kus a vlevo od nich je sloupec „3 ks celkem“ se součtem (i s množstevní slevou). Řádek se nijak neposune.</li>
+          <li><strong>Podmíněná cena a košík</strong> – když nejnižší cena platí jen se slevovým kódem, s AlzaPlus+ nebo po cashbacku / výkupu, upozorní vás rozšíření před vložením do košíku ze seznamu (u slevového kódu je potřeba vložit zboží z detailu produktu). Můžete ho přesto přidat.</li>
+        </ul>
+        <h3>Lišta nad seznamem</h3>
+        <ul>
+          <li><strong>Souhrn:</strong> počet položek, kolik zaplatíte (podle počtu kusů, i s množstevní slevou „Kup víc, zaplať míň“), cashback zvlášť, úspora proti ceníkovým cenám a kolik položek zlevnilo / zdražilo.</li>
+          <li><strong>Filtry:</strong> zlevněné od minula, ve slevě, pod obvyklou cenou, vyplatí se počkat, množstevní sleva, jiný stav levněji, skladem, cíl dosažen, podezřelá sleva. Stupně množstevní slevy uvidíte po najetí myší na cenu. Počet v závorce říká, kolik položek filtru odpovídá.</li>
+          <li><strong>Řazení:</strong> nejlevnější, nejlevnější za kus, nejdražší, největší sleva, nejvíc pod obvyklou cenou, největší zlevnění od minula.</li>
+        </ul>
+        <p class="tip">Filtry a řazení položky jen skrývají a přeskupují – na samotném seznamu na Alze nic nemění.</p>
+      </section>
+
+      <section id="detail">
+        <h2>🔎 Detail produktu</h2>
+        <p>Na stránce produktu je v levém sloupci (pod galerií) karta <strong>📈 Historie cen</strong>:</p>
+        <ul>
+          <li><strong>Aktuálně</strong> – nejnižší cena, kterou můžete zaplatit, a pod ní hodnocení vůči obvyklé ceně.</li>
+          <li><strong>Za kus</strong> – skutečná cena za kus u balení (i bez historie).</li>
+          <li><strong>Obvyklá cena, nejnižší za 30 dní, historické minimum</strong> a malý graf – klikem na graf se otevře celá historie.</li>
+          <li><strong>🔔 Hlídat na pozadí</strong> – produkt se bude pravidelně kontrolovat, i když není v žádném seznamu.</li>
+          <li><strong>🎯 Nastavit cílovou cenu</strong> – viz <a href="#cil">Cílová cena</a>.</li>
+        </ul>
+      </section>
+
+      <section id="historie">
+        <h2>📈 Historie cen</h2>
+        <p>Dialog historie otevřete klikem na cenu v seznamu nebo tlačítkem „Celá historie a graf“ na detailu produktu.</p>
+        <ul>
+          <li><strong>Dlaždice nahoře:</strong> historické minimum, nejvyšší prodejní a ceníková cena, nejnižší cena za 30 dní, obvyklá cena, od kdy se produkt sleduje a poslední kontrola.</li>
+          <li><strong>Graf:</strong> každý typ ceny má svou barvu, barevný pruh dole je dostupnost. Vodorovné čáry jsou minimum, maximum a cílová cena. Najetím myší uvidíte ceny v daném období.</li>
+          <li><strong>Tabulka:</strong> všechny změny cen a dostupnosti s časem od–do.</li>
+        </ul>
+        <h3>Typy cen</h3>
+        <table>
+          <tr><th>Typ</th><th>Co znamená</th></tr>
+          <tr><td>Původní cena</td><td>běžná cena, při akci přeškrtnutá</td></tr>
+          <tr><td>Akční cena / Black Friday</td><td>cena v akci pro všechny</td></tr>
+          <tr><td>AlzaPlus+</td><td>cena pro členy AlzaPlus+</td></tr>
+          <tr><td>Slevový kód</td><td>cena po zadání kódu u produktu</td></tr>
+          <tr><td>Cashback, Výkup</td><td>cena po vrácení peněz od výrobce / po výkupu starého zařízení</td></tr>
+          <tr><td>Benefit, B2B</td><td>cena pro firemní a benefitní účty</td></tr>
+        </table>
+        <p>„Prodejní cena“ je vždy ta nejnižší, kterou můžete zaplatit – z ní se počítá minimum, obvyklá cena, cílová cena i notifikace.</p>
+      </section>
+
+      <section id="dobra-cena">
+        <h2>✅ Je cena opravdu dobrá?</h2>
+        <h3>Obvyklá cena a hodnocení</h3>
+        <p>
+          Obvyklá cena je cena, za kterou se produkt za posledních 180 dní prodával nejdéle – krátká akce ji nestáhne. Aktuální cena se s ní
+          porovná:
+        </p>
+        <ul>
+          <li><span class="badge good">▼</span> <strong>Nejnižší za X dní</strong> / <strong>o X % pod obvyklou cenou</strong> – dobrá chvíle na nákup.</li>
+          <li><strong>Teď za obvyklou cenu</strong> – rozdíl do 3 %.</li>
+          <li><span class="badge high">▲</span> <strong>o X % nad obvyklou cenou</strong> – vyplatí se počkat.</li>
+        </ul>
+        <p>Po najetí myší uvidíte i to, kolikrát byl produkt levnější než obvykle a jak dlouho to trvalo.</p>
+        <h3>Rytmus akcí – vyplatí se počkat?</h3>
+        <p>Když měl produkt za posledních 180 dní aspoň 3 akce, rozšíření spočítá, jak často, na jak dlouho a jak hluboko bývá ve slevě (např. „Akce zhruba jednou za 6 týdnů, obvykle −15 % na 7 dní“) a kdy se dá čekat další. Když další akce přijde do 3 týdnů, ukáže <strong>⏳ vyplatí se počkat</strong> – v seznamu u ceny a ve filtru, na detailu modře v kartě s historií. Při nepravidelných akcích se další akce nepředpovídá.</p>
+        <h3>Stejný produkt v jiném stavu</h3>
+        <p>Alza prodává některé produkty i rozbalené nebo zánovní (každý stav je samostatný produkt). Když je jiný stav levnější než nejnižší cena, kterou za tento kus zaplatíte (i s AlzaPlus+ a benefitem), uvidíte to v kartě na detailu a po najetí myší na cenu v seznamu (např. „Levněji v jiném stavu: Zánovní 6 459 Kč (o 231 Kč levněji)“); v seznamu je i filtr <em>Jiný stav levněji</em>.</p>
+        <h3>Podezřelá sleva</h3>
+        <ul>
+          <li><strong>Za 30 dní levněji:</strong> produkt je „ve slevě“, ale v posledních 30 dnech šel koupit levněji, než stojí teď.</li>
+          <li><strong>Vymyšlená přeškrtnutá cena:</strong> za přeškrtnutou cenu se produkt za dobu sledování nikdy neprodával, nebo naposledy před víc než 90 dny.</li>
+        </ul>
+        <p>Podezřelé slevy najdete ve filtru „Podezřelá sleva“ v seznamu, oranžovým pruhem v historii a na kartě detailu produktu.</p>
+        <h3>⚠️ Podezřelá cena</h3>
+        <p>Když Alza změní web, rozšíření může přečíst špatné číslo, třeba měsíční splátku místo ceny. Taková cena se neschová, ať vám neuteče skutečná sleva. Je ale označená ⚠️ a čárkovaným rámečkem, po najetí myší je vidět proč:</p>
+        <ul>
+          <li><strong>Pod polovinou další ceny:</strong> cena je nižší než polovina nejbližší vyšší ceny z téže kontroly. Nezapočítá se do minima, šipky změny, hodnocení ceny ani podezřelé slevy.</li>
+          <li><strong>Pod polovinou obvyklé ceny:</strong> nejnižší cena spadla pod polovinu obvyklé ceny za posledních 30 dní. Počítá se normálně, jen je označená. Když cena vydrží, výstraha zmizí.</li>
+        </ul>
+        <p>Upozornění na změnu u takového produktu má navíc řádek s výstrahou. Cenu si ověřte na Alze.</p>
+        <p class="tip warn">Hodnocení vychází jen z historie, kterou rozšíření samo zaznamenalo. U nově sledovaných produktů (méně než 14 dní) se nezobrazuje.</p>
+      </section>
+
+      <section id="cil">
+        <h2>🎯 Cílová cena</h2>
+        <ol>
+          <li>Otevřete historii cen produktu (nebo na detailu klikněte na „🎯 Nastavit cílovou cenu“).</li>
+          <li>Zadejte cenu, za kterou chcete nakoupit, a klikněte na <strong>Hlídat</strong>.</li>
+        </ol>
+        <p>
+          Jakmile nejnižší cena klesne na cílovou nebo pod ni, přijde notifikace – i když stránku nemáte otevřenou. Ohlásí se jednou; znovu až poté, co
+          cena zase vystoupá nad cíl a klesne. Produkt s cílovou cenou se hlídá automaticky.
+        </p>
+        <h3>Cíl za kus</h3>
+        <p>
+          U balení (kapsle, pleny, krmivo…) lze vedle pole přepnout <strong>Kč → Kč/ks</strong> a zadat cenu za kus, např. „2,40 Kč/ks“. Rozšíření si
+          ji přepočte na celé balení.
+        </p>
+      </section>
+
+      <section id="hlidani">
+        <h2>🔔 Hlídání na pozadí a notifikace</h2>
+        <ul>
+          <li><strong>Hlídaný seznam:</strong> otevřete seznam a v popupu rozšíření klikněte na <strong>🔔 Hlídat seznam</strong>, nebo klikněte na zvoneček v záložce seznamu. Hlídá se celý seznam; nově přidané položky se do hlídání dostanou při příštím otevření seznamu.</li>
+          <li><strong>Hlídaný produkt:</strong> tlačítko „🔔 Hlídat na pozadí“ na detailu produktu, nebo nastavená cílová cena.</li>
+          <li>Kontrola běží <strong>každou hodinu</strong>, dokud je spuštěný prohlížeč. V nastavení ji změníte na každé 3, 6 nebo 12 hodin nebo na <strong>jednou denně ve zvolený čas</strong> – když je prohlížeč v tu dobu zavřený, proběhne pár minut po jeho spuštění. Kdy bude další, ukazuje popup. Hned ji spustíte tlačítkem ▶️ Zkontrolovat v popupu.</li>
+          <li><strong>Zelené číslo na ikoně</strong> rozšíření = počet produktů se změnou od posledního otevření popupu, přehled změn je v popupu. <strong>Modré číslo</strong> = staré produkty navržené ke smazání.</li>
+          <li><strong>Přehled změn v popupu:</strong> zlevnění, naskladnění, nová akce a dosažená cílová cena zeleně, zdražení červeně (na zdražení notifikace nechodí), konec prodeje a nedostupnost šedě. Podbarvené jsou nové změny, už viděné mají barevný jen text. U hlídaných seznamů vidíte, kolik produktů za posledních 7 dní zlevnilo (▼) a zdražilo (▲). Hlídání seznamu vypnete tlačítkem 🔕 Nehlídat seznam v popupu na otevřeném seznamu nebo v nastavení (záložka Hlídané seznamy). Nápověda je v nastavení (❓ vpravo nahoře).</li>
+        </ul>
+        <p>V nastavení si vyberete, o čem chcete vědět: zlevnění (i od kolika procent), nové ceny (akce, kód, cashback), dostupnost a tiché hodiny.</p>
+        <p class="tip">Nechodí notifikace? V nastavení klikněte na <strong>🔔 Vyzkoušet notifikace</strong>. Když nepřijdou, zkontrolujte ve Windows „Nerušit“ / Asistenta soustředění a povolení oznámení pro prohlížeč (Chrome, Firefox).</p>
+      </section>
+
+      <section id="za-kus">
+        <h2>⚖️ Skutečná cena za kus</h2>
+        <p>
+          Alza počítá cenu za kus jen z ceny pro všechny – slevu AlzaPlus+ ani slevový kód do ní nezahrne. Při nákupu do zásoby tak nepoznáte, které
+          balení je opravdu nejvýhodnější. Rozšíření to dopočítá:
+        </p>
+        <ul>
+          <li><strong>Kategorie a vyhledávání:</strong> před Alzinou cenou za jednotku je oranžový štítek se skutečnou cenou, např. <span class="unit">2,50 Kč/ks</span>. Tlačítko <strong>„Seřadit podle skutečné ceny za jednotku“</strong> načte celou kategorii a seřadí ji.</li>
+          <li><strong>Nákupní seznam:</strong> cena za kus u každé ceny po najetí myší a řazení „Nejlevnější za kus“.</li>
+          <li><strong>Detail produktu:</strong> dlaždice „Za kus“ s cenou za kus u každého typu ceny. Ve výběru velikosti balení je u každé velikosti cena za kus (u délek za metr) ve sloupci vpravo – nejvýhodnější zeleně, nejdražší červeně. Cenu za jednotku zvolené velikosti (i s označením nejvýhodnější / nejdražší) ukazuje hned i zavřený výběr.</li>
+        </ul>
+        <p>Štítky v kategoriích jdou vypnout v nastavení (Výpisy kategorií → Skutečná cena za jednotku).</p>
+      </section>
+
+      <section id="nastaveni">
+        <h2>⚙️ Nastavení a data</h2>
+        <p>Nastavení otevřete ikonou ⚙️ v popupu rozšíření.</p>
+        <ul>
+          <li><strong>Ukládat ceny z procházení</strong> (Sledování cen) – ceny produktů, které uvidíte ve výpisech kategorií, ve vyhledávání, na detailu, v karuselech a na úvodní stránce, se tiše ukládají do historie, i když je nehlídáte. Až se k produktu vrátíte, uvidíte, jak se jeho cena vyvíjela. Nic se nezobrazuje ani neoznamuje. Ve výchozím stavu zapnuto.</li>
+          <li><strong>Uložená data</strong> – přehled všech produktů s historií a proč se ukládají (📋 seznam, 🔔 detail, 🎯 cílová cena, 👀 procházení). Hledání, filtry, historie cen přes 📈 a smazání dat jednoho produktu.</li>
+          <li><strong>Záloha (JSON)</strong> – všechna data do souboru; <strong>Obnovit ze zálohy</strong> je zase doplní (nic nemaže, historie se sloučí).</li>
+          <li><strong>Historie (CSV)</strong> – všechny ceny pro Excel.</li>
+          <li><strong>Uklidit stará data</strong> – smaže produkty, které nehlídáte a přes 3 měsíce jste je neotevřeli ani se nekontrolovaly (uložené při procházení až po roce). Rozšíření je samo navrhne modrým číslem na ikoně a upozorněním v popupu.</li>
+          <li><strong>Smazat všechna data</strong> – jen po napsání slova SMAZAT; předtím se automaticky stáhne záloha.</li>
+          <li><strong>Diagnostika</strong> – když něco nefunguje, stáhněte diagnostiku a pošlete ji autorovi (obsahuje verzi, nastavení, log kontrol a chyby; žádná hesla ani cookies).</li>
+        </ul>
+        <p class="tip">Všechna data zůstávají jen ve vašem prohlížeči. Rozšíření komunikuje pouze s weby Alzy a nikam jinam nic neodesílá.</p>
+      </section>
+
+      <section id="faq">
+        <h2>❓ Časté otázky</h2>
+        <details>
+          <summary>Ceny se neukládají / kontrola hlásí chybu</summary>
+          <p>
+            Zkontrolujte, že jste na Alze přihlášeni a nemáte zapnuté „Zobrazovat ceny bez DPH“. Bez přihlášení rozšíření ceny záměrně neukládá – historie by
+            byla pomíchaná s cenami jiného účtu.
+          </p>
+        </details>
+        <details>
+          <summary>Nevidím hodnocení ceny ani kontrolu přeškrtnuté ceny</summary>
+          <p>Potřebují aspoň 14 dní historie produktu. Do té doby se nezobrazují, aby nestrašily na základě pár dní dat.</p>
+        </details>
+        <details>
+          <summary>Proč se seznam znovu nenačítá po obnovení stránky?</summary>
+          <p>Ceny načtené před méně než 15 minutami se berou z paměti, aby rozšíření zbytečně nezatěžovalo Alzu. Pak se načtou znovu.</p>
+        </details>
+        <details>
+          <summary>Některý produkt nemá cenu za kus</summary>
+          <p>Cena za kus se ukazuje jen u produktů, u kterých jde spolehlivě zjistit počet kusů v balení (parametr „Počet kusů“ nebo popis „360 ks v balení“).</p>
+        </details>
+        <details>
+          <summary>Přišla notifikace o změně, ale v seznamu ji nevidím</summary>
+          <p>Kontrola na pozadí ukládá ceny do historie. Otevřete historii produktu nebo přehled změn v popupu – tam je každá zachycená změna.</p>
+        </details>
+        <details>
+          <summary>Přecházím na nový počítač</summary>
+          <p>Na starém stáhněte zálohu (JSON), na novém ji obnovte v nastavení. Historie se sloučí s tím, co už na novém počítači je.</p>
+        </details>
+        <details>
+          <summary>Proč mám v Uložených datech produkty, které nehlídám?</summary>
+          <p>
+            Jsou to produkty z nákupních seznamů, které jste otevřeli, a s volbou „Ukládat ceny z procházení“ i produkty, které jste viděli při procházení
+            Alzy (👀). Jejich historie se hodí, až se k produktu vrátíte. Ukládání z procházení vypnete v nastavení; produkty, které nehlídáte, se samy
+            navrhnou ke smazání (uložené při procházení až po roce).
+          </p>
+        </details>
+      </section>
+    </main>
+  </body>
+</html>
