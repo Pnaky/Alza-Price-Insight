@@ -293,6 +293,29 @@ test("upgradePriceDropText převede starý tvar poklesu", () => {
   assert.equal(AlzaCore.upgradePriceDropText("jiný text", "https://www.alza.cz/x-d1.htm"), "jiný text");
 });
 
+test("getChangeTone a kaskáda barvy čísla na ikoně (zlevnění > zdražení > ukončení)", () => {
+  const drop = "Benefit: 4 949 Kč → 4 948 Kč (-1 Kč, -0 %)";
+  const rise = "Benefit: 405 Kč → 406 Kč (+1 Kč, +0,2 %)";
+  const ended = "Nedostupné → Prodej skončil";
+  assert.equal(AlzaCore.getChangeTone(drop), "down");
+  assert.equal(AlzaCore.getChangeTone(rise), "up");
+  assert.equal(AlzaCore.getChangeTone(ended), "off");
+  assert.equal(AlzaCore.getChangeTone("Nedostupné → Skladem"), "down");
+  assert.equal(AlzaCore.getChangeTone("Nově Akční cena: 1 000 Kč"), "down");
+  assert.equal(AlzaCore.getChangeTone("⚠️ podezřelá cena"), "warning");
+
+  const recent = [
+    { key: "a", lines: [rise] },
+    { key: "b", lines: [drop] },
+    { key: "c", lines: [ended] },
+  ];
+  assert.equal(AlzaCore.getBadgeTone(recent, ["a", "b", "c"]), "down");
+  assert.equal(AlzaCore.getBadgeTone(recent, ["a", "c"]), "up");
+  assert.equal(AlzaCore.getBadgeTone(recent, ["c"]), "off");
+  // Viděné produkty barvu neurčují
+  assert.equal(AlzaCore.getBadgeTone(recent, ["c", "x"]), "off");
+});
+
 test("findStaleProducts: nehlídané a staré, hlídané nikdy", () => {
   const old = NOW - 100 * DAY;
   const all = {

@@ -1,11 +1,15 @@
 // Texty stránky nastavení (cz / sk / hu / en) – stejně jako popup. Čeština je zdroj, sk / hu / en strojové
 // překlady (jako nápověda). Statické texty v options.html mají data-i18n*; texty z options.js přes t().
-// Úplnost klíčů a parametrů {0} hlídá tests/i18n.test.js
+// Úplnost klíčů a parametrů {0} hlídá tests/options-i18n.test.js
 const OPTIONS_TEXTS = {
   cz: {
     pageTitle: "Nastavení – Alza Price Insight",
     helpLink: "❓ Nápověda",
     helpLinkTitle: "Jak rozšíření používat",
+    welcomeLink: "🧭 Průvodce",
+    primaryDomain: "Hlavní Alza",
+    primaryDomainTip: "Alza, kde nejčastěji nakupujete. Na ní průvodce ověřuje přihlášení a ceny s DPH a vedou na ni odkazy. Automaticky = podle jazyka rozšíření (slovenština → alza.sk, maďarština → alza.hu, jinak alza.cz). Ceny se ukládají na všech Alzách, kde jste přihlášeni.",
+    welcomeLinkTitle: "Průvodce nastavením – ověří přihlášení a ceny s DPH a provede hlídáním a notifikacemi",
     version: "Nastavení · verze {0}",
 
     notifications: "🔔 Notifikace",
@@ -67,7 +71,7 @@ const OPTIONS_TEXTS = {
     wipeNoteEnd: ":",
     wipeWord: "SMAZAT",
     wipeButton: "🗑️ Smazat",
-    wipeButtonConfirm: "🗑️ Záloha je uložená – smazat",
+    wipeButtonConfirm: "🗑️ Zálohu máte uloženou? Smazat",
     wipeDownloading: "Záloha {0} se stahuje. Ověřte, že je ve stažených souborech, a smazání potvrďte.",
     wipeDone: "✓ Smazáno ({0} položek). Obnovit je jde importem zálohy.",
     wipeFailed: "Smazání selhalo: {0}",
@@ -135,6 +139,7 @@ const OPTIONS_TEXTS = {
     exportedJson: "✓ Exportováno položek: {0} (historie produktů: {1})",
     exportedCsv: "✓ Exportováno řádků historie: {0}",
     importNotBackup: "Soubor není záloha tohoto rozšíření",
+    importTooBig: "Soubor je příliš velký na zálohu tohoto rozšíření",
     importEmpty: "Záloha neobsahuje žádná použitelná data",
     importUnknownDate: "neznámo",
     importConfirm:
@@ -167,6 +172,10 @@ const OPTIONS_TEXTS = {
     // Diagnostika
     errorSummary: "Zaznamenané chyby: {0}, poslední {1}",
     errorSummaryNone: "Zatím žádné zaznamenané chyby.",
+    reportBug: "🐞 Nahlásit chybu",
+    reportBugTitle: "Otevře nové hlášení na GitHubu s předvyplněnou verzí, prohlížečem a posledními chybami (je potřeba účet na GitHubu). Nic se neodešle, dokud hlášení sami neodešlete. Hlášení je veřejné – před odesláním ho zkontrolujte.",
+    reportBugBody: "**Co se stalo:**\n\n\n**Na které stránce Alzy (odkaz):**\n\n\n**Co jste čekali:**\n\n\n---\nVerze: {0}\nProhlížeč: {1}\nJazyk rozšíření: {2}\nHlavní Alza: {3}\nPoslední chyby z logu:\n{4}\n\nPomůže snímek obrazovky (vložte ho sem) nebo soubor z Nastavení → Diagnostika → Stáhnout diagnostiku.",
+    reportBugNoErrors: "žádné",
 
     // Hlídané seznamy
     listFallbackName: "Seznam {0}",
@@ -193,6 +202,10 @@ const OPTIONS_TEXTS = {
     pageTitle: "Nastavenia – Alza Price Insight",
     helpLink: "❓ Nápoveda",
     helpLinkTitle: "Ako rozšírenie používať",
+    welcomeLink: "🧭 Sprievodca",
+    primaryDomain: "Hlavná Alza",
+    primaryDomainTip: "Alza, kde najčastejšie nakupujete. Na nej sprievodca overuje prihlásenie a ceny s DPH a vedú na ňu odkazy. Automaticky = podľa jazyka rozšírenia (slovenčina → alza.sk, maďarčina → alza.hu, inak alza.cz). Ceny sa ukladajú na všetkých Alzách, kde ste prihlásení.",
+    welcomeLinkTitle: "Sprievodca nastavením – overí prihlásenie a ceny s DPH a prevedie sledovaním a notifikáciami",
     version: "Nastavenia · verzia {0}",
 
     notifications: "🔔 Notifikácie",
@@ -254,7 +267,7 @@ const OPTIONS_TEXTS = {
     wipeNoteEnd: ":",
     wipeWord: "ZMAZAŤ",
     wipeButton: "🗑️ Zmazať",
-    wipeButtonConfirm: "🗑️ Záloha je uložená – zmazať",
+    wipeButtonConfirm: "🗑️ Zálohu máte uloženú? Zmazať",
     wipeDownloading: "Záloha {0} sa sťahuje. Overte, že je v stiahnutých súboroch, a zmazanie potvrďte.",
     wipeDone: "✓ Zmazané ({0} položiek). Obnoviť ich ide importom zálohy.",
     wipeFailed: "Zmazanie zlyhalo: {0}",
@@ -319,8 +332,9 @@ const OPTIONS_TEXTS = {
     exportedJson: "✓ Exportované položky: {0} (história produktov: {1})",
     exportedCsv: "✓ Exportované riadky histórie: {0}",
     importNotBackup: "Súbor nie je záloha tohto rozšírenia",
+    importTooBig: "Súbor je príliš veľký na zálohu tohto rozšírenia",
     importEmpty: "Záloha neobsahuje žiadne použiteľné dáta",
-    importUnknownDate: "neznámo",
+    importUnknownDate: "neznáme",
     importConfirm:
       "Importovať zálohu z {0}?\n\nPoložiek: {1} (história produktov: {2}). Rovnaké produkty, zoznamy a nastavenia sa prepíšu hodnotami zo zálohy, história cien sa zlúči. Nič sa nezmaže.",
     imported: "✓ Importované položky: {0}",
@@ -349,6 +363,10 @@ const OPTIONS_TEXTS = {
 
     errorSummary: "Zaznamenané chyby: {0}, posledná {1}",
     errorSummaryNone: "Zatiaľ žiadne zaznamenané chyby.",
+    reportBug: "🐞 Nahlásiť chybu",
+    reportBugTitle: "Otvorí nové hlásenie na GitHube s predvyplnenou verziou, prehliadačom a poslednými chybami (je potrebný účet na GitHube). Nič sa neodošle, kým hlásenie sami neodošlete. Hlásenie je verejné – pred odoslaním ho skontrolujte.",
+    reportBugBody: "**Čo sa stalo:**\n\n\n**Na ktorej stránke Alzy (odkaz):**\n\n\n**Čo ste čakali:**\n\n\n---\nVerzia: {0}\nPrehliadač: {1}\nJazyk rozšírenia: {2}\nHlavná Alza: {3}\nPosledné chyby z logu:\n{4}\n\nPomôže snímka obrazovky (vložte ju sem) alebo súbor z Nastavenia → Diagnostika → Stiahnuť diagnostiku.",
+    reportBugNoErrors: "žiadne",
 
     listFallbackName: "Zoznam {0}",
     unwatchListTitle: "Prestať sledovať zoznam (história cien zostane)",
@@ -373,6 +391,10 @@ const OPTIONS_TEXTS = {
     pageTitle: "Beállítások – Alza Price Insight",
     helpLink: "❓ Súgó",
     helpLinkTitle: "A bővítmény használata",
+    welcomeLink: "🧭 Beállítási varázsló",
+    primaryDomain: "Fő Alza",
+    primaryDomainTip: "Az Alza, ahol a legtöbbet vásárol. Ezen ellenőrzi a varázsló a bejelentkezést és az ÁFÁ-s árakat, és ide vezetnek a hivatkozások. Automatikusan = a bővítmény nyelve szerint (szlovák → alza.sk, magyar → alza.hu, egyébként alza.cz). Az árak minden Alzán mentődnek, ahol be van jelentkezve.",
+    welcomeLinkTitle: "Beállítási varázsló – ellenőrzi a bejelentkezést és az ÁFÁ-s árakat, és végigvezet a figyelésen és az értesítéseken",
     version: "Beállítások · verzió {0}",
 
     notifications: "🔔 Értesítések",
@@ -434,7 +456,7 @@ const OPTIONS_TEXTS = {
     wipeNoteEnd: " szót:", // mezera za slovem v <strong>,
     wipeWord: "TÖRLÉS",
     wipeButton: "🗑️ Törlés",
-    wipeButtonConfirm: "🗑️ A mentés megvan – törlés",
+    wipeButtonConfirm: "🗑️ Elmentette a biztonsági mentést? Törlés",
     wipeDownloading: "A(z) {0} mentés letöltése folyamatban. Ellenőrizze, hogy megvan-e a letöltött fájlok között, majd erősítse meg a törlést.",
     wipeDone: "✓ Törölve ({0} tétel). A mentés importálásával visszaállíthatók.",
     wipeFailed: "A törlés nem sikerült: {0}",
@@ -499,6 +521,7 @@ const OPTIONS_TEXTS = {
     exportedJson: "✓ Exportált tételek: {0} (termékelőzmények: {1})",
     exportedCsv: "✓ Exportált előzménysorok: {0}",
     importNotBackup: "A fájl nem ennek a bővítménynek a biztonsági mentése",
+    importTooBig: "A fájl túl nagy ahhoz, hogy ennek a bővítménynek a biztonsági mentése legyen",
     importEmpty: "A mentés nem tartalmaz használható adatot",
     importUnknownDate: "ismeretlen",
     importConfirm:
@@ -529,6 +552,10 @@ const OPTIONS_TEXTS = {
 
     errorSummary: "Rögzített hibák: {0}, az utolsó {1}",
     errorSummaryNone: "Még nincs rögzített hiba.",
+    reportBug: "🐞 Hiba bejelentése",
+    reportBugTitle: "Új bejelentést nyit a GitHubon előre kitöltött verzióval, böngészővel és az utolsó hibákkal (GitHub-fiók szükséges). Semmi sem kerül elküldésre, amíg a bejelentést maga el nem küldi. A bejelentés nyilvános – küldés előtt ellenőrizze.",
+    reportBugBody: "**Mi történt:**\n\n\n**Melyik Alza-oldalon (hivatkozás):**\n\n\n**Mit várt:**\n\n\n---\nVerzió: {0}\nBöngésző: {1}\nA bővítmény nyelve: {2}\nFő Alza: {3}\nUtolsó hibák a naplóból:\n{4}\n\nSokat segít egy képernyőkép (illessze be ide) vagy a Beállítások → Diagnosztika → Diagnosztika letöltése fájl.",
+    reportBugNoErrors: "nincs",
 
     listFallbackName: "Lista {0}",
     unwatchListTitle: "A lista figyelésének leállítása (az árelőzmények megmaradnak)",
@@ -553,6 +580,10 @@ const OPTIONS_TEXTS = {
     pageTitle: "Settings – Alza Price Insight",
     helpLink: "❓ Help",
     helpLinkTitle: "How to use the extension",
+    welcomeLink: "🧭 Setup guide",
+    primaryDomain: "Main Alza",
+    primaryDomainTip: "The Alza you shop at most. The setup guide checks your sign-in and prices incl. VAT there, and links lead to it. Automatic = by the extension language (Slovak → alza.sk, Hungarian → alza.hu, otherwise alza.cz). Prices are saved on every Alza you're signed in to.",
+    welcomeLinkTitle: "Setup guide – checks your sign-in and prices incl. VAT and walks you through watching and notifications",
     version: "Settings · version {0}",
 
     notifications: "🔔 Notifications",
@@ -614,7 +645,7 @@ const OPTIONS_TEXTS = {
     wipeNoteEnd: ":",
     wipeWord: "DELETE",
     wipeButton: "🗑️ Delete",
-    wipeButtonConfirm: "🗑️ Backup is saved – delete",
+    wipeButtonConfirm: "🗑️ Backup saved? Delete",
     wipeDownloading: "Backup {0} is downloading. Check that it is in your downloads, then confirm the deletion.",
     wipeDone: "✓ Deleted ({0} items). You can restore them by importing the backup.",
     wipeFailed: "Deletion failed: {0}",
@@ -679,6 +710,7 @@ const OPTIONS_TEXTS = {
     exportedJson: "✓ Exported items: {0} (product histories: {1})",
     exportedCsv: "✓ Exported history rows: {0}",
     importNotBackup: "The file is not a backup of this extension",
+    importTooBig: "The file is too large to be a backup of this extension",
     importEmpty: "The backup contains no usable data",
     importUnknownDate: "unknown",
     importConfirm:
@@ -709,6 +741,10 @@ const OPTIONS_TEXTS = {
 
     errorSummary: "Recorded errors: {0}, last {1}",
     errorSummaryNone: "No recorded errors yet.",
+    reportBug: "🐞 Report a bug",
+    reportBugTitle: "Opens a new report on GitHub pre-filled with the version, browser and recent errors (a GitHub account is needed). Nothing is sent until you submit the report yourself. The report is public – check it before submitting.",
+    reportBugBody: "**What happened:**\n\n\n**On which Alza page (link):**\n\n\n**What you expected:**\n\n\n---\nVersion: {0}\nBrowser: {1}\nExtension language: {2}\nMain Alza: {3}\nRecent errors from the log:\n{4}\n\nA screenshot helps (paste it here), or the file from Settings → Diagnostics → Download diagnostics.",
+    reportBugNoErrors: "none",
 
     listFallbackName: "List {0}",
     unwatchListTitle: "Stop watching the list (price history stays)",

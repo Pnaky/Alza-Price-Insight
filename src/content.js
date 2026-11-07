@@ -122,6 +122,13 @@ const AlzaPriceTracker = {
       return;
     }
 
+    // Firefox po aktualizaci rozšíření vloží skript do otevřené stránky znovu – prvky předchozí verze jsou mrtvé
+    // (lišta, oznámení) a dostupnost by měla starý příznak, takže by se k ní historie znovu nepřipojila
+    document
+      .querySelectorAll(".alza-price-tracker-toolbar:not(.alza-price-tracker-unit-toolbar), .alza-price-tracker-notification")
+      .forEach((element) => element.remove());
+    document.querySelectorAll(".alza-price-tracker-history-trigger").forEach((element) => element.classList.remove("alza-price-tracker-history-trigger"));
+
     const { currency, locale, lang } = AlzaCore.domains[this.getAlzaDomain()];
     this.state.currencySymbol = currency;
     this.state.locale = locale;
@@ -145,7 +152,7 @@ const AlzaPriceTracker = {
       this.logExtensionInfo();
 
       if (isListPage) {
-        this.observePageChanges();
+        this.observePageChanges().catch((error) => console.error("Error observing page changes:", error));
         this.setupWatchBells();
         this.setupCartWarnings();
         this.watchPriceRecords();
@@ -195,7 +202,7 @@ const AlzaPriceTracker = {
       const load = (syncWatched) => {
         this.state.listSwitchWait = null;
         if (this.state.listId !== listId) return;
-        this.reloadPrices(listId, { syncWatched });
+        this.reloadPrices(listId, { syncWatched }).catch((error) => console.error("Error reloading prices:", error));
         // Po načtení hlavních cen nastavit pozorovatele pro detekci chybějících cen
         setTimeout(() => this.setupMissingPricesObserver(), 3000);
       };
@@ -290,7 +297,7 @@ const AlzaPriceTracker = {
         .filter((product) => product.productUrl);
 
       if (productsToFetch.length > 0) {
-        this.batchFetchPrices(productsToFetch, this.state.listId);
+        this.batchFetchPrices(productsToFetch, this.state.listId).catch((error) => console.error("Error fetching missing prices:", error));
       }
 
       return false; // Ještě nejsou všechny načteny
@@ -450,7 +457,7 @@ const AlzaPriceTracker = {
         const age = Date.now() - productData?.lastUpdated;
         if (productData && age >= 0 && age < this.config.cacheValidityMs) {
           if (AlzaCore.getPriceEntries(productData).length > 0) {
-            this.displayAllPrices(item, null, productData);
+            this.displayAllPrices(item, null, productData, productUrl);
           } else {
             this.state.noPriceUrls.add(productUrl);
             this.removeSpinnerFromItem(item);
@@ -469,7 +476,7 @@ const AlzaPriceTracker = {
       if (productsToFetch.length > 0) {
         // Zobrazit notifikaci o načítání
         this.showLoadingNotification(productsToFetch.length, 0);
-        this.batchFetchPrices(productsToFetch, listId);
+        this.batchFetchPrices(productsToFetch, listId).catch((error) => console.error("Error fetching prices:", error));
       }
     }).catch((error) => console.error("Error processing list items:", error));
   },
@@ -529,6 +536,7 @@ const AlzaPriceTracker = {
     if (!page.ok || !page.isProduct) {
       // Trvalá chyba – opakování nepomůže (404, přihlášení / captcha místo detailu…)
       console.warn(`Alza Price Insight – produkt nejde načíst (${page.error || "není detail produktu"}): ${productUrl}`);
+      this.state.noPriceUrls.add(productUrl); // Doplňování chybějících cen by ho jinak stahovalo znovu každých pár sekund
       this.removeSpinnerFromItem(itemElement);
       this.updateLoadingNotification();
       return { skipped: true };
@@ -542,7 +550,9 @@ const AlzaPriceTracker = {
     }
 
     const { prices, name, packCount, quantityTiers, conditions } = page;
-    const availability = this.getAvailabilityCode(itemElement);
+    // Dostupnost z řádku jen když v něm je pořád tentýž produkt (stahování trvá, React mezitím mohl řádek použít
+    // pro jiný) – null = beze změny
+    const availability = itemElement.querySelector(this.selectors.productLink)?.href === productUrl ? this.getAvailabilityCode(itemElement) : null;
     const recordHistory = (snapshot, oldPrices) =>
       this.recordPriceHistory(productUrl, snapshot, availability, oldPrices?.[productUrl], name).catch((error) =>
         console.error(`Error saving price history for ${productUrl}:`, error)
@@ -737,7 +747,7 @@ const AlzaPriceTracker = {
     // „cena / ks“ – ta je schovaná CSS, aby řádek neproblikl)
     document.querySelectorAll(this.selectors.listItem).forEach((item) => {
       const container = item.querySelector(this.selectors.priceContainer);
-      const data = this.state.itemData.get(item);
+      const data = this.getItemData(item);
       if (!container || !data || !container.querySelector(".alza-price-tracker-price")) return;
       const quantity = String(parseInt(item.querySelector(this.selectors.quantityInput)?.value, 10) || 1);
       if (container.dataset.alzaPriceTrackerQuantity === quantity) return;
@@ -756,7 +766,8 @@ const AlzaPriceTracker = {
       if (item.querySelector(`${this.selectors.priceContainer} .alza-price-tracker-price`)) continue;
       const url = item.querySelector(this.selectors.productLink)?.href;
       const record = url && this.state.priceRecords.get(this.getProductKey(url));
-      if (record && AlzaCore.getPriceEntries(record).length > 0) await this.displayAllPrices(item, null, record);
+      // URL s sebou – React mohl řádek během čekání použít pro jiný produkt
+      if (record && AlzaCore.getPriceEntries(record).length > 0) await this.displayAllPrices(item, null, record, url);
     }
   },
 
@@ -1077,19 +1088,12 @@ const AlzaPriceTracker = {
   addTooltip(priceElement, currentPrice, allPrices) {
     if (!allPrices || allPrices.length < 2) return;
 
-    const sortedPrices = [...allPrices].sort((a, b) => a.price - b.price);
-    const currentIndex = sortedPrices.findIndex((p) => p.price === currentPrice);
-
-    let tooltipText = "";
-
-    if (currentIndex < sortedPrices.length - 1) {
-      tooltipText = this.getDiscountText(sortedPrices[currentIndex + 1].price, currentPrice);
-    }
-
-    if (currentIndex < sortedPrices.length - 2) {
-      const nextHigherPriceText = this.getDiscountText(sortedPrices[currentIndex + 2].price, currentPrice);
-      tooltipText += tooltipText ? ` / ${nextHigherPriceText}` : nextHigherPriceText;
-    }
+    // Rozdíl proti dvěma nejbližším VYŠŠÍM cenám – dvě stejné ceny (AlzaPlus+ = kód) by daly „-0 Kč (-0 %)“
+    const higherPrices = [...new Set(allPrices.map((p) => p.price))].filter((price) => price > currentPrice).sort((a, b) => a - b);
+    const tooltipText = higherPrices
+      .slice(0, 2)
+      .map((price) => this.getDiscountText(price, currentPrice))
+      .join(" / ");
 
     if (tooltipText) {
       priceElement.title = tooltipText;

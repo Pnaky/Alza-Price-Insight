@@ -1,124 +1,133 @@
+/* Vzhled jako průvodce nastavením a nastavení: tmavé pozadí s přechodem z barev ikony, bílé karty se stínem */
 :root {
+  --ink: #1e1e1e;
+  --navy: #263f6a;
+  --lime: #c9dd03;
   --blue: #0094e7;
   --text: #212121;
   --muted: #616161;
-  --line: #e6e6e6;
+  --line: #e8eaee;
   --green: #2e7d32;
   --red: #c62828;
   --orange: #e65100;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+/* Pozadí a záhlaví: ../shared/page.css */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  background: #f6f7f8;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text);
 }
 
+/* Stejná šířka (960 px obsahu) a záhlaví jako nastavení a průvodce */
 main {
-  max-width: 820px;
+  max-width: 992px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 28px 16px 56px;
 }
 
-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-header img {
-  width: 48px;
-  height: 48px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-header p {
-  margin: 0;
-  color: var(--muted);
-}
-
+/* Obsah – průsvitné štítky na tmavém pozadí */
 nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 22px;
 }
 
 nav a {
-  padding: 4px 10px;
-  border: 1px solid var(--line);
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
-  background: #fff;
-  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef2f7;
   font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
 }
 
 nav a:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  border-color: var(--lime);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
 }
 
 section {
-  margin-bottom: 14px;
-  padding: 16px 20px;
-  border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 24px 30px 20px;
+  border-radius: 16px;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  scroll-margin-top: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  scroll-margin-top: 16px;
 }
 
 h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
+  margin: 0 0 10px;
+  font-size: 21px;
+  letter-spacing: -0.2px;
 }
 
 h3 {
-  margin: 14px 0 4px;
-  font-size: 15px;
+  margin: 18px 0 4px;
+  font-size: 15.5px;
 }
 
 p,
 ul,
 ol {
-  margin: 6px 0;
+  margin: 8px 0;
+}
+
+ul,
+ol {
+  padding-left: 22px;
 }
 
 li {
-  margin: 3px 0;
+  margin: 5px 0;
+}
+
+li::marker {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+a {
+  color: #1653a4;
 }
 
 .tip {
-  margin: 10px 0 0;
-  padding: 8px 12px;
-  border-left: 4px solid var(--blue);
-  border-radius: 6px;
-  background: #f1f8fe;
+  margin: 14px 0 0;
+  padding: 11px 15px;
+  border-left: 4px solid var(--navy);
+  border-radius: 10px;
+  background: #f2f6fc;
 }
 
 .warn {
   border-left-color: var(--orange);
-  background: #fff3e0;
+  background: #fff4e5;
 }
 
 table {
   width: 100%;
-  margin: 8px 0;
+  margin: 10px 0;
   border-collapse: collapse;
   font-size: 14px;
 }
 
 th,
 td {
-  padding: 5px 8px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
@@ -126,7 +135,10 @@ td {
 
 th {
   color: var(--muted);
+  font-size: 12px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .badge {
@@ -146,19 +158,24 @@ th {
 .unit {
   display: inline-block;
   padding: 0 6px;
-  border-radius: 4px;
+  border-radius: 5px;
   background: #fff3e0;
   color: var(--orange);
   font-weight: 600;
 }
 
+/* Časté otázky – rozbalovací karty */
 details {
-  padding: 6px 0;
-  border-bottom: 1px solid var(--line);
+  margin: 8px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fafbfc;
 }
 
-details:last-child {
-  border-bottom: 0;
+details[open] {
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 summary {
@@ -166,46 +183,82 @@ summary {
   font-weight: 600;
 }
 
+summary::marker {
+  color: var(--navy);
+}
+
 details p {
-  margin: 6px 0 2px 18px;
+  margin: 8px 0 2px 18px;
 }
 
 kbd {
-  padding: 0 4px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  padding: 1px 5px;
+  border: 1px solid #cfd3da;
+  border-bottom-width: 2px;
+  border-radius: 5px;
   background: #fafafa;
   font-family: inherit;
   font-size: 13px;
 }
 
-/* Přepínač jazyka a upozornění na strojový překlad */
+/* Přepínač jazyka – segmenty jako výběr jazyka v průvodci */
 .languages {
+  display: flex;
   margin-left: auto;
-  align-self: flex-start;
+  align-self: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
   font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .languages a,
 .languages strong {
-  margin-left: 6px;
+  padding: 6px 11px;
+}
+
+.languages strong {
+  background: #fff;
+  color: var(--text);
 }
 
 .languages a {
-  color: var(--blue);
+  color: #d5dbe5;
   text-decoration: none;
 }
 
+.languages a:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* Upozornění na strojový překlad (sk, hu, en) */
 .machine {
-  margin: 0 0 14px;
-  padding: 8px 12px;
-  border-radius: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
   background: #fffde7;
   border: 1px solid #fff176;
   font-size: 14px;
 }
 
 .machine a {
-  color: var(--blue);
+  color: #1653a4;
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    flex-wrap: wrap;
+  }
+
+  .languages {
+    margin-left: 0;
+  }
+
+  section {
+    padding: 20px 18px 16px;
+  }
 }

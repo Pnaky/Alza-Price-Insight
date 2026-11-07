@@ -100,6 +100,8 @@ const AlzaUnitPrice = {
   async init() {
     // Jen stránky s výpisem produktů s cenou za jednotku (drogerie, potraviny…); jinde nic nesledovat
     if (!document.querySelector(`${this.selectors.item} ${this.selectors.unitPrice}`)) return;
+    // Lišta předchozí verze skriptu (Firefox ho po aktualizaci rozšíření vloží znovu) – mrtvá, pryč
+    document.querySelectorAll(".alza-price-tracker-unit-toolbar").forEach((element) => element.remove());
 
     this.state.domainKey = AlzaCore.getDomainKey(window.location.hostname);
     // Změna v nastavení se projeví hned i v otevřené stránce
@@ -118,6 +120,8 @@ const AlzaUnitPrice = {
   setEnabled(enabled) {
     if (enabled === this.state.enabled) return;
     this.state.enabled = enabled;
+    // Úprava výšky bloku ceny Alzy (main.css) jen se zapnutou cenou za jednotku
+    document.documentElement.toggleAttribute("data-alza-price-tracker-unit-price", enabled);
 
     if (enabled) {
       this.update();

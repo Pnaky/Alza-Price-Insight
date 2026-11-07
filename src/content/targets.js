@@ -175,7 +175,7 @@ Object.assign(AlzaPriceTracker, {
 
   // Ikona cílové ceny – zelená, když je cíl dosažen; cena a rozdíl v tooltipu
   updateTargetMarker(itemElement) {
-    const data = this.state.itemData.get(itemElement);
+    const data = this.getItemData(itemElement);
     const priceContainer = itemElement.querySelector(this.selectors.priceContainer);
     if (!data || !priceContainer) return;
 

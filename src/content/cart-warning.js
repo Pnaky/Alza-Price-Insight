@@ -30,7 +30,7 @@ Object.assign(AlzaPriceTracker, {
           ? [...document.querySelectorAll(this.selectors.listItem)]
           : [button.closest(this.selectors.listItem)].filter(Boolean);
         const conditional = items
-          .map((item) => ({ item, condition: this.getConditionalLowest(this.state.itemData.get(item)?.priceMap) }))
+          .map((item) => ({ item, condition: this.getConditionalLowest(this.getItemData(item)?.priceMap) }))
           .filter(({ condition }) => condition);
         if (conditional.length === 0) return;
         event.preventDefault();

@@ -149,13 +149,49 @@ function sendToBackground(message) {
 
 document.getElementById("openOptions").addEventListener("click", () => chrome.runtime.openOptionsPage());
 
-// Odkaz na Alzu: doména prvního hlídaného seznamu, jinak podle jazyka prohlížeče
+// === Domény Alzy ===
+// Data jsou oddělená po doménách, popup ukazuje všechny dohromady. Doména otevřené záložky (null = jiná
+// stránka než Alza) určuje odkaz na Alzu; štítek domény se ukáže, jen když hlídáte víc domén
+let activeDomain = null;
+
+async function getActiveTabDomain() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // Adresu záložky prohlížeč popupu prozradí jen u stránek Alzy (host_permissions)
+    return tab?.url && AlzaCore.isAlzaUrl(tab.url) ? AlzaCore.getDomainKey(new URL(tab.url).hostname) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getUrlDomain(url) {
+  return AlzaCore.isAlzaUrl(url) ? AlzaCore.getDomainKey(new URL(url).hostname) : null;
+}
+
+function getHost(domain) {
+  return new URL(AlzaCore.domains[domain].origin).hostname.replace(/^www\./, "");
+}
+
+// Štítek „CZ“ / „SK“ / „HU“ (null = jedna doména, štítek není potřeba)
+function createDomainBadge(domain, show) {
+  if (!show || !AlzaCore.isKnownDomain(domain)) return null;
+  const badge = document.createElement("span");
+  badge.className = "domain-badge";
+  badge.textContent = AlzaCore.domains[domain].lang.toUpperCase();
+  badge.title = getHost(domain);
+  return badge;
+}
+
+// Odkaz na Alzu: doména otevřené záložky, jinak hlavní Alza z nastavení (průvodce, nastavení), jinak prvního
+// hlídaného seznamu, jinak podle jazyka prohlížeče
 const UI_DOMAINS = { cz: "alza_cz", sk: "alza_sk", hu: "alza_hu", en: "alza_cz" };
+let primaryDomain = null;
 // Ikonou je favicona Alzy; když se nenačte (offline), zobrazí se doména
 function renderAlzaLink(lists) {
-  const domain = Object.values(lists).find((list) => AlzaCore.isKnownDomain(list?.domain))?.domain || UI_DOMAINS[ui.lang] || "alza_cz";
+  const domain =
+    activeDomain || primaryDomain || Object.values(lists).find((list) => AlzaCore.isKnownDomain(list?.domain))?.domain || UI_DOMAINS[ui.lang] || "alza_cz";
   const origin = AlzaCore.domains[domain].origin;
-  const host = new URL(origin).hostname.replace(/^www\./, "");
+  const host = getHost(domain);
   const link = document.getElementById("openAlza");
   link.href = `${origin}/`;
   link.title = t("openAlzaTitle", host);
@@ -178,7 +214,7 @@ const WATCH_STATE_KEY = AlzaCore.storageKeys.watchState;
 const toggleWatchButton = document.getElementById("toggleWatch");
 const runWatchNowButton = document.getElementById("runWatchNow");
 let watchState = null;
-let newChangeKeys = new Set(); // Produkty z čísla na ikoně v okamžiku otevření popupu
+let newChangeKeys = new Set(); // Produkty z čísla na ikoně při otevření popupu a z kontrol doběhlých, dokud je otevřený
 
 function formatTime(timestamp) {
   return timestamp ? new Date(timestamp).toLocaleString(ui.locale, { dateStyle: "short", timeStyle: "short" }) : "–";
@@ -224,10 +260,22 @@ async function renderWatch() {
   const nextAlarm = await chrome.alarms.get("alzaWatchRun").catch(() => null);
 
   renderAlzaLink(lists);
+  const watchedProducts = Object.values(data[WATCH_PRODUCTS_KEY] || {}).filter(Boolean);
+  // Poškozený záznam (null) nesmí shodit popup
+  const validLists = Object.entries(lists).filter(([, list]) => list);
+  const domains = new Set(
+    [
+      ...validLists.map(([, list]) => list.domain),
+      ...watchedProducts.map((product) => product.domain),
+      ...Object.values(data[TARGETS_KEY] || {}).map((target) => target?.domain),
+      ...(state.recent || []).map((item) => getUrlDomain(item.url)),
+    ].filter((domain) => AlzaCore.isKnownDomain(domain))
+  );
+  const showDomains = domains.size > 1;
+
   const listElement = document.getElementById("watchLists");
   listElement.replaceChildren(
-    // Poškozený záznam (null) nesmí shodit popup
-    ...Object.entries(lists).filter(([, list]) => list).map(([key, list]) => {
+    ...validLists.map(([key, list]) => {
       const link = document.createElement("a");
       if (AlzaCore.isAlzaUrl(list.url)) link.href = list.url;
       link.target = "_blank";
@@ -235,17 +283,17 @@ async function renderWatch() {
       link.title = t("listSynced", formatTime(list.syncedAt));
 
       const products = Object.entries(list.products || {}).map(([url, info]) => ({ url, domain: list.domain, name: info?.name, image: info?.image }));
-      return createWatchGroup(`list:${key}`, link, products, createWatchSummary(products));
+      return createWatchGroup(`list:${key}`, link, products, { badge: createDomainBadge(list.domain, showDomains) }, createWatchSummary(products));
     })
   );
 
-  // Produkty hlídané z detailu – název jen rozbalí seznam (správa je na stránce nastavení)
+  // Produkty hlídané z detailu – název jen rozbalí seznam (správa je na stránce nastavení). Můžou být z více
+  // domén – štítek pak má každý produkt
   if (productCount > 0) {
     const link = document.createElement("a");
     link.href = "#";
     link.textContent = t("watchedProducts", productCount);
-    const products = Object.values(data[WATCH_PRODUCTS_KEY]).filter(Boolean);
-    const item = createWatchGroup("products", link, products, createWatchSummary(products));
+    const item = createWatchGroup("products", link, watchedProducts, { productBadges: showDomains }, createWatchSummary(watchedProducts));
     link.addEventListener("click", (event) => {
       event.preventDefault();
       item.querySelector(".expand").click();
@@ -276,7 +324,7 @@ async function renderWatch() {
   if (state.pendingNotifications?.length) addLine(t("pending", state.pendingNotifications.length));
   (state.problems || []).forEach((problem) => addLine(`⚠️ ${problem.name}: ${problem.message}`, "watch-problem"));
   runWatchNowButton.disabled = Boolean(state.running) || (Object.keys(lists).length === 0 && targetCount === 0 && productCount === 0);
-  renderChanges(state.recent || []);
+  renderChanges(state.recent || [], showDomains);
   renderCleanup(data[CLEANUP_KEY] || {});
 }
 
@@ -309,19 +357,20 @@ document.getElementById("cleanupSnooze").addEventListener("click", async () => {
 // Rozbalené zůstávají i po překreslení (kontrola na pozadí mění stav a seznamy)
 const expandedGroups = new Set();
 
-function createWatchGroup(groupKey, link, products, ...actions) {
+// badge = štítek domény celé skupiny (před názvem), productBadges = štítek u každého produktu
+function createWatchGroup(groupKey, link, products, { badge = null, productBadges = false } = {}, ...actions) {
   const item = document.createElement("li");
   const expand = document.createElement("button");
   expand.className = "expand";
   expand.title = t("showProducts");
-  item.append(expand, link, ...actions);
+  item.append(...[expand, badge, link, ...actions].filter(Boolean));
 
   const update = () => {
     const open = expandedGroups.has(groupKey);
     expand.textContent = open ? "▼" : "▶";
     expand.setAttribute("aria-expanded", String(open));
     item.querySelector(".watch-products")?.remove();
-    if (open) item.appendChild(createProductPanel(products));
+    if (open) item.appendChild(createProductPanel(products, productBadges));
   };
   expand.addEventListener("click", () => {
     if (!expandedGroups.delete(groupKey)) expandedGroups.add(groupKey);
@@ -368,11 +417,11 @@ function createWatchSummary(products) {
     };
     const parts = [down > 0 && part("down", `▼ ${down}`), up > 0 && part("up", `▲ ${up}`)].filter(Boolean);
     summary.replaceChildren(...parts.flatMap((element, index) => (index ? [" ", element] : [element])));
-  });
+  }).catch(showError);
   return summary;
 }
 
-function createProductPanel(products) {
+function createProductPanel(products, showDomains = false) {
   const panel = document.createElement("div");
   panel.className = "watch-products";
   const valid = products.filter((product) => AlzaCore.isKnownDomain(product.domain) && AlzaCore.isAlzaUrl(product.url));
@@ -397,6 +446,9 @@ function createProductPanel(products) {
           row.appendChild(image);
         }
 
+        const badge = createDomainBadge(product.domain, showDomains);
+        if (badge) row.appendChild(badge);
+
         const name = AlzaCore.getLatestName(history) || product.name || product.url;
         const link = document.createElement("a");
         link.href = product.url;
@@ -413,28 +465,12 @@ function createProductPanel(products) {
         return row;
       })
     );
-  });
+  }).catch(showError);
   return panel;
 }
 
-// Druh řádku změny podle jeho textu (core.js notifyPriceDrop / notifyPriceRise / notifyTargetReached /
-// notifyNewPrice / notifyAvailability): down = zlevnění, nová cena, cílová cena, naskladnění; up = zdražení;
-// off = jiná změna dostupnosti (nedostupné, prodej skončil…); warning = výstraha k podezřelé ceně
-const TEXT_LANGUAGES = ["cz", "sk", "hu", "en"];
-const IN_STOCK_LABELS = TEXT_LANGUAGES.map((lang) => AlzaCore.getAvailabilityLabel("in", lang));
-const NEW_PRICE_PREFIXES = TEXT_LANGUAGES.map((lang) => AlzaCore.translate(lang, "notifyNewPrice", "", "").split(" ")[0] + " ");
-
-function getChangeTone(text) {
-  if (text.startsWith("⚠️")) return "warning";
-  if (/\(\+[^()]*%\)$/.test(text)) return "up";
-  if (/\(-[^()]*%\)$/.test(text) || text.startsWith("🎯") || NEW_PRICE_PREFIXES.some((prefix) => text.startsWith(prefix))) return "down";
-  const availability = text.match(/ → (.+)$/);
-  if (availability) return IN_STOCK_LABELS.includes(availability[1]) ? "down" : "off";
-  return null;
-}
-
 // Přehled posledních změn – nové (číslo na ikoně při otevření popupu) zvýrazněné nahoře
-function renderChanges(recent) {
+function renderChanges(recent, showDomains = false) {
   const section = document.getElementById("changes");
   section.hidden = recent.length === 0;
   if (recent.length === 0) return;
@@ -456,7 +492,8 @@ function renderChanges(recent) {
     ...recent.map((item) => {
       const row = document.createElement("div");
       const lines = item.lines.map((text) => AlzaCore.upgradePriceDropText(text, item.url));
-      const tones = lines.map(getChangeTone);
+      // Druh změny: core.js getChangeTone (stejný určuje barvu čísla na ikoně)
+      const tones = lines.map((text) => AlzaCore.getChangeTone(text));
       // Nová změna (číslo na ikoně) má řádek podbarvený podle první změny ceny / dostupnosti (výstraha ho
       // neurčuje); viděné zůstávají bílé a druh změny ukazuje jen barva textu
       const tone = newChangeKeys.has(item.key) && tones.find((value) => value && value !== "warning");
@@ -494,6 +531,8 @@ function renderChanges(recent) {
 
       const meta = document.createElement("div");
       meta.className = "change-meta";
+      const badge = createDomainBadge(getUrlDomain(item.url), showDomains);
+      if (badge) meta.append(badge, " ");
       meta.append(formatTime(item.at));
       if (item.listName) meta.append(" · ", link(item.listUrl, item.listName));
       body.appendChild(meta);
@@ -520,6 +559,13 @@ runWatchNowButton.addEventListener("click", () => {
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area !== "local" || ![WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY].some((key) => changes[key])) return;
+  // Změny z kontroly doběhlé při otevřeném popupu (např. tlačítko Zkontrolovat) – zvýraznit a hned označit viděné
+  const unseen = changes[WATCH_STATE_KEY]?.newValue?.unseen || [];
+  // I znovu změněný, už zvýrazněný produkt – jinak by po zavření zůstalo číslo na ikoně (markSeen zapíše [] → bez smyčky)
+  if (unseen.length > 0) {
+    unseen.forEach((key) => newChangeKeys.add(key));
+    sendToBackground({ action: "watchSeen" });
+  }
   renderWatch().catch(showError);
   if (changes[WATCH_LISTS_KEY]) {
     watchState = (await sendToActiveTab({ action: "getWatchState" })) || watchState;
@@ -529,14 +575,17 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 
 (async () => {
   // Jazyk zvolený v nastavení – před prvním vykreslením
-  uiLanguage = AlzaCore.getUiLanguage(await AlzaCore.getSettings());
+  const settings = await AlzaCore.getSettings();
+  uiLanguage = AlzaCore.getUiLanguage(settings);
   ui = UI_LANGUAGES[uiLanguage];
+  primaryDomain = AlzaCore.getPrimaryDomain(settings);
   applyStaticTexts();
 
   // Otevřený popup = změny viděny – vynulovat číslo na ikoně, ale v přehledu je nechat zvýrazněné
   const { [WATCH_STATE_KEY]: initialState = {} } = await chrome.storage.local.get(WATCH_STATE_KEY);
-  newChangeKeys = new Set(initialState.unseen || []);
+  newChangeKeys = new Set([...newChangeKeys, ...(initialState.unseen || [])]);
   sendToBackground({ action: "watchSeen" });
+  activeDomain = await getActiveTabDomain();
   watchState = await sendToActiveTab({ action: "getWatchState" });
   renderToggle();
   await renderWatch();

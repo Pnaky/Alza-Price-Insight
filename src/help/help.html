@@ -4,16 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nápověda – Alza Price Insight</title>
+    <link rel="stylesheet" href="../shared/page.css" />
     <link rel="stylesheet" href="help.css" />
   </head>
 
   <body>
     <main>
-      <header>
+      <header class="app-header">
         <img src="../../img/icon-48.png" alt="" />
         <div>
-          <h1>Nápověda</h1>
-          <p>Alza Price Insight – historie cen, hlídání a skutečná cena za kus na alza.cz, alza.sk a alza.hu</p>
+          <h1 class="app-title">Alza Price Insight</h1>
+          <p class="app-sub">Nápověda</p>
         </div>
         <div class="languages">
           <strong>CZ</strong><a href="help-sk.html" lang="sk">SK</a><a href="help-hu.html" lang="hu">HU</a><a href="help-en.html" lang="en">EN</a>
@@ -35,6 +36,7 @@
 
       <section id="zaciname">
         <h2>🚀 Začínáme</h2>
+        <p class="tip">Po instalaci se otevře <strong>🧭 Průvodce nastavením</strong>: vyberete hlavní Alzu, jedním kliknutím ověří přihlášení a ceny s DPH (u každé položky napíše, co je hotové a co udělat) a provede vás hlídáním a notifikacemi. Znovu ho spustíte v nastavení (🧭 Průvodce vpravo nahoře), hlavní Alzu změníte v nastavení u jazyka.</p>
         <ol>
           <li><strong>Přihlaste se na Alze.</strong> Ceny se ukládají jen přihlášeným – Alza ukazuje každému jiné ceny (AlzaPlus+, benefity, B2B).</li>
           <li><strong>Mějte zapnuté ceny s DPH.</strong> S volbou „Zobrazovat ceny bez DPH“ se ceny neukládají, aby se nepomíchaly.</li>
@@ -156,8 +158,8 @@
           <li><strong>Hlídaný seznam:</strong> otevřete seznam a v popupu rozšíření klikněte na <strong>🔔 Hlídat seznam</strong>, nebo klikněte na zvoneček v záložce seznamu. Hlídá se celý seznam; nově přidané položky se do hlídání dostanou při příštím otevření seznamu.</li>
           <li><strong>Hlídaný produkt:</strong> tlačítko „🔔 Hlídat na pozadí“ na detailu produktu, nebo nastavená cílová cena.</li>
           <li>Kontrola běží <strong>každou hodinu</strong>, dokud je spuštěný prohlížeč. V nastavení ji změníte na každé 3, 6 nebo 12 hodin nebo na <strong>jednou denně ve zvolený čas</strong> – když je prohlížeč v tu dobu zavřený, proběhne pár minut po jeho spuštění. Kdy bude další, ukazuje popup. Hned ji spustíte tlačítkem ▶️ Zkontrolovat v popupu.</li>
-          <li><strong>Zelené číslo na ikoně</strong> rozšíření = počet produktů se změnou od posledního otevření popupu, přehled změn je v popupu. <strong>Modré číslo</strong> = staré produkty navržené ke smazání.</li>
-          <li><strong>Přehled změn v popupu:</strong> zlevnění, naskladnění, nová akce a dosažená cílová cena zeleně, zdražení červeně (na zdražení notifikace nechodí), konec prodeje a nedostupnost šedě. Podbarvené jsou nové změny, už viděné mají barevný jen text. U hlídaných seznamů vidíte, kolik produktů za posledních 7 dní zlevnilo (▼) a zdražilo (▲). Hlídání seznamu vypnete tlačítkem 🔕 Nehlídat seznam v popupu na otevřeném seznamu nebo v nastavení (záložka Hlídané seznamy). Nápověda je v nastavení (❓ vpravo nahoře).</li>
+          <li><strong>Číslo na ikoně</strong> rozšíření = počet produktů se změnou od posledního otevření popupu, přehled změn je v popupu. Barva: <strong>zelená</strong> = aspoň jeden produkt zlevnil, naskladnil se, má novou akci nebo dosáhl cílové ceny, <strong>červená</strong> = žádný nezlevnil, ale aspoň jeden zdražil, <strong>šedá</strong> = jen konec prodeje nebo nedostupnost. <strong>Modré číslo</strong> = staré produkty navržené ke smazání.</li>
+          <li><strong>Přehled změn v popupu:</strong> zlevnění, naskladnění, nová akce a dosažená cílová cena zeleně, zdražení červeně (na zdražení notifikace nechodí), konec prodeje a nedostupnost šedě. Podbarvené jsou nové změny, už viděné mají barevný jen text. U hlídaných seznamů vidíte, kolik produktů za posledních 7 dní zlevnilo (▼) a zdražilo (▲). Hlídání seznamu vypnete tlačítkem 🔕 Nehlídat seznam v popupu na otevřeném seznamu nebo v nastavení (záložka Hlídané seznamy). Když hlídáte víc Alz, mají seznamy, změny i hlídané produkty štítek <strong>CZ / SK / HU</strong> (po najetí myší adresa Alzy). Nápověda je v nastavení (❓ vpravo nahoře).</li>
         </ul>
         <p>V nastavení si vyberete, o čem chcete vědět: zlevnění (i od kolika procent), nové ceny (akce, kód, cashback), dostupnost a tiché hodiny.</p>
         <p class="tip">Nechodí notifikace? V nastavení klikněte na <strong>🔔 Vyzkoušet notifikace</strong>. Když nepřijdou, zkontrolujte ve Windows „Nerušit“ / Asistenta soustředění a povolení oznámení pro prohlížeč (Chrome, Firefox).</p>
@@ -187,7 +189,7 @@
           <li><strong>Historie (CSV)</strong> – všechny ceny pro Excel.</li>
           <li><strong>Uklidit stará data</strong> – smaže produkty, které nehlídáte a přes 3 měsíce jste je neotevřeli ani se nekontrolovaly (uložené při procházení až po roce). Rozšíření je samo navrhne modrým číslem na ikoně a upozorněním v popupu.</li>
           <li><strong>Smazat všechna data</strong> – jen po napsání slova SMAZAT; předtím se automaticky stáhne záloha.</li>
-          <li><strong>Diagnostika</strong> – když něco nefunguje, stáhněte diagnostiku a pošlete ji autorovi (obsahuje verzi, nastavení, log kontrol a chyby; žádná hesla ani cookies).</li>
+          <li><strong>Diagnostika</strong> – když něco nefunguje, klikněte na <strong>🐞 Nahlásit chybu</strong>: otevře se předvyplněné hlášení na GitHubu (verze, prohlížeč, poslední chyby). Nebo stáhněte diagnostiku a pošlete ji autorovi (obsahuje verzi, nastavení, log kontrol a chyby; žádná hesla ani cookies).</li>
         </ul>
         <p class="tip">Všechna data zůstávají jen ve vašem prohlížeči. Rozšíření komunikuje pouze s weby Alzy a nikam jinam nic neodesílá.</p>
       </section>

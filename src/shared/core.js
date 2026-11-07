@@ -69,7 +69,7 @@ const AlzaCore = {
     minDropPercent: 0, // Zlevnění menší než toto procento se neohlásí
     notifyNewPrices: true, // Nový typ ceny – akce, slevový kód, cashback…
     notifyAvailability: "all", // all = každá změna, inStock = jen naskladnění, off = vůbec
-    quietHours: false, // V tichých hodinách se notifikace odloží na první kontrolu po jejich konci
+    quietHours: false, // V tichých hodinách se notifikace odloží a odejdou po jejich konci (alarm alzaQuietEnd)
     quietFrom: "22:00",
     quietTo: "07:00",
     checkSchedule: "1h", // Jak často kontrolovat na pozadí: 1h / 3h / 6h / 12h / daily (jednou denně v checkTime)
@@ -77,6 +77,7 @@ const AlzaCore = {
     categoryUnitPrice: true, // Skutečná cena za jednotku a řazení podle ní ve výpisech kategorií (category.js)
     saveBrowsing: true, // Ukládat ceny produktů viděných při procházení – výpisy (browsing.js) i detail
     uiLanguage: "auto", // Jazyk popupu a nápovědy: auto = podle prohlížeče, jinak cs / sk / hu / en
+    primaryDomain: "auto", // Hlavní Alza (průvodce – ověření přihlášení a DPH, odkazy): auto = podle jazyka, jinak alza_cz / alza_sk / alza_hu
   },
 
   // Klíče záznamu ceny, které nejsou cenou
@@ -372,6 +373,12 @@ const AlzaCore = {
     return this.uiLanguages.includes(browser) ? browser : "en";
   },
 
+  // Hlavní Alza: volba v nastavení (primaryDomain), jinak podle jazyka rozšíření (sk → alza.sk, hu → alza.hu, jinak alza.cz)
+  getPrimaryDomain(settings = null) {
+    if (Object.hasOwn(this.domains, settings?.primaryDomain)) return settings.primaryDomain;
+    return { sk: "alza_sk", hu: "alza_hu" }[this.getUiLanguage(settings)] || "alza_cz";
+  },
+
   // Nápověda v daném jazyce (sk, hu a en jsou strojové překlady české)
   getHelpUrl(language = this.getUiLanguage()) {
     const file = { cs: "help.html", sk: "help-sk.html", hu: "help-hu.html" }[language] || "help-en.html";
@@ -393,8 +400,11 @@ const AlzaCore = {
 
   // Nejbližší čas "HH:MM" po now (dnes, nebo zítra) a poslední před ním – místní čas, takže i přes změnu
   // letního času. Neplatný čas = výchozí
+  // Platný čas "HH:MM" (00:00–23:59) – nastavení, import, denní kontrola, tiché hodiny
+  timePattern: /^([01]\d|2[0-3]):[0-5]\d$/,
+
   getDailyRunTimes(time, now = Date.now()) {
-    const [hours, minutes] = /^\d{2}:\d{2}$/.test(time) ? time.split(":").map(Number) : this.defaultSettings.checkTime.split(":").map(Number);
+    const [hours, minutes] = (this.timePattern.test(time) ? time : this.defaultSettings.checkTime).split(":").map(Number);
     const next = new Date(now);
     next.setHours(hours, minutes, 0, 0);
     if (next.getTime() <= now) next.setDate(next.getDate() + 1);
@@ -407,8 +417,9 @@ const AlzaCore = {
   isQuietTime(settings, date = new Date()) {
     if (!settings.quietHours) return false;
     const toMinutes = (time) => {
-      const [hours, minutes] = String(time).split(":").map(Number);
-      return hours * 60 + (minutes || 0);
+      if (!this.timePattern.test(time)) return NaN;
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 60 + minutes;
     };
     const now = date.getHours() * 60 + date.getMinutes();
     const from = toMinutes(settings.quietFrom);
@@ -421,7 +432,7 @@ const AlzaCore = {
     const { currency, locale } = this.domains[domainKey] || this.domains.alza_cz;
     // Kč a Ft bez desetinných míst, € se dvěma
     const digits = currency === "€" ? 2 : 0;
-    const formatted = price.toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const formatted = (Number(price) || 0).toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
     return `${formatted} ${currency}`;
   },
 
@@ -450,7 +461,8 @@ const AlzaCore = {
   getErrorSource() {
     if (typeof window === "undefined") return "background";
     const { protocol, hostname, pathname } = globalThis.location;
-    return protocol === "chrome-extension:" ? pathname : `${hostname}${pathname}`;
+    if (!protocol.endsWith("-extension:")) return `${hostname}${pathname}`; // chrome-extension: i moz-extension:
+    return pathname.includes("_generated_background") ? "background" : pathname; // Firefox: stránka na pozadí
   },
 
   recordError(args) {
@@ -508,10 +520,12 @@ const AlzaCore = {
   // Změna DOM jen v našich prvcích (třídy alza-price-tracker…) – na ni nereagovat, jinak by se vlastní
   // vykreslení samo znovu spouštělo
   // Prvky Alzy, kterým jen přidáváme třídu (buňka ceny, záložka seznamu, dostupnost – mají data-testid), naše
-  // nejsou: když je React přepíše, reagovat se musí (obnova cen)
+  // nejsou: když je React přepíše, reagovat se musí (obnova cen). Hledání nahoru končí na prvním prvku Alzy
+  // s data-testid – naše třída na vzdálenějším předkovi Alzy (kontejner seznamu) celý podstrom za náš neudělá.
+  // Na prvky Alzy bez data-testid (kontejner, <html>) dávat jen atributy data-alza-price-tracker-…, ne třídy
   isOwnMutation(record) {
     const isOwn = (node) => {
-      const marked = (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement)?.closest('[class*="alza-price-tracker"]');
+      const marked = (node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement)?.closest('[class*="alza-price-tracker"], [data-testid]');
       return Boolean(marked) && !marked.hasAttribute("data-testid");
     };
     if (record.type === "attributes") return isOwn(record.target);
@@ -708,10 +722,11 @@ const AlzaCore = {
     return record;
   },
 
-  // Pokles pod 1 % s desetinným místem – "-0 %" u malé slevy mate
+  // Pokles pod 1 % s desetinným místem, pod 0,1 % s jednou platnou číslicí – "-0 %" u malé slevy mate
   formatPercent(percent, domainKey) {
     const { locale } = this.domains[domainKey] || this.domains.alza_cz;
-    return percent.toLocaleString(locale, { maximumFractionDigits: percent < 1 ? 1 : 0 });
+    const options = percent > 0 && percent < 0.1 ? { maximumSignificantDigits: 1 } : { maximumFractionDigits: percent < 1 ? 1 : 0 };
+    return percent.toLocaleString(locale, options);
   },
 
   // Text poklesu ceny: "Benefit: 2 253 Kč → 2 250 Kč (-3 Kč, -0,1 %)"
@@ -740,12 +755,44 @@ const AlzaCore = {
     return this.formatPriceDrop(this.domains[domainKey].lang, match[1], previous, price, domainKey);
   },
 
+  // Druh řádku změny podle jeho textu (notifyPriceDrop / notifyPriceRise / notifyTargetReached / notifyNewPrice /
+  // notifyAvailability) ve všech jazycích textů: down = zlevnění, nová cena, cílová cena, naskladnění; up = zdražení;
+  // off = jiná změna dostupnosti (nedostupné, prodej skončil…); warning = výstraha k podezřelé ceně; jinak null
+  getChangeTone(text) {
+    if (typeof text !== "string") return null;
+    const langs = ["cz", "sk", "hu", "en"];
+    if (text.startsWith("⚠️")) return "warning";
+    if (/\(\+[^()]*%\)$/.test(text)) return "up";
+    // Začátky textu „Nově …“ ve všech jazycích – spočítat jednou (volá se pro každý řádek přehledu i čísla na ikoně)
+    this.newPricePrefixes ??= langs.map((lang) => this.translate(lang, "notifyNewPrice", "", "").split(" ")[0] + " ");
+    if (/\(-[^()]*%\)$/.test(text) || text.startsWith("🎯") || this.newPricePrefixes.some((prefix) => text.startsWith(prefix))) return "down";
+    const availability = text.match(/ → (.+)$/);
+    if (availability) return langs.some((lang) => this.getAvailabilityLabel("in", lang) === availability[1]) ? "down" : "off";
+    return null;
+  },
+
+  // Barva čísla na ikoně pro nové změny (kaskáda): down = aspoň jedno zlevnění (zdražení ani ukončení neřeší),
+  // up = aspoň jedno zdražení (ukončení neřeší), off = jen ukončení / nedostupnost. recent = přehled změn
+  // ({ key, lines }), keys = nové (neviděné) produkty
+  getBadgeTone(recent = [], keys = []) {
+    const tones = new Set(
+      (Array.isArray(recent) ? recent : []).filter((item) => item && keys.includes(item.key)).flatMap((item) => (item.lines || []).map((text) => this.getChangeTone(text)))
+    );
+    return ["down", "up", "off"].find((tone) => tones.has(tone)) || "down";
+  },
+
   // === Parsování stránky produktu ===
 
   // Cena z textu Alzy ("29 490,-", "1 299,90 €") bez znaménka – rozdíl ceny se znaménkem: parsePriceDifference,
   // obecné číslo: toNumber. Desetinná je čárka (Alza tisíce odděluje mezerou)
   parsePrice(priceText) {
     return parseFloat(String(priceText).replace(/[^\d,.]/g, "").replace(",", "."));
+  },
+
+  // Cena z detailu produktu: prázdný nebo nečíselný text („Zdarma“) = žádná cena, ne NaN / 0 (jako ve výpisu)
+  parsePositivePrice(priceText) {
+    const price = this.parsePrice(priceText);
+    return price > 0 ? price : null;
   },
 
   findPromoPriceElement(doc, dataTypes) {
@@ -762,15 +809,13 @@ const AlzaCore = {
   extractPromoPrice(element, parent, promoIconUrl) {
     if (!element || !parent) return null;
 
-    return {
-      price: this.parsePrice(element.textContent),
-      icon: promoIconUrl,
-    };
+    const price = this.parsePositivePrice(element.textContent);
+    return price === null ? null : { price, icon: promoIconUrl };
   },
 
   extractOriginalPrice(element) {
     if (!element) return null;
-    return this.parsePrice(element.textContent);
+    return this.parsePositivePrice(element.textContent);
   },
 
   getSpecialPriceIcon(container) {
@@ -855,7 +900,7 @@ const AlzaCore = {
       priceBox = mainPriceBoxWrapper.querySelector(".price-box, .js-price-box, .ads-pb");
     }
 
-    const specialPrice = specialPriceElement ? this.parsePrice(specialPriceElement.textContent) : null;
+    const specialPrice = specialPriceElement ? this.parsePositivePrice(specialPriceElement.textContent) : null;
     const specialPriceText = this.getSpecialPriceText(specialPriceHeader);
     const specialPriceIcon = this.getSpecialPriceIcon(specialPriceHeaderContainer);
 
@@ -885,9 +930,9 @@ const AlzaCore = {
 
   // Výsledek fetchProductPage ({ ok: false, error, status }) – má smysl stahovat znovu? Síť, timeout, 429
   // a chyby serveru ano; 404, přesměrování mimo Alzu a jiné 4xx ne (opakování by jen zatěžovalo Alzu)
-  isRetryableFetchError({ status = 0, error = "" } = {}) {
+  isRetryableFetchError({ status = 0, offsite = false } = {}) {
     if (status === 429 || status >= 500) return true;
-    return status === 0 && !/mimo Alzu/.test(error);
+    return status === 0 && !offsite;
   },
 
   // Je to vůbec detail produktu? (jinak nejspíš přihlášení, captcha nebo chybová stránka)
@@ -961,7 +1006,7 @@ const AlzaCore = {
 
   // Nadpis stránky produktu – zdroj názvu do historie pro seznam, službu na pozadí i detail (stejné znění)
   getProductName(doc) {
-    return doc.querySelector("#h1c h1, h1")?.textContent.replace(/\s+/g, " ").trim() || null;
+    return (doc.querySelector("#h1c h1") || doc.querySelector("h1"))?.textContent.replace(/\s+/g, " ").trim() || null;
   },
 
   // Nejnovější název z historie (záznam ho má jen tam, kde se změnil)
@@ -1008,6 +1053,7 @@ const AlzaCore = {
   classifyAvailability(raw, lang) {
     if (raw === null || raw === undefined) return null;
     if (this.availabilityCodes.includes(raw)) return raw;
+    if (typeof raw !== "string") return null;
 
     const text = raw.toLowerCase();
     const startsWith = (key) => text.startsWith(this.translate(lang, key).toLowerCase());
@@ -1050,6 +1096,8 @@ const AlzaCore = {
   },
 
   isSamePriceMap(a, b) {
+    a = a || {};
+    b = b || {};
     const keys = Object.keys(a);
     return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
   },
@@ -1333,7 +1381,9 @@ const AlzaCore = {
   // a sloučit sousední záznamy, které se tím stanou shodnými (uloží se při dalším zápisu)
   normalizeHistory(entries, lang) {
     const result = [];
-    (Array.isArray(entries) ? entries : []).forEach((entry) => {
+    // Poškozený záznam (null, bez cen) nesmí shodit celý produkt
+    (Array.isArray(entries) ? entries : []).filter((entry) => entry && typeof entry === "object").forEach((entry) => {
+      entry.p = entry.p && typeof entry.p === "object" ? entry.p : {};
       entry.a = this.classifyAvailability(entry.a, lang);
       const prev = result[result.length - 1];
       // Záznam se změnou názvu zůstává samostatný
@@ -1453,6 +1503,7 @@ const AlzaCore = {
   getVatFromKnownPrices(pairs, domainKey, now = Date.now()) {
     const rate = 1 + (this.domains[domainKey]?.vatRate || 0) / 100;
     if (rate === 1) return null;
+    const step = this.domains[domainKey].currency === "€" ? 0.02 : 1;
     let withVat = 0;
     let withoutVat = 0;
     pairs.forEach(({ prices, entries }) => {
@@ -1461,7 +1512,8 @@ const AlzaCore = {
       const types = this.listingMainTypes.filter((type) => prices[type] !== undefined && last.p[type] !== undefined);
       if (types.length === 0) return;
       if (types.every((type) => prices[type] === last.p[type])) withVat++;
-      else if (types.every((type) => Math.abs(prices[type] * rate - last.p[type]) <= Math.max(1, last.p[type] * 0.005))) withoutVat++;
+      // Tolerance zaokrouhlení DPH: krok měny (Kč a Ft celé, € centy), ne 1 € – jinak by běžná změna ceny vypadala jako cena bez DPH
+      else if (types.every((type) => Math.abs(prices[type] * rate - last.p[type]) <= Math.max(step, last.p[type] * 0.002))) withoutVat++;
     });
     if (withoutVat > 0) return false;
     return withVat > 0 ? true : null;
@@ -1527,7 +1579,7 @@ const AlzaCore = {
   // novější záznamy. Stejný čas = stejný záznam, ponechá se ten s pozdější kontrolou. Vrací novou historii
   mergeHistories(existing, imported) {
     const byTime = new Map();
-    [...(Array.isArray(existing) ? existing : []), ...(Array.isArray(imported) ? imported : [])].forEach((entry) => {
+    [...(Array.isArray(existing) ? existing : []), ...(Array.isArray(imported) ? imported : [])].filter(Boolean).forEach((entry) => {
       const current = byTime.get(entry.t);
       if (!current || entry.s > current.s) byTime.set(entry.t, entry);
     });
@@ -1549,7 +1601,7 @@ const AlzaCore = {
   // počítá z ceny pro všechny – zaokrouhlenou na desetinná místa ceny za kus). null = nic nesedí
   getPackCount(texts, unitPrice, minPrice, maxPrice) {
     const step = 0.5 * 10 ** -unitPrice.decimals;
-    const pattern = /(\d+(?:[  ]\d{3})*)\s*(?:ks|kusů|kusy|kus|db)(?!\p{L})/giu;
+    const pattern = /(\d+(?:[   ]\d{3})*)\s*(?:ks|kusů|kusy|kus|db)(?!\p{L})/giu;
     for (const text of texts) {
       for (const match of String(text || "").matchAll(pattern)) {
         // "vel. 4 152 ks" – mezera může být oddělovač tisíců i konec předchozího čísla, zkusit obojí

@@ -4,16 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Súgó – Alza Price Insight</title>
+    <link rel="stylesheet" href="../shared/page.css" />
     <link rel="stylesheet" href="help.css" />
   </head>
 
   <body>
     <main>
-      <header>
+      <header class="app-header">
         <img src="../../img/icon-48.png" alt="" />
         <div>
-          <h1>Súgó</h1>
-          <p>Alza Price Insight – árelőzmények, figyelés és valós darabár az alza.cz, alza.sk és alza.hu oldalakon</p>
+          <h1 class="app-title">Alza Price Insight</h1>
+          <p class="app-sub">Súgó</p>
         </div>
         <div class="languages">
           <a href="help.html" lang="cs">CZ</a><a href="help-sk.html" lang="sk">SK</a><strong>HU</strong><a href="help-en.html" lang="en">EN</a>
@@ -37,6 +38,7 @@
 
       <section id="zaciname">
         <h2>🚀 Kezdés</h2>
+        <p class="tip">Telepítés után megnyílik a <strong>🧭 Beállítási varázsló</strong>: kiválasztja a fő Alzát, egy kattintással ellenőrzi a bejelentkezést és az ÁFÁ-s árakat (minden tételnél leírja, mi van kész és mi a teendő), és végigvezet a figyelésen és az értesítéseken. Újra a beállításokban indíthatja (🧭 Beállítási varázsló jobbra fent), a fő Alzát a beállításokban a nyelv mellett módosíthatja.</p>
         <ol>
           <li><strong>Jelentkezzen be az Alzán.</strong> Az árak csak bejelentkezett felhasználónál mentődnek – az Alza mindenkinek más árakat mutat (AlzaPlus+, benefit, B2B).</li>
           <li><strong>Az árak ÁFA-val jelenjenek meg.</strong> Ha az ÁFA nélküli árak megjelenítése be van kapcsolva, az árak nem mentődnek, hogy ne keveredjenek.</li>
@@ -159,8 +161,8 @@
           <li><strong>Figyelt lista:</strong> nyissa meg a listát, és a bővítmény felugró ablakában kattintson a <strong>🔔 Lista figyelése</strong> gombra, vagy kattintson a csengőre a lista fülén. Az egész lista figyelve van; az újonnan hozzáadott tételek a lista következő megnyitásakor kerülnek a figyelésbe.</li>
           <li><strong>Figyelt termék:</strong> a termékoldalon a „🔔 Figyelés a háttérben“ gomb, vagy egy beállított célár.</li>
           <li>Az ellenőrzés <strong>óránként</strong> fut, amíg a böngésző fut. A beállításokban 3, 6 vagy 12 óránkéntire, illetve <strong>naponta egyszer a megadott időpontban</strong> futóra módosíthatja – ha a böngésző akkor nincs megnyitva, néhány perccel az indítása után fut le. A következő időpontját a felugró ablak mutatja. Azonnal elindíthatja a felugró ablak ▶️ Ellenőrzés gombjával.</li>
-          <li><strong>A zöld szám az ikonon</strong> = a felugró ablak legutóbbi megnyitása óta változott termékek száma, a változások a felugró ablakban láthatók. <strong>A kék szám</strong> = törlésre javasolt régi termékek.</li>
-          <li><strong>Változások a felugró ablakban:</strong> az árcsökkenés, a raktárra érkezés, az új akció és az elért célár zölden, az áremelés pirosan (áremelésről nem jön értesítés), az értékesítés vége és a nem elérhetőség szürkén. Az új változások színes háttérrel, a már látottak csak színes szöveggel jelennek meg. A figyelt listáknál látja, hány termék lett az elmúlt 7 napban olcsóbb (▼) és drágább (▲). A lista figyelését a megnyitott listán a felugró ablak 🔕 Figyelés leállítása gombjával vagy a beállításokban (Figyelt listák fül) kapcsolja ki. A súgó a beállításokban érhető el (❓ jobb felül).</li>
+          <li><strong>A szám az ikonon</strong> = a felugró ablak legutóbbi megnyitása óta változott termékek száma, a változások a felugró ablakban láthatók. Színe: <strong>zöld</strong> = legalább egy termék olcsóbb lett, raktárra érkezett, új akciót kapott vagy elérte a célárat, <strong>piros</strong> = egy sem lett olcsóbb, de legalább egy drágult, <strong>szürke</strong> = csak az értékesítés vége vagy nem elérhető. <strong>A kék szám</strong> = törlésre javasolt régi termékek.</li>
+          <li><strong>Változások a felugró ablakban:</strong> az árcsökkenés, a raktárra érkezés, az új akció és az elért célár zölden, az áremelés pirosan (áremelésről nem jön értesítés), az értékesítés vége és a nem elérhetőség szürkén. Az új változások színes háttérrel, a már látottak csak színes szöveggel jelennek meg. A figyelt listáknál látja, hány termék lett az elmúlt 7 napban olcsóbb (▼) és drágább (▲). A lista figyelését a megnyitott listán a felugró ablak 🔕 Figyelés leállítása gombjával vagy a beállításokban (Figyelt listák fül) kapcsolja ki. Ha több Alzát figyel, a listák, a változások és a figyelt termékek <strong>CZ / SK / HU</strong> címkét kapnak (az egérmutatót fölé víve az Alza címe látszik). A súgó a beállításokban érhető el (❓ jobb felül).</li>
         </ul>
         <p>A beállításokban kiválaszthatja, miről szeretne tudni: árcsökkenés (akár hány százaléktól), új árak (akció, kód, cashback), elérhetőség és csendes órák.</p>
         <p class="tip">Nem jönnek értesítések? A beállításokban kattintson a <strong>🔔 Értesítések kipróbálása</strong> gombra. Ha nem érkeznek meg, ellenőrizze a Windows „Ne zavarjanak“ / Fókuszsegéd beállítását és a böngésző (Chrome, Firefox) értesítési engedélyét.</p>
@@ -190,7 +192,7 @@
           <li><strong>Előzmények (CSV)</strong> – minden ár Excelhez.</li>
           <li><strong>Régi adatok törlése</strong> – törli azokat a termékeket, amelyeket nem figyel, és több mint 3 hónapja nem nyitotta meg és nem voltak ellenőrizve (a böngészés közben mentetteket csak egy év után). A bővítmény maga is javasolja őket kék számmal az ikonon és értesítéssel a felugró ablakban.</li>
           <li><strong>Minden adat törlése</strong> – csak a TÖRLÉS szó beírása után; előtte automatikusan letöltődik egy biztonsági mentés.</li>
-          <li><strong>Diagnosztika</strong> – ha valami nem működik, töltse le a diagnosztikát, és küldje el a szerzőnek (verzió, beállítások, ellenőrzési napló és hibák; jelszavak és cookie-k nélkül).</li>
+          <li><strong>Diagnosztika</strong> – ha valami nem működik, kattintson a <strong>🐞 Hiba bejelentése</strong> gombra: megnyílik egy előre kitöltött bejelentés a GitHubon (verzió, böngésző, utolsó hibák). Vagy töltse le a diagnosztikát, és küldje el a szerzőnek (verzió, beállítások, ellenőrzési napló és hibák; jelszavak és cookie-k nélkül).</li>
         </ul>
         <p class="tip">Minden adat csak az Ön böngészőjében marad. A bővítmény kizárólag az Alza weboldalaival kommunikál, máshová semmit sem küld.</p>
       </section>

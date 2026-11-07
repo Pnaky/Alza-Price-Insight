@@ -2,6 +2,31 @@
 
 ## Nevydáno
 
+## 2026.11.7 – 2026-11-07
+
+- Po instalaci průvodce nastavením: hlavní Alza, ověření přihlášení a cen s DPH jedním kliknutím (co je hotové a co udělat), hlídání a notifikace ve 3 krocích
+- Nastavení: 🧭 Průvodce v záhlaví, volba Hlavní Alza
+- Nový vzhled nastavení, nápovědy a popupu (jako průvodce); záhlaví na všech stránkách na stejném místě
+- Nastavení: 🐞 Nahlásit chybu – předvyplněné hlášení na GitHubu (verze, prohlížeč, poslední chyby)
+- Oprava: nastavení po otevření samo odskočilo dolů
+- Popup: odkaz na Alzu vede na doménu otevřené záložky (na alza.sk na alza.sk)
+- Popup: když hlídáte víc Alz, seznamy, změny cen i hlídané produkty mají štítek CZ / SK / HU
+- Popup: cena v přehledu změn už nezatéká pod posuvník
+- Číslo na ikoně počítá i zdražení; barva: zelená = něco zlevnilo, červená = jen zdražení, šedá = jen konec prodeje
+- Popup: podbarvené jsou i nové zdražení a změny z kontroly spuštěné při otevřeném popupu
+- Oprava: seřazený nákupní seznam znovu obnoví ceny, které Alza přepíše (AlzaPlus+, kód, součet za kusy)
+- Odložené notifikace z tichých hodin přijdou hned po jejich konci, ne až s další kontrolou
+- Kontrola bez připojení k internetu se zopakuje za 15 minut a nepočítá se jako proběhlá
+- Oprava: číslo na ikoně mohlo po otevření popupu zůstat; počítá jen změny, které popup ukáže
+- Oprava: na alza.sk a alza.hu se běžné zlevnění mohlo vyhodnotit jako „ceny bez DPH“ a ukládání se zastavilo
+- Průvodce: zeleně „vše připraveno“ jen s ověřenými cenami s DPH; mezi hlídanými počítá i cílové ceny
+- Nastavení: změny z průvodce už nepřepíše otevřená stránka nastavení
+- Import zálohy: kontrola adres, obrázků a časů; hlásí i vynechané položky
+- Nahlásit chybu: z veřejného hlášení zmizí adresy produktů
+- Malé zlevnění v procentech s desetinnými místy místo „-0 %“
+- Popup: odkaz na Alzu vede na hlavní Alzu z nastavení, když není otevřená záložka Alzy
+- Po aktualizaci rozšíření se na otevřené stránce Alzy nezdvojí lišta seznamu ani řazení podle ceny za kus
+
 ## 2026.11.6 – 2026-11-06
 
 - Oprava: seznam bez přihlášení (nebo s cenami bez DPH) se donekonečna načítal místo upozornění, že se ceny neukládají

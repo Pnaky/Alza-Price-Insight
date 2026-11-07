@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-w="pageTitle">Vítejte – Alza Price Insight</title>
+    <link rel="stylesheet" href="../shared/page.css" />
+    <style>
+      /* Barvy z ikony a propagačních obrázků: tmavý rám, limetková, oranžová, námořnická modrá */
+      :root {
+        --ink: #1e1e1e;
+        --navy: #263f6a;
+        --lime: #c9dd03;
+        --orange: #ee771a;
+        --blue: #0094e7;
+        --text: #212121;
+        --muted: #6b6b6b;
+        --line: #e8eaee;
+        --ok: #2e7d32;
+        --todo: #c62828;
+        --info: #8a8a8a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Pozadí a záhlaví: ../shared/page.css */
+      body {
+        margin: 0;
+        padding: 28px 16px 56px;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--text);
+      }
+
+      /* Stejná šířka (960 px obsahu) a záhlaví jako nastavení a nápověda */
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      /* Výběr jazyka vpravo v záhlaví – 🌐 jako v nastavení, ať je jasné, co se tu volí */
+      .language {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      header select {
+        padding: 5px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #eef2f7;
+        font: inherit;
+        font-size: 13px;
+      }
+
+      header select option {
+        color: var(--text);
+      }
+
+      .card {
+        padding: 34px 38px 30px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.4);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+        line-height: 1.15;
+        letter-spacing: -0.3px;
+      }
+
+      h2 {
+        margin: 6px 0 8px;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+
+      .lead {
+        margin: 0 0 22px;
+        color: #444;
+        font-size: 16px;
+      }
+
+      /* Úvod: tři věci, které je dobré vědět */
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 4px 0 26px;
+      }
+
+      .fact {
+        padding: 14px 14px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #f8f9fb;
+      }
+
+      .fact strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .fact p {
+        margin: 0;
+        color: #555;
+        font-size: 13px;
+      }
+
+      .fact.key {
+        border-color: #f3c89f;
+        background: #fff7ef;
+      }
+
+      /* Kroky 1–3 */
+      .steps {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .steps span {
+        flex: 1;
+        padding-top: 8px;
+        border-top: 4px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .steps span.active {
+        border-color: var(--navy);
+        color: var(--navy);
+      }
+
+      .steps span.done {
+        border-color: var(--lime);
+        color: #5b6500;
+      }
+
+      .step-of {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      /* Výběr hlavní Alzy – logo z CDN Alzy, když se nenačte, zůstane název */
+      /* Nadpis dostane fokus při přepnutí obrazovky (čtečky) – bez rámečku */
+      [tabindex="-1"]:focus {
+        outline: none;
+      }
+
+      .pick-title {
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+
+      .domains {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .domain {
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        min-height: 78px;
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .domain img {
+        height: 26px;
+        max-width: 120px;
+      }
+
+      /* Název jen místo loga, které se nenačetlo */
+      .domain img.broken {
+        display: none;
+      }
+
+      .domain img:not(.broken) + span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+
+      .domain[aria-checked="true"] {
+        border-color: var(--navy);
+        background: #f2f6fc;
+        color: var(--navy);
+        box-shadow: 0 0 0 3px rgba(38, 63, 106, 0.12);
+      }
+
+      /* Checklist ověření */
+      .checks {
+        margin: 18px 0 4px;
+        padding: 0;
+        list-style: none;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .checks li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        column-gap: 10px;
+        padding: 13px 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .checks li:first-child {
+        border-top: 0;
+      }
+
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-top: 1px;
+        border: 2px solid #cfd3da;
+        border-radius: 7px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      li[data-state="ok"] .mark {
+        border-color: var(--ok);
+        background: var(--ok);
+      }
+
+      li[data-state="todo"] .mark {
+        border-color: var(--todo);
+        background: var(--todo);
+      }
+
+      li[data-state="info"] .mark {
+        border-color: var(--info);
+        background: var(--info);
+      }
+
+      li[data-state="busy"] .mark {
+        border-color: var(--blue);
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .check-name {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .check-status {
+        font-weight: 600;
+      }
+
+      li[data-state="todo"] .check-status {
+        color: var(--todo);
+      }
+
+      .check-help {
+        margin: 4px 0 0;
+        color: #555;
+        font-size: 13px;
+      }
+
+      .check-help:empty {
+        display: none;
+      }
+
+      .check-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .check-actions:empty {
+        display: none;
+      }
+
+      .summary {
+        margin: 14px 0 0;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+
+      .summary:empty {
+        display: none;
+      }
+
+      .summary.ok {
+        background: #edf7ee;
+        color: #1b5e20;
+      }
+
+      .summary.todo {
+        background: #fff4e5;
+        color: #7a4100;
+      }
+
+      /* Jak hlídat */
+      ul.how {
+        margin: 0 0 20px;
+        padding: 0;
+        list-style: none;
+      }
+
+      ul.how li {
+        margin: 8px 0;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: #f8f9fb;
+        font-size: 14px;
+      }
+
+      /* Volby: popisek, ovládání a nápověda pod nimi */
+      .option {
+        padding: 14px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .option-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .option-label {
+        font-weight: 600;
+      }
+
+      .controls {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .controls.disabled {
+        opacity: 0.45;
+      }
+
+      .option-help {
+        margin: 4px 0 0;
+        color: #616161;
+        font-size: 13px;
+      }
+
+      select,
+      input[type="time"],
+      input[type="number"] {
+        padding: 5px 8px;
+        border: 1px solid #cfd3da;
+        border-radius: 7px;
+        background: #fff;
+        font: inherit;
+        font-size: 14px;
+      }
+
+      input[type="number"] {
+        width: 64px;
+      }
+
+      .switch {
+        appearance: none;
+        position: relative;
+        flex: none;
+        width: 40px;
+        height: 22px;
+        margin: 0;
+        border-radius: 11px;
+        background: #cfcfcf;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.15s;
+      }
+
+      .switch:checked {
+        background: var(--blue);
+      }
+
+      .switch:checked::after {
+        transform: translateX(18px);
+      }
+
+      /* Tlačítka */
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .nav .spacer {
+        flex: 1;
+      }
+
+      button,
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border: 1px solid #cfd3da;
+        border-radius: 9px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      button:hover,
+      .button:hover {
+        border-color: #9aa3b0;
+      }
+
+      button.primary,
+      .button.primary {
+        padding: 10px 20px;
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #fff;
+      }
+
+      button.primary:hover,
+      .button.primary:hover {
+        background: #333;
+      }
+
+      button.big {
+        padding: 12px 22px;
+        font-size: 16px;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      .link {
+        border: 0;
+        background: none;
+        padding: 8px 4px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      .link:hover {
+        color: var(--text);
+      }
+
+      .saved {
+        min-height: 20px;
+        color: var(--ok);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .saved.error {
+        color: var(--todo);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      @media (max-width: 640px) {
+        .card {
+          padding: 24px 18px;
+        }
+
+        .facts {
+          grid-template-columns: 1fr;
+        }
+
+        .domains {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="app-header">
+        <img src="../../img/icon-48.png" alt="" />
+        <div><span class="app-title">Alza Price Insight</span><span class="app-sub" data-w="subtitle">Průvodce nastavením</span></div>
+        <label class="language" id="languageLabel"
+          ><span aria-hidden="true">🌐</span>
+          <select id="language">
+            <option value="auto" data-o="languageAuto">automaticky</option>
+            <option value="cs" lang="cs">Čeština</option>
+            <option value="sk" lang="sk">Slovenčina</option>
+            <option value="hu" lang="hu">Magyar</option>
+            <option value="en" lang="en">English</option>
+          </select></label
+        >
+      </header>
+
+      <main class="card">
+        <!-- Úvod -->
+        <section data-screen="intro">
+          <h1 tabindex="-1" data-w="heroTitle">Vítejte! Za minutu je nastaveno.</h1>
+          <p class="lead" data-w="heroLead"></p>
+          <div class="facts">
+            <div class="fact"><strong data-w="factHistoryTitle"></strong><p data-w="factHistory"></p></div>
+            <div class="fact key"><strong data-w="factAccountTitle"></strong><p data-w="factAccount"></p></div>
+            <div class="fact"><strong data-w="factPrivacyTitle"></strong><p data-w="factPrivacy"></p></div>
+          </div>
+          <div class="nav">
+            <button type="button" class="primary big" data-go="check" data-w="start">Začít nastavení →</button>
+            <span class="spacer"></span>
+            <button type="button" class="link" data-go="done" data-w="skip">Přeskočit, nastavím později</button>
+          </div>
+        </section>
+
+        <!-- Krok 1: ověření na pozadí -->
+        <section data-screen="check" hidden>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
+          <div class="step-of" data-step-of="1"></div>
+          <h2 tabindex="-1" data-w="checkTitle"></h2>
+          <div class="pick-title" id="pickTitle" data-w="pickTitle"></div>
+          <div class="domains" role="radiogroup" aria-labelledby="pickTitle">
+            <button type="button" class="domain" role="radio" data-domain="alza_cz"><img src="https://cdn.alza.cz/images/web-static/eshop-logos/alza_cz.svg" alt="" /><span>alza.cz</span></button>
+            <button type="button" class="domain" role="radio" data-domain="alza_sk"><img src="https://cdn.alza.sk/images/web-static/eshop-logos/alza_sk.svg" alt="" /><span>alza.sk</span></button>
+            <button type="button" class="domain" role="radio" data-domain="alza_hu"><img src="https://cdn.alza.hu/images/web-static/eshop-logos/alza_hu.svg" alt="" /><span>alza.hu</span></button>
+          </div>
+          <p class="option-help" data-w="pickHelp"></p>
+          <p class="lead" data-w="checkLead" style="margin-top: 22px"></p>
+          <button type="button" class="primary big" id="runCheck" data-w="checkButton">🔍 Ověřit</button>
+          <ul class="checks" id="checks">
+            <li data-check="login"><span class="mark"></span><div><div class="check-name" data-w="checkLogin"></div><div class="check-status"></div><p class="check-help"></p><div class="check-actions"></div></div></li>
+            <li data-check="vat"><span class="mark"></span><div><div class="check-name" data-w="checkVat"></div><div class="check-status"></div><p class="check-help"></p></div></li>
+            <li data-check="notifications"><span class="mark"></span><div><div class="check-name" data-w="checkNotifications"></div><div class="check-status"></div><p class="check-help"></p></div></li>
+            <li data-check="pin"><span class="mark"></span><div><div class="check-name" data-w="checkPin"></div><div class="check-status"></div><p class="check-help"></p></div></li>
+          </ul>
+          <p class="summary" id="checkSummary" role="status"></p>
+          <span class="saved" data-saved role="status"></span>
+          <div class="nav">
+            <button type="button" data-go="intro" data-w="back">← Zpět</button>
+            <span class="spacer"></span>
+            <button type="button" class="primary" data-go="watch" data-w="next">Pokračovat →</button>
+          </div>
+        </section>
+
+        <!-- Krok 2: co a jak často hlídat -->
+        <section data-screen="watch" hidden>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
+          <div class="step-of" data-step-of="2"></div>
+          <h2 tabindex="-1" data-w="watchTitle"></h2>
+          <p class="lead" data-w="watchLead"></p>
+          <ul class="how">
+            <li data-w="watchHowList"></li>
+            <li data-w="watchHowProduct"></li>
+            <li data-w="watchHowTarget"></li>
+          </ul>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="checkSchedule"></span>
+              <span class="controls">
+                <select name="checkSchedule">
+                  <option value="1h" data-o="schedule1h"></option>
+                  <option value="3h" data-o="schedule3h"></option>
+                  <option value="6h" data-o="schedule6h"></option>
+                  <option value="12h" data-o="schedule12h"></option>
+                  <option value="daily" data-o="scheduleDaily"></option>
+                </select>
+                <input type="time" name="checkTime" />
+              </span>
+            </div>
+            <p class="option-help" data-o="checkScheduleTip"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="saveBrowsing"></span>
+              <input type="checkbox" class="switch" name="saveBrowsing" />
+            </div>
+            <p class="option-help" data-o="saveBrowsingTip"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="unitPrice"></span>
+              <input type="checkbox" class="switch" name="categoryUnitPrice" />
+            </div>
+            <p class="option-help" data-o="unitPriceTip"></p>
+          </div>
+          <div class="nav">
+            <button type="button" data-go="check" data-w="back">← Zpět</button>
+            <span class="saved" data-saved role="status"></span>
+            <span class="spacer"></span>
+            <button type="button" class="primary" data-go="notify" data-w="next">Pokračovat →</button>
+          </div>
+        </section>
+
+        <!-- Krok 3: notifikace -->
+        <section data-screen="notify" hidden>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
+          <div class="step-of" data-step-of="3"></div>
+          <h2 tabindex="-1" data-w="notifyTitle"></h2>
+          <p class="lead" data-w="notifyLead"></p>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="drops"></span>
+              <span class="controls">
+                <span class="controls" id="dropRow"><span data-o="dropFrom"></span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span>
+                <input type="checkbox" class="switch" name="notifyDrops" />
+              </span>
+            </div>
+            <p class="option-help" data-o="dropsTip"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="newPrices"></span>
+              <input type="checkbox" class="switch" name="notifyNewPrices" />
+            </div>
+            <p class="option-help" data-o="newPricesTip"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="availability"></span>
+              <select name="notifyAvailability">
+                <option value="all" data-o="availabilityAll"></option>
+                <option value="inStock" data-o="availabilityInStock"></option>
+                <option value="off" data-o="availabilityOff"></option>
+              </select>
+            </div>
+            <p class="option-help" data-o="availabilityTip"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="quietHours"></span>
+              <span class="controls">
+                <span class="controls" id="quietRow"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
+                <input type="checkbox" class="switch" name="quietHours" />
+              </span>
+            </div>
+            <p class="option-help" data-o="quietHoursTip"></p>
+          </div>
+          <div class="option">
+            <button type="button" id="testNotifications" data-o="testNotifications"></button>
+            <p class="option-help" data-o="testNotificationsTitle"></p>
+          </div>
+          <div class="nav">
+            <button type="button" data-go="watch" data-w="back">← Zpět</button>
+            <span class="saved" data-saved role="status"></span>
+            <span class="spacer"></span>
+            <button type="button" class="primary" data-go="done" data-w="finish">Dokončit ✓</button>
+          </div>
+        </section>
+
+        <!-- Hotovo -->
+        <section data-screen="done" hidden>
+          <h1 tabindex="-1" data-w="doneTitle"></h1>
+          <p class="lead" data-w="doneLead"></p>
+          <div class="nav" style="margin-top: 0">
+            <a class="button primary big" id="openAlza" target="_blank" rel="noopener"></a>
+          </div>
+          <ul class="checks">
+            <li data-check="watching"><span class="mark"></span><div><div class="check-name" data-w="doneWatch"></div><div class="check-status"></div><p class="check-help"></p></div></li>
+          </ul>
+          <div class="nav">
+            <a class="button" id="openHelp" target="_blank" data-w="openHelp"></a>
+            <a class="button" id="openSettings" href="../options/options.html" target="_blank" data-w="openSettings"></a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../shared/core.js"></script>
+    <script src="../shared/store.js"></script>
+    <script src="../shared/product-page.js"></script>
+    <script src="../options/options-texts.js"></script>
+    <script src="welcome-texts.js"></script>
+    <script src="welcome.js"></script>
+  </body>
+</html>

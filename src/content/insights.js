@@ -113,7 +113,7 @@ Object.assign(AlzaPriceTracker, {
 
   // Šipka u ceny v seznamu: ▼ pod obvyklou cenou, ▲ nad ní; obvyklá cena značku nemá (řádek by byl přeplácaný)
   updateVerdictMarker(itemElement) {
-    const data = this.state.itemData.get(itemElement);
+    const data = this.getItemData(itemElement);
     const priceContainer = itemElement.querySelector(this.selectors.priceContainer);
     if (!data || !priceContainer) return;
 
@@ -146,7 +146,7 @@ Object.assign(AlzaPriceTracker, {
   async updatePriceInsights(itemElement, productUrl, priceMap) {
     const entries = await this.getDisplayHistory(productUrl);
     // Položka se mezitím mohla překreslit s jiným produktem nebo cenami
-    const data = this.state.itemData.get(itemElement);
+    const data = this.getItemData(itemElement);
     if (data?.priceMap !== priceMap) return;
 
     // Varování se v seznamu nezobrazují (řádek by byl přeplácaný) – slouží filtru v liště, detail je v dialogu

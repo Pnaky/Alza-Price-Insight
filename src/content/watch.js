@@ -162,6 +162,11 @@ Object.assign(AlzaPriceTracker, {
     if (tab.classList.contains(className) !== enabled) tab.classList.toggle(className, enabled);
   },
 
+  // Příznak na prvku Alzy (data-alza-price-tracker-…) – jen při změně, ať se observer zbytečně nespouští
+  setFlag(element, name, enabled) {
+    if (element.hasAttribute(name) !== enabled) element.toggleAttribute(name, enabled);
+  },
+
   isOnWatchBell(tab, x, y) {
     const { right, size, tolerance } = this.config.watchBell;
     const rect = tab.getBoundingClientRect();

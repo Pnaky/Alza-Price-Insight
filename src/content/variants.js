@@ -34,7 +34,7 @@ Object.assign(AlzaPriceTracker, {
       if (document.querySelector(`${buttonSelector}[aria-expanded="true"]`)) return;
       const hadFocus = document.activeElement === button;
       const root = document.documentElement;
-      root.classList.add("alza-price-tracker-variant-probe");
+      root.setAttribute("data-alza-price-tracker-variant-probe", ""); // Atribut, ne třída – <html> patří Alze
       try {
         button.click();
         if (await this.waitForCondition(() => document.querySelector(optionSelector), 1500)) this.annotateVariantOptions();
@@ -43,7 +43,7 @@ Object.assign(AlzaPriceTracker, {
         if (button.getAttribute("aria-expanded") === "true") button.click();
         if (!hadFocus) button.blur();
         await this.waitForCondition(() => !document.querySelector(optionSelector), 1000);
-        root.classList.remove("alza-price-tracker-variant-probe");
+        root.removeAttribute("data-alza-price-tracker-variant-probe");
       }
     }
     this.annotateSelectedVariants();

@@ -108,10 +108,23 @@ Object.assign(AlzaPriceTracker, {
     const hint = this.translate("historyHint");
     this.appendTitle(element, hint);
     element.addEventListener("click", (event) => {
+      // Po aktualizaci rozšíření (osiřelá stránka) klik nepohltit – dialog by stejně nic nenačetl
+      if (!AlzaCore.isContextAlive()) return;
       event.preventDefault();
       event.stopPropagation();
-      this.openHistoryDialog(product, productData);
+      // React mohl prvek mezitím použít pro jiný produkt (přepnutí seznamu) – produkt zjistit až při kliknutí
+      const item = element.closest(this.selectors.listItem);
+      const current = item && this.getProductInfo(item);
+      const same = !current || current.url === product.url;
+      this.openHistoryDialog(same ? product : current, same ? productData : null);
     });
+  },
+
+  // Data vykreslené položky seznamu (ceny, změna) – jen pokud v řádku je pořád tentýž produkt. React řádky
+  // znovu používá pro jiné produkty a WeakMap podle prvku by vrátila data předchozího
+  getItemData(itemElement) {
+    const data = itemElement && this.state.itemData.get(itemElement);
+    return data && data.url === itemElement.querySelector(this.selectors.productLink)?.href ? data : null;
   },
 
   // Volá se z posluchačů kliknutí – chyba vykreslení se zapíše do logu, ne jako nezachycená výjimka

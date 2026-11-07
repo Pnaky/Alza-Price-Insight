@@ -1,0 +1,46 @@
+/* Společný vzhled stránek rozšíření – průvodce (welcome), nastavení (options) a nápověda (help): pozadí a záhlaví
+   s logem. Záhlaví je všude stejně vysoké a na stejném místě, ať při přechodu mezi stránkami nic neposkakuje.
+   Obsah má na všech stránkách šířku 960 px a horní okraj 28 px (kontejner stránky: max-width 960 px + 16 px po stranách). */
+
+html {
+  min-height: 100%;
+  background: radial-gradient(circle at 85% 6%, rgba(201, 221, 3, 0.12) 0%, transparent 34%),
+    linear-gradient(135deg, #161616 0%, #1e2636 45%, #263f6a 100%);
+  /* Místo pro posuvník i na krátké stránce – obsah se při přechodu na delší stránku neposune do strany */
+  scrollbar-gutter: stable;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin: 0 0 20px;
+  color: #eef2f7;
+}
+
+.app-header > img {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.app-title {
+  display: block;
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.app-sub {
+  display: block;
+  margin: 0;
+  color: #aab4c3;
+  font-size: 12.5px;
+  line-height: 1.45;
+}

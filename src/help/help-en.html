@@ -4,16 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Help – Alza Price Insight</title>
+    <link rel="stylesheet" href="../shared/page.css" />
     <link rel="stylesheet" href="help.css" />
   </head>
 
   <body>
     <main>
-      <header>
+      <header class="app-header">
         <img src="../../img/icon-48.png" alt="" />
         <div>
-          <h1>Help</h1>
-          <p>Alza Price Insight – price history, watching and the real unit price on alza.cz, alza.sk and alza.hu</p>
+          <h1 class="app-title">Alza Price Insight</h1>
+          <p class="app-sub">Help</p>
         </div>
         <div class="languages">
           <a href="help.html" lang="cs">CZ</a><a href="help-sk.html" lang="sk">SK</a><a href="help-hu.html" lang="hu">HU</a><strong>EN</strong>
@@ -40,6 +41,7 @@
 
       <section id="zaciname">
         <h2>🚀 Getting started</h2>
+        <p class="tip">After installation, the <strong>🧭 Setup guide</strong> opens: you pick your main Alza, it checks your sign-in and prices incl. VAT in one click (each item says what's done and what to do) and walks you through watching and notifications. Run it again from the settings (🧭 Setup guide, top right); change the main Alza in the settings next to the language.</p>
         <ol>
           <li><strong>Log in to Alza.</strong> Prices are saved only when you are logged in – Alza shows different prices to different accounts (AlzaPlus+, benefits, B2B).</li>
           <li><strong>Show prices including VAT.</strong> With "show prices without VAT" turned on, prices are not saved so they don't get mixed up.</li>
@@ -161,8 +163,8 @@
           <li><strong>Watched list:</strong> open the list and click <strong>🔔 Watch list</strong> in the extension popup, or click the bell on the list's tab. The whole list is watched; newly added items are included the next time you open the list.</li>
           <li><strong>Watched product:</strong> the "🔔 watch in background" button on a product page, or a target price.</li>
           <li>The check runs <strong>every hour</strong> while the browser is running. In the settings you can change it to every 3, 6 or 12 hours or to <strong>once a day at a chosen time</strong> – if the browser is closed then, it runs a few minutes after it starts. The popup shows when the next one is due. Run it right away with ▶️ Check now in the popup.</li>
-          <li><strong>A green number on the icon</strong> = products with a change since you last opened the popup, which lists the changes. <strong>A blue number</strong> = old products suggested for deletion.</li>
-          <li><strong>Changes in the popup:</strong> price drops, back in stock, a new sale and a reached target price in green, price increases in red (no notification for increases), end of sale and unavailability in grey. New changes have a coloured background, ones you've seen only coloured text. Watched lists show how many products got cheaper (▼) and more expensive (▲) over the last 7 days. Stop watching a list with 🔕 Stop watching list in the popup on the open list, or in the settings (Watched lists tab). Help is in the settings (❓ top right).</li>
+          <li><strong>The number on the icon</strong> = products with a change since you last opened the popup, which lists the changes. Its colour: <strong>green</strong> = at least one product got cheaper, came back in stock, has a new sale or reached its target price, <strong>red</strong> = none got cheaper but at least one got more expensive, <strong>grey</strong> = only sales ended or unavailability. <strong>A blue number</strong> = old products suggested for deletion.</li>
+          <li><strong>Changes in the popup:</strong> price drops, back in stock, a new sale and a reached target price in green, price increases in red (no notification for increases), end of sale and unavailability in grey. New changes have a coloured background, ones you've seen only coloured text. Watched lists show how many products got cheaper (▼) and more expensive (▲) over the last 7 days. Stop watching a list with 🔕 Stop watching list in the popup on the open list, or in the settings (Watched lists tab). If you watch more than one Alza, lists, changes and watched products get a <strong>CZ / SK / HU</strong> label (hover it to see the Alza address). Help is in the settings (❓ top right).</li>
         </ul>
         <p>In the settings you choose what you want to hear about: price drops (optionally from a given percentage), new prices (sale, code, cashback), availability and quiet hours.</p>
         <p class="tip">No notifications? In the settings click <strong>🔔 Test notifications</strong>. If nothing arrives, check Windows "Do not disturb" / Focus assist and notification permission for your browser (Chrome, Firefox).</p>
@@ -192,7 +194,7 @@
           <li><strong>History (CSV)</strong> – all prices for Excel.</li>
           <li><strong>Clean up old data</strong> – deletes products you don't watch that haven't been opened or checked for over 3 months (those saved while browsing only after a year). The extension suggests them itself with a blue number on the icon and a notice in the popup.</li>
           <li><strong>Delete all data</strong> – only after typing the word DELETE; a backup is downloaded automatically first.</li>
-          <li><strong>Diagnostics</strong> – if something doesn't work, download the diagnostics and send them to the author (version, settings, check log and errors; no passwords or cookies).</li>
+          <li><strong>Diagnostics</strong> – if something doesn't work, click <strong>🐞 Report a bug</strong>: a pre-filled report opens on GitHub (version, browser, recent errors). Or download the diagnostics and send them to the author (version, settings, check log and errors; no passwords or cookies).</li>
         </ul>
         <p class="tip">All data stays in your browser only. The extension talks only to Alza websites and sends nothing anywhere else.</p>
       </section>

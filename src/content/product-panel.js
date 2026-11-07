@@ -266,6 +266,8 @@ Object.assign(AlzaPriceTracker, {
     const points = entries
       .map((entry, index) => ({ t: entry.t, end: entries[index + 1]?.t ?? entry.s, v: AlzaCore.getPlausibleMinPrice(entry.p) }))
       .filter((point) => point.v !== null);
+    // Žádný záznam s cenou (poškozená data) – prázdný graf, ne pád celého panelu
+    if (points.length === 0) return document.createElement("div");
 
     let t0 = points[0].t;
     let t1 = points[points.length - 1].end;

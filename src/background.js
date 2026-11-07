@@ -14,6 +14,8 @@ const WATCH_STATE_KEY = AlzaCore.storageKeys.watchState;
 const WATCH_LOG_KEY = AlzaCore.storageKeys.watchLog;
 const CLEANUP_KEY = AlzaCore.storageKeys.cleanup;
 const ALARM_NAME = "alzaWatchRun";
+const RETRY_ALARM_NAME = "alzaWatchRetry"; // Kontrola, která narazila na offline – zkusit znovu, hlavní plán se nemění
+const QUIET_END_ALARM_NAME = "alzaQuietEnd"; // Konec tichých hodin – odeslat odložené notifikace
 
 const config = {
   missedRunDelayMs: 5 * 60 * 1000, // Zmeškaná denní kontrola (prohlížeč byl ve zvolený čas zavřený) proběhne po 5 min
@@ -28,6 +30,8 @@ const config = {
   logMaxRuns: 50,
   maxPendingNotifications: 50,
   cleanupRecountMs: 60 * 60 * 1000,
+  offlineRetryMs: 15 * 60 * 1000,
+  notificationImageTimeoutMs: 5000,
 };
 
 let running = false;
@@ -55,7 +59,7 @@ const staleRunReset = (async () => {
   // workeru (alarm, zprávy ze záložek) ho přepočítat nejvýš jednou za cleanupRecountMs, jinak jen ikona
   const { [CLEANUP_KEY]: cleanup } = await chrome.storage.local.get(CLEANUP_KEY);
   if (Date.now() - (cleanup?.checkedAt || 0) >= config.cleanupRecountMs) await updateCleanup();
-  else await updateBadge((await getState()).unseen);
+  else await withStateLock(async () => updateBadge(await getState()));
 })().catch((error) => console.error("Stav po startu se nepodařilo obnovit:", error)); // Jinak by každý běh skončil na await
 
 // === Plánování ===
@@ -101,10 +105,23 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 // Po instalaci (ne po aktualizaci) ukázat, jak rozšíření používat
 chrome.runtime.onInstalled.addListener(({ reason }) => {
-  if (reason === "install") chrome.tabs.create({ url: AlzaCore.getHelpUrl() });
+  // Po instalaci průvodce nastavením (ověření přihlášení a DPH, hlídání, notifikace); nápověda je odkaz z něj
+  if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("src/welcome/welcome.html") });
 });
 
+// Spuštění prohlížeče: probudí službu na pozadí – kód na nejvyšší úrovni obnoví číslo na ikoně a naplánuje kontrolu
+// (Firefox alarmy po restartu nedrží a bez posluchače by se stránka na pozadí nespustila)
+chrome.runtime.onStartup.addListener(() => {});
+
 chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === QUIET_END_ALARM_NAME) {
+    flushPendingNotifications().catch((error) => console.error("Odložené notifikace se nepodařilo odeslat:", error));
+    return;
+  }
+  if (alarm.name === RETRY_ALARM_NAME) {
+    runWatch({ force: false, trigger: "alarm" });
+    return;
+  }
   if (alarm.name !== ALARM_NAME) return;
   if (!alarm.periodInMinutes) scheduleAlarm({ reset: true }); // Denní kontrola: naplánovat zítřejší
   runWatch({ force: false, trigger: "alarm" });
@@ -157,9 +174,16 @@ const productPagesUse = { users: 0, opening: null, closing: null };
 
 async function acquireProductPages() {
   productPagesUse.users++;
-  await productPagesUse.closing;
-  productPagesUse.opening ??= ProductPages.open();
-  await productPagesUse.opening;
+  try {
+    await productPagesUse.closing;
+    productPagesUse.opening ??= ProductPages.open();
+    await productPagesUse.opening;
+  } catch (error) {
+    // Nepovedené otevření nesmí zůstat uložené – jinak by selhalo každé další stažení až do restartu
+    productPagesUse.users--;
+    productPagesUse.opening = null;
+    throw error;
+  }
 }
 
 async function releaseProductPages() {
@@ -258,7 +282,7 @@ async function runWatch({ force, trigger }) {
         break;
       }
 
-      await sleep(config.delayBetweenProductsMs);
+      if (product !== products.at(-1)) await sleep(config.delayBetweenProductsMs);
     }
   } catch (error) {
     console.error("Chyba při kontrole hlídaných seznamů:", error);
@@ -282,43 +306,69 @@ async function finishRun({ state, log, checked, changes, problems, targetUpdates
   if (productPagesAcquired) await releaseProductPages();
   await saveTargetStates(targetUpdates);
 
-  state.running = false;
-  state.lastRunEnd = Date.now();
-  state.checked = checked;
-  state.changes = changes.map(({ name, url, changes }) => ({ name, url, lines: changes.map((change) => change.text) }));
-  state.problems = problems.map(({ name, url, message }) => ({ name, url, message }));
-
-  // V tichých hodinách se notifikace odkládají, problémy se ohlásí až po nich (pokud trvají)
+  const end = Date.now();
+  // V tichých hodinách se notifikace odkládají (odešlou se po jejich konci), problémy se ohlásí až po nich (pokud trvají)
   const settings = await AlzaCore.getSettings();
-  const notifiable = filterNotifications(changes, settings);
-  const pending = mergeNotifications([...(state.pendingNotifications || []), ...notifiable]);
-
-  // Stav uložit před notifikacemi – selhání notifikace ani stahování obrázků ho nesmí zablokovat
-  // a "viděno" z popupu během odesílání se už nepřepíše
   const quiet = AlzaCore.isQuietTime(settings);
-  state.pendingNotifications = quiet ? pending.slice(-config.maxPendingNotifications) : [];
-  const notifyProblemsNow =
-    !quiet && problems.length > 0 && (force || Date.now() - (state.lastProblemNotifiedAt || 0) >= config.problemNotifyIntervalMs);
-  if (notifyProblemsNow) state.lastProblemNotifiedAt = Date.now();
+  const notifiable = filterNotifications(changes, settings);
+  // Přehled v popupu i číslo na ikoně i se zdražením (to se ale neoznamuje notifikací)
+  const shown = filterNotifications(changes, settings, { withRises: true });
+  let pending = [];
+  let notifyProblemsNow = false;
 
-  await withStateLock(async () => {
-    // Číslo na ikoně i v tichých hodinách. Seznam viděných se mohl během běhu změnit (popup) – číst znovu
+  // Stav uložit před notifikacemi – selhání notifikace ani stahování obrázků ho nesmí zablokovat. Číst ho znovu až
+  // ve frontě: během běhu ho mohl změnit popup (viděno) nebo smazání dat v nastavení – stav ze začátku běhu by je přepsal
+  const saved = await withStateLock(async () => {
     const current = await getState();
+    pending = mergeNotifications([...(current.pendingNotifications || []), ...notifiable]);
+    notifyProblemsNow = !quiet && problems.length > 0 && (force || end - (current.lastProblemNotifiedAt || 0) >= config.problemNotifyIntervalMs);
     const unseen = current.unseen || [];
-    state.unseen = [...new Set([...unseen, ...notifiable.map(({ url, domain }) => AlzaCore.getProductKey(domain, url))])];
-    // Přehled v popupu i se zdražením (bez čísla na ikoně a notifikace)
-    state.recent = addRecentChanges(current.recent, filterNotifications(changes, settings, { withRises: true }), unseen, state.lastRunEnd);
-    await saveState(state);
+    const recent = addRecentChanges(current.recent, shown, unseen, end);
+    const next = {
+      ...current,
+      running: false,
+      // Offline se nic nezkontrolovalo – čas poslední kontroly zůstane (zmeškaná denní kontrola se dožene)
+      lastRunEnd: log.offline ? current.lastRunEnd : end,
+      checked,
+      changes: changes.map(({ name, url, changes }) => ({ name, url, lines: changes.map((change) => change.text) })),
+      problems: problems.map(({ name, url, message }) => ({ name, url, message })),
+      pendingNotifications: quiet ? pending.slice(-config.maxPendingNotifications) : [],
+      lastProblemNotifiedAt: notifyProblemsNow ? end : current.lastProblemNotifiedAt,
+      recent,
+      // Číslo na ikoně i v tichých hodinách – jen produkty, které přehled změn v popupu opravdu ukáže (drží posledních N)
+      unseen: [...new Set([...unseen, ...shown.map(({ url, domain }) => AlzaCore.getProductKey(domain, url))])].filter((key) =>
+        recent.some((item) => item.key === key)
+      ),
+    };
+    await saveState(next);
+    return next;
   });
-  if (log.total > 0) await appendLog({ ...log, end: state.lastRunEnd });
+  if (log.total > 0) await appendLog({ ...log, end });
 
-  try {
-    await updateCleanup(); // Nastaví i číslo na ikoně
-    if (!quiet) await notifyChanges(pending);
-    if (notifyProblemsNow) await notifyProblems(problems);
-  } catch (error) {
-    console.error("Chyba při odesílání notifikací:", error);
+  // Bez připojení: zkusit znovu za chvíli (hlavní plán kontrol se nemění)
+  if (log.offline) await chrome.alarms.create(RETRY_ALARM_NAME, { when: end + config.offlineRetryMs });
+  // Odložené notifikace odeslat hned po konci tichých hodin, ne až s další kontrolou (denní může být až zítra)
+  if (quiet && saved.pendingNotifications.length > 0) {
+    await chrome.alarms.create(QUIET_END_ALARM_NAME, { when: AlzaCore.getDailyRunTimes(settings.quietTo, end).next + 60 * 1000 });
   }
+
+  // Každý krok zvlášť – chyba přepočtu čistky nesmí zastavit notifikace ani naopak
+  await updateCleanup().catch((error) => console.error("Návrh čistky se nepodařilo přepočítat:", error)); // Nastaví i číslo na ikoně
+  if (!quiet) await notifyChanges(pending).catch((error) => console.error("Chyba při odesílání notifikací:", error));
+  if (notifyProblemsNow) await notifyProblems(problems).catch((error) => console.error("Chyba při odesílání notifikace o problému:", error));
+}
+
+// Konec tichých hodin: odložené notifikace hned, ne až s další kontrolou. Běžící kontrola je odešle sama
+async function flushPendingNotifications() {
+  const settings = await AlzaCore.getSettings();
+  if (AlzaCore.isQuietTime(settings)) return; // Tiché hodiny se mezitím změnily – odešle je další kontrola
+  const pending = await withStateLock(async () => {
+    const state = await getState();
+    if (state.running || !state.pendingNotifications?.length) return [];
+    await saveState({ ...state, pendingNotifications: [] });
+    return state.pendingNotifications;
+  });
+  await notifyChanges(pending);
 }
 
 // Produkty všech hlídaných seznamů, hlídané produkty z detailu a produkty s cílovou cenou bez duplicit
@@ -592,16 +642,19 @@ async function seedRecentFromLog() {
 }
 
 // === Číslo na ikoně ===
-// Zelené = produkty se změnou od posledního otevření popupu; když žádné nejsou, modré = produkty
-// navržené ke smazání (nehlídané a dlouho nekontrolované), dokud je uživatel neodloží
+// Počet produktů se změnou od posledního otevření popupu, barva podle kaskády (AlzaCore.getBadgeTone): zelená =
+// aspoň jedno zlevnění, červená = aspoň jedno zdražení, šedá = jen ukončení / nedostupnost. Když žádné nejsou,
+// modré = produkty navržené ke smazání (nehlídané a dlouho nekontrolované), dokud je uživatel neodloží
+const BADGE_COLORS = { down: "#2e7d32", up: "#c62828", off: "#757575" };
 
-async function updateBadge(unseen = []) {
+async function updateBadge({ unseen, recent } = {}) {
+  unseen = Array.isArray(unseen) ? unseen : [];
   const { [CLEANUP_KEY]: cleanup = {} } = await chrome.storage.local.get(CLEANUP_KEY);
   const suggest = cleanup.count > 0 && !(cleanup.snoozedUntil > Date.now());
   const name = chrome.i18n.getMessage("name");
 
   if (unseen.length > 0 || !suggest) {
-    await chrome.action.setBadgeBackgroundColor({ color: "#2e7d32" });
+    await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLORS[AlzaCore.getBadgeTone(recent, unseen)] });
     await chrome.action.setBadgeText({ text: unseen.length > 0 ? String(unseen.length) : "" });
     await chrome.action.setTitle({ title: name });
     return;
@@ -622,8 +675,9 @@ async function updateCleanup() {
     const now = Date.now();
     // at = kdy se počet změnil, checkedAt = kdy se naposledy počítal (start workeru)
     await chrome.storage.local.set({ [CLEANUP_KEY]: { ...previous, count, at: previous.count === count ? previous.at : now, checkedAt: now } });
+    // Číslo na ikoně ve frontě – jinak by souběžné „viděno“ z popupu mohlo přepsat starým číslem
+    await updateBadge(await getState());
   });
-  await updateBadge((await getState()).unseen);
 }
 
 // keys = produkty otevřeného seznamu, null = vše (otevřený popup)
@@ -634,9 +688,9 @@ async function markSeen(keys) {
   return withStateLock(async () => {
     const state = await getState();
     const unseen = keys ? (state.unseen || []).filter((key) => !keys.includes(key)) : [];
-    if (unseen.length === (state.unseen || []).length) return;
+    if (unseen.length === (state.unseen || []).length) return updateBadge(state); // Beze změny – jen srovnat ikonu
     await saveState({ ...state, unseen });
-    await updateBadge(unseen);
+    await updateBadge({ ...state, unseen });
   });
 }
 
@@ -660,8 +714,12 @@ async function notifyChanges(changes) {
   // Windows ukáže v notifikaci jen pár řádků – po jednom produktu se čte nejlépe
   if (changes.length <= config.maxIndividualNotifications) {
     for (const change of changes) {
-      const iconUrl = await loadProductIcon(change.image);
-      await createNotification({ title: change.name, message: change.lines.join("\n"), ...(iconUrl && { iconUrl }) }, change.url);
+      try {
+        const iconUrl = await loadProductIcon(change.image);
+        await createNotification({ title: change.name, message: change.lines.join("\n"), ...(iconUrl && { iconUrl }) }, change.url);
+      } catch (error) {
+        console.error("Notifikaci se nepodařilo vytvořit:", error); // Ostatní produkty i tak
+      }
     }
     return;
   }
@@ -726,7 +784,7 @@ async function loadProductIcon(imageUrl) {
   const url = AlzaCore.getProductImageUrl(imageUrl, config.notificationImageSize);
   if (!url) return null;
   try {
-    const response = await fetch(url, { credentials: "omit" });
+    const response = await fetch(url, { credentials: "omit", signal: AbortSignal.timeout(config.notificationImageTimeoutMs) });
     const type = response.headers.get("content-type") || "";
     if (!response.ok || !type.startsWith("image/")) return null;
 
@@ -763,15 +821,20 @@ async function squareImage(blob) {
 async function createNotification(options, targetUrl) {
   const notificationId = `alza-watch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const defaults = { type: "basic", iconUrl: chrome.runtime.getURL("img/icon-128.png"), priority: 1 };
+  // Cíl kliknutí uložit dřív, než se notifikace ukáže – rychlé kliknutí by jinak nic neotevřelo
+  if (targetUrl) await chrome.storage.session.set({ [notifyTargetKey(notificationId)]: targetUrl });
   try {
     await chrome.notifications.create(notificationId, { ...defaults, ...options });
   } catch (error) {
     // Obrázek, který Chrome neumí zobrazit – raději ikona doplňku než žádná notifikace
-    if (!options.iconUrl) throw error;
-    await chrome.notifications.create(notificationId, { ...defaults, ...options, iconUrl: defaults.iconUrl });
+    try {
+      if (!options.iconUrl) throw error;
+      await chrome.notifications.create(notificationId, { ...defaults, ...options, iconUrl: defaults.iconUrl });
+    } catch (finalError) {
+      if (targetUrl) await chrome.storage.session.remove(notifyTargetKey(notificationId));
+      throw finalError;
+    }
   }
-
-  if (targetUrl) await chrome.storage.session.set({ [notifyTargetKey(notificationId)]: targetUrl });
 }
 
 // === Pomocné ===

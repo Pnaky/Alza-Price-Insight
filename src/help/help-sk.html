@@ -4,16 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nápoveda – Alza Price Insight</title>
+    <link rel="stylesheet" href="../shared/page.css" />
     <link rel="stylesheet" href="help.css" />
   </head>
 
   <body>
     <main>
-      <header>
+      <header class="app-header">
         <img src="../../img/icon-48.png" alt="" />
         <div>
-          <h1>Nápoveda</h1>
-          <p>Alza Price Insight – história cien, sledovanie a skutočná cena za kus na alza.cz, alza.sk a alza.hu</p>
+          <h1 class="app-title">Alza Price Insight</h1>
+          <p class="app-sub">Nápoveda</p>
         </div>
         <div class="languages">
           <a href="help.html" lang="cs">CZ</a><strong>SK</strong><a href="help-hu.html" lang="hu">HU</a><a href="help-en.html" lang="en">EN</a>
@@ -37,6 +38,7 @@
 
       <section id="zaciname">
         <h2>🚀 Začíname</h2>
+        <p class="tip">Po inštalácii sa otvorí <strong>🧭 Sprievodca nastavením</strong>: vyberiete hlavnú Alzu, jedným kliknutím overí prihlásenie a ceny s DPH (pri každej položke napíše, čo je hotové a čo urobiť) a prevedie vás sledovaním a notifikáciami. Znova ho spustíte v nastaveniach (🧭 Sprievodca vpravo hore), hlavnú Alzu zmeníte v nastaveniach pri jazyku.</p>
         <ol>
           <li><strong>Prihláste sa na Alze.</strong> Ceny sa ukladajú len prihláseným – Alza ukazuje každému iné ceny (AlzaPlus+, benefity, B2B).</li>
           <li><strong>Majte zapnuté ceny s DPH.</strong> S voľbou „Zobrazovať ceny bez DPH“ sa ceny neukladajú, aby sa nepomiešali.</li>
@@ -159,8 +161,8 @@
           <li><strong>Sledovaný zoznam:</strong> otvorte zoznam a v popupe rozšírenia kliknite na <strong>🔔 Sledovať zoznam</strong>, alebo kliknite na zvonček v záložke zoznamu. Sleduje sa celý zoznam; novo pridané položky sa do sledovania dostanú pri ďalšom otvorení zoznamu.</li>
           <li><strong>Sledovaný produkt:</strong> tlačidlo „🔔 Sledovať na pozadí“ na detaile produktu, alebo nastavená cieľová cena.</li>
           <li>Kontrola beží <strong>každú hodinu</strong>, kým je spustený prehliadač. V nastaveniach ju zmeníte na každé 3, 6 alebo 12 hodín alebo na <strong>raz denne vo zvolenom čase</strong> – keď je prehliadač v tom čase zatvorený, prebehne pár minút po jeho spustení. Kedy bude ďalšia, ukazuje popup. Hneď ju spustíte tlačidlom ▶️ Skontrolovať v popupe.</li>
-          <li><strong>Zelené číslo na ikone</strong> rozšírenia = počet produktov so zmenou od posledného otvorenia popupu, prehľad zmien je v popupe. <strong>Modré číslo</strong> = staré produkty navrhnuté na zmazanie.</li>
-          <li><strong>Prehľad zmien v popupe:</strong> zlacnenie, naskladnenie, nová akcia a dosiahnutá cieľová cena zelene, zdraženie červeno (na zdraženie notifikácie nechodia), koniec predaja a nedostupnosť sivo. Podfarbené sú nové zmeny, už videné majú farebný len text. Pri sledovaných zoznamoch vidíte, koľko produktov za posledných 7 dní zlacnelo (▼) a zdraželo (▲). Sledovanie zoznamu vypnete tlačidlom 🔕 Nesledovať zoznam v popupe na otvorenom zozname alebo v nastaveniach (záložka Sledované zoznamy). Nápoveda je v nastaveniach (❓ vpravo hore).</li>
+          <li><strong>Číslo na ikone</strong> rozšírenia = počet produktov so zmenou od posledného otvorenia popupu, prehľad zmien je v popupe. Farba: <strong>zelená</strong> = aspoň jeden produkt zlacnel, naskladnil sa, má novú akciu alebo dosiahol cieľovú cenu, <strong>červená</strong> = žiadny nezlacnel, ale aspoň jeden zdražel, <strong>sivá</strong> = len koniec predaja alebo nedostupnosť. <strong>Modré číslo</strong> = staré produkty navrhnuté na zmazanie.</li>
+          <li><strong>Prehľad zmien v popupe:</strong> zlacnenie, naskladnenie, nová akcia a dosiahnutá cieľová cena zelene, zdraženie červeno (na zdraženie notifikácie nechodia), koniec predaja a nedostupnosť sivo. Podfarbené sú nové zmeny, už videné majú farebný len text. Pri sledovaných zoznamoch vidíte, koľko produktov za posledných 7 dní zlacnelo (▼) a zdraželo (▲). Sledovanie zoznamu vypnete tlačidlom 🔕 Nesledovať zoznam v popupe na otvorenom zozname alebo v nastaveniach (záložka Sledované zoznamy). Keď sledujete viac Alz, majú zoznamy, zmeny aj sledované produkty štítok <strong>CZ / SK / HU</strong> (po prejdení myšou adresa Alzy). Nápoveda je v nastaveniach (❓ vpravo hore).</li>
         </ul>
         <p>V nastaveniach si vyberiete, o čom chcete vedieť: zlacnenie (aj od koľkých percent), nové ceny (akcia, kód, cashback), dostupnosť a tiché hodiny.</p>
         <p class="tip">Nechodia notifikácie? V nastaveniach kliknite na <strong>🔔 Vyskúšať notifikácie</strong>. Keď neprídu, skontrolujte vo Windows „Nerušiť“ / Asistenta sústredenia a povolenie oznámení pre prehliadač (Chrome, Firefox).</p>
@@ -190,7 +192,7 @@
           <li><strong>História (CSV)</strong> – všetky ceny pre Excel.</li>
           <li><strong>Upratať staré dáta</strong> – zmaže produkty, ktoré nesledujete a viac ako 3 mesiace ste ich neotvorili ani sa nekontrolovali (uložené pri prehliadaní až po roku). Rozšírenie ich samo navrhne modrým číslom na ikone a upozornením v popupe.</li>
           <li><strong>Zmazať všetky dáta</strong> – len po napísaní slova ZMAZAŤ; predtým sa automaticky stiahne záloha.</li>
-          <li><strong>Diagnostika</strong> – keď niečo nefunguje, stiahnite diagnostiku a pošlite ju autorovi (obsahuje verziu, nastavenia, log kontrol a chyby; žiadne heslá ani cookies).</li>
+          <li><strong>Diagnostika</strong> – keď niečo nefunguje, kliknite na <strong>🐞 Nahlásiť chybu</strong>: otvorí sa predvyplnené hlásenie na GitHube (verzia, prehliadač, posledné chyby). Alebo stiahnite diagnostiku a pošlite ju autorovi (obsahuje verziu, nastavenia, log kontrol a chyby; žiadne heslá ani cookies).</li>
         </ul>
         <p class="tip">Všetky dáta zostávajú len vo vašom prehliadači. Rozšírenie komunikuje iba s webmi Alzy a nikam inam nič neodosiela.</p>
       </section>

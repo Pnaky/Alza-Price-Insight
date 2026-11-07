@@ -145,7 +145,7 @@ Object.assign(AlzaPriceTracker, {
     let raised = 0;
 
     layout.items.forEach((item) => {
-      const data = this.state.itemData.get(item);
+      const data = this.getItemData(item);
       const lowest = data ? AlzaCore.getLowestPrice(data.priceMap) : null;
       if (lowest === null) return;
       const quantity = parseInt(item.querySelector(this.selectors.quantityInput)?.value, 10) || 1;
@@ -176,7 +176,7 @@ Object.assign(AlzaPriceTracker, {
     toolbar.querySelectorAll(".alza-price-tracker-toolbar-chip").forEach((chip) => {
       const { filter } = chip.dataset;
       const label = this.translate(`filter${filter[0].toUpperCase()}${filter.slice(1)}`);
-      const count = layout.items.filter((item) => this.matchesListFilter(filter, item, this.state.itemData.get(item))).length;
+      const count = layout.items.filter((item) => this.matchesListFilter(filter, item, this.getItemData(item))).length;
       this.setTextIfChanged(chip, filter === "all" ? label : `${label} (${count})`);
       // Prázdný filtr skrýt (kromě aktivního, ať jde vypnout)
       this.setTabClass(chip, "alza-price-tracker-hidden", filter !== "all" && count === 0 && this.state.listView.filter !== filter);
@@ -189,14 +189,15 @@ Object.assign(AlzaPriceTracker, {
 
   applyListView(layout) {
     const { filter, sort } = this.state.listView;
-    const dataOf = (index) => this.state.itemData.get(layout.items[index]);
+    const dataOf = (index) => this.getItemData(layout.items[index]);
 
     layout.rows.forEach((row, index) => {
-      this.setTabClass(row, "alza-price-tracker-hidden", !this.matchesListFilter(filter, layout.items[index], dataOf(index)));
+      // Řádky a kontejner patří Alze – atribut, ne naše třída (isOwnMutation by jinak bral změny uvnitř za naše)
+      this.setFlag(row, "data-alza-price-tracker-hidden", !this.matchesListFilter(filter, layout.items[index], dataOf(index)));
     });
 
     const sorted = sort !== "default" && layout.sortable;
-    this.setTabClass(layout.container, "alza-price-tracker-sorted", sorted);
+    this.setFlag(layout.container, "data-alza-price-tracker-sorted", sorted);
     const order = new Map();
     if (sorted) {
       layout.rows

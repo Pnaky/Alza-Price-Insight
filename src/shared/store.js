@@ -81,10 +81,12 @@ const AlzaStore = {
   },
 
   async migrate() {
-    const all = await chrome.storage.local.get(null);
+    // Běží při každém startu služby na pozadí – nejdřív jen 3 staré klíče, celé úložiště až když je co převádět
     const prefix = AlzaCore.storagePrefixes.legacyPrices;
-    const legacyKeys = Object.keys(all).filter((key) => key.startsWith(prefix) && AlzaCore.isKnownDomain(key.slice(prefix.length)));
+    const legacy = await chrome.storage.local.get(Object.keys(AlzaCore.domains).map((domainKey) => prefix + domainKey));
+    const legacyKeys = Object.keys(legacy);
     if (legacyKeys.length === 0) return 0;
+    const all = await chrome.storage.local.get(null);
     const updates = {};
     legacyKeys.forEach((key) => Object.assign(updates, this.legacyToPriceRecords(key.slice(prefix.length), all[key], { ...all, ...updates })));
     await chrome.storage.local.set(updates);
@@ -157,6 +159,8 @@ const AlzaStore = {
     //   update = nahradit jen existující položku, merge = doplnit pole do položky, remove = smazat
     // Vrací výsledný objekt
     async patchMap({ key, set = {}, update = {}, merge = {}, remove = [], keep = [] }) {
+      // Klíč "__proto__" by místo položky změnil prototyp – položka by se tiše ztratila
+      [set, update, merge].forEach((entries) => delete entries.__proto__);
       const { [key]: stored } = await chrome.storage.local.get(key);
       const map = stored && typeof stored === "object" ? stored : {};
       const kept = (existing) => Object.fromEntries(keep.filter((field) => existing?.[field] !== undefined).map((field) => [field, existing[field]]));
@@ -215,7 +219,8 @@ const AlzaStore = {
       const converted = {};
       Object.entries(items).forEach(([key, value]) => {
         if (key.startsWith(legacyPrefix)) Object.assign(converted, this.legacyToPriceRecords(key.slice(legacyPrefix.length), value, converted));
-        else converted[key] = value;
+        // Stejný produkt ve starém i novém formátu téže zálohy – sloučit, ne přepsat (minimum, maximum)
+        else converted[key] = converted[key] && AlzaCore.parseProductStorageKey(key)?.kind === "price" ? this.mergeDuplicateRecords(converted[key], value) : value;
       });
       const existing = await chrome.storage.local.get(Object.keys(converted));
       const isObject = (value) => value && typeof value === "object" && !Array.isArray(value);

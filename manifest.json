@@ -4,7 +4,7 @@
   "description": "__MSG_description__",
   "default_locale": "en",
   "author": "Jan Pňakovič",
-  "version": "2026.11.6",
+  "version": "2026.11.7",
   "minimum_chrome_version": "121",
   "browser_specific_settings": {
     "gecko": {

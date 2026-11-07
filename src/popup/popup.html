@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alza Price Insight</title>
     <style>
+      /* Světlé pozadí s bílými kartami; tmavý pruh záhlaví s logem ladí s průvodcem, nastavením a nápovědou */
+      html {
+        background: #f3f5f7;
+      }
+
       body {
         width: 400px; /* Řádek změny „Akční cena: 24 542 Kč → 24 537 Kč (-5 Kč, -0,1 %)“ se vejde na jeden řádek */
         margin: 0;
-        padding: 10px 12px;
+        padding: 12px 12px 10px;
         font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
         font-size: 13px;
         color: #212121;
@@ -18,13 +23,19 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 10px;
+        margin: -12px -12px 12px;
+        padding: 10px 12px;
+        background: radial-gradient(circle at 92% 0%, rgba(201, 221, 3, 0.16) 0%, transparent 55%),
+          linear-gradient(135deg, #161616 0%, #1e2636 55%, #263f6a 100%);
       }
 
       .logo {
         flex: none;
         width: 32px;
         height: 32px;
+        padding: 2px;
+        border-radius: 8px;
+        background: #fff;
       }
 
       .brand {
@@ -39,6 +50,7 @@
         white-space: nowrap;
         font-size: 16px;
         font-weight: 700;
+        color: #eef2f7;
       }
 
       /* Odkaz na Alzu: její favicona v rámečku jako tlačítko vedle ⚙️ (bez načtené ikony text domény) */
@@ -51,17 +63,18 @@
         min-width: 34px; /* Stejně velké jako ⚙️ (.icon-button); bez ikony je širší o text domény */
         height: 30px;
         padding: 0 6px;
-        border: 1px solid #d2d2d2;
-        border-radius: 4px;
-        background: linear-gradient(180deg, #fff, #efefef);
-        color: #1653a4;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #eef2f7;
         font-size: 12px;
         font-weight: 600;
         text-decoration: none;
       }
 
       .alza-link:hover {
-        border-color: #1653a4;
+        border-color: #c9dd03;
+        background: rgba(255, 255, 255, 0.16);
       }
 
       .alza-link img {
@@ -70,23 +83,27 @@
       }
 
       button {
-        padding: 6px 8px;
+        padding: 7px 10px;
         cursor: pointer;
-        color: #000;
-        border: 1px solid #d2d2d2;
-        border-radius: 4px;
+        color: #212121;
+        border: 1px solid #cfd3da;
+        border-radius: 9px;
         font-family: inherit;
         font-size: 13px;
-        background: linear-gradient(180deg, #fff, #efefef);
+        font-weight: 600;
+        background: #fff;
       }
 
       button:hover {
-        background: linear-gradient(180deg, #f8f8f8, #efefef);
+        border-color: #9aa3b0;
+        background: #f8f9fb;
       }
 
       button:disabled {
         cursor: default;
+        border-color: #e0e0e0;
         color: #9e9e9e;
+        background: #f7f7f7;
       }
 
       .icon-button {
@@ -98,8 +115,16 @@
         width: 34px;
         height: 30px;
         padding: 0;
+        border-color: rgba(255, 255, 255, 0.25);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
         font-size: 16px;
         line-height: 1;
+      }
+
+      .icon-button:hover {
+        border-color: #c9dd03;
+        background: rgba(255, 255, 255, 0.16);
       }
 
       .actions {
@@ -117,9 +142,9 @@
       }
 
       .watch-info {
-        margin: 0 0 8px;
+        margin: 0;
         font-size: 12px;
-        color: #505050;
+        color: #616161;
       }
 
       .watch-info.error {
@@ -133,15 +158,26 @@
       .watch-lists {
         list-style: none;
         margin: 0 0 8px;
-        padding: 0;
+        padding: 4px 12px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e8eaee;
+        box-shadow: 0 2px 8px rgba(30, 38, 54, 0.08);
+      }
+
+      .watch-lists:empty {
+        display: none;
       }
 
       .watch-lists li {
         display: flex;
         align-items: center;
         gap: 6px;
-        padding: 2px 0;
-        border-bottom: 1px solid #efefef;
+        padding: 5px 0;
+      }
+
+      .watch-lists li + li {
+        border-top: 1px solid #e8eaee;
       }
 
       .watch-lists a {
@@ -224,9 +260,9 @@
       /* Návrh čistky (modré číslo na ikoně) */
       .cleanup {
         margin-bottom: 10px;
-        padding: 6px 8px;
-        border-radius: 4px;
-        box-shadow: inset 3px 0 0 #1976d2;
+        padding: 9px 12px;
+        border-radius: 12px;
+        box-shadow: inset 4px 0 0 #1976d2, 0 2px 8px rgba(30, 38, 54, 0.08);
         background: #e3f2fd;
         font-size: 12px;
         color: #0d47a1;
@@ -240,33 +276,44 @@
       }
 
       .cleanup-actions button {
-        padding: 2px 8px;
+        padding: 3px 9px;
         font-size: 12px;
       }
 
       /* Přehled změn cen (číslo na ikoně = nové položky) */
       .changes {
         margin-bottom: 10px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e8eaee;
+        box-shadow: 0 2px 8px rgba(30, 38, 54, 0.08);
+        overflow: hidden;
       }
 
       .changes h2 {
-        margin: 0 0 4px;
-        font-size: 12px;
+        margin: 0;
+        padding: 8px 12px 6px;
+        font-size: 11.5px;
         font-weight: 600;
-        color: #505050;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #6b6b6b;
       }
 
       .changes-list {
         max-height: 280px;
         overflow-y: auto;
-        border-top: 1px solid #efefef;
+        border-top: 1px solid #e8eaee;
       }
 
       .change {
         display: flex;
         gap: 8px;
-        padding: 6px 4px;
-        border-bottom: 1px solid #efefef;
+        padding: 7px 12px 7px 8px; /* Vpravo víc – cena nesmí zatékat pod posuvník přehledu */
+      }
+
+      .change + .change {
+        border-top: 1px solid #e8eaee;
       }
 
       /* Podbarvení podle změny: zlevnění (a naskladnění, nová akce, cílová cena) zeleně, zdražení červeně,
@@ -344,6 +391,20 @@
 
       .change-meta a {
         color: #9e9e9e;
+      }
+
+      /* Štítek domény (CZ / SK / HU) – jen když hlídáte víc Alz */
+      .domain-badge {
+        flex: none;
+        display: inline-block;
+        padding: 0 3px;
+        border: 1px solid #c8c8c8;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 14px;
+        color: #616161;
+        cursor: default;
       }
 
     </style>
