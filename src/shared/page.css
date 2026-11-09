@@ -1,11 +1,95 @@
 /* Společný vzhled stránek rozšíření – průvodce (welcome), nastavení (options) a nápověda (help): pozadí a záhlaví
    s logem. Záhlaví je všude stejně vysoké a na stejném místě, ať při přechodu mezi stránkami nic neposkakuje.
-   Obsah má na všech stránkách šířku 960 px a horní okraj 28 px (kontejner stránky: max-width 960 px + 16 px po stranách). */
+   Obsah má na všech stránkách šířku 960 px a horní okraj 28 px (kontejner stránky: max-width 960 px + 16 px po stranách).
+   Pozadí je ploché a řídí se nastavením systému / prohlížeče (prefers-color-scheme): světle šedé, nebo tmavé.
+   Bílé karty zůstávají v obou režimech bílé – mění se jen pozadí, záhlaví, tlačítka v záhlaví a záložky. */
+
+:root {
+  /* Škála mezer, zaoblení a písma – nový kód bere hodnoty odsud */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+
+  /* Světlý režim */
+  --page-bg: #f3f4f6;
+  --head-fg: #1e1e1e;
+  --head-sub: #6b6b6b;
+  --head-btn-fg: #212121;
+  --head-btn-border: #cfd3da;
+  --head-btn-bg: #fff;
+  --head-btn-hover-border: #9aa3b0;
+  --head-btn-hover-bg: #f8f9fb;
+  --head-btn-active-fg: #fff;
+  --head-btn-active-bg: #263f6a;
+  --tab-fg: #4a4f57;
+  --tab-bg: #e5e7eb;
+  --tab-hover-fg: #1e1e1e;
+  --tab-hover-bg: #dadde2;
+  --card-border: #e5e7eb;
+  --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --logo-ring: 0 0 0 1px #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #1b1d21;
+    --head-fg: #eef2f7;
+    --head-sub: #aab4c3;
+    --head-btn-fg: #eef2f7;
+    --head-btn-border: rgba(255, 255, 255, 0.22);
+    --head-btn-bg: rgba(255, 255, 255, 0.06);
+    --head-btn-hover-border: rgba(255, 255, 255, 0.45);
+    --head-btn-hover-bg: rgba(255, 255, 255, 0.14);
+    --head-btn-active-fg: #212121;
+    --head-btn-active-bg: #fff;
+    --tab-fg: #d5dbe5;
+    --tab-bg: rgba(255, 255, 255, 0.08);
+    --tab-hover-fg: #fff;
+    --tab-hover-bg: rgba(255, 255, 255, 0.16);
+    --card-border: transparent;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --logo-ring: none;
+  }
+}
+
+/* Ikony (src/shared/icons.js) – plné, navy; --tone = barva okolního textu (výstrahy, mazání). V záhlaví na tmavém
+   pozadí a v záložkách mají barvu textu */
+.alza-price-tracker-icon {
+  display: inline-block;
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.35em;
+  vertical-align: -0.2em;
+  fill: currentColor;
+  color: #263f6a;
+}
+
+.alza-price-tracker-icon--tone,
+.app-header .alza-price-tracker-icon,
+.tab .alza-price-tracker-icon {
+  color: inherit;
+}
+
+/* Samotná ikona bez textu (tlačítko jen s ikonou, ikona v textu nápovědy) bez okraje */
+.alza-price-tracker-icon--solo {
+  margin-right: 0;
+}
 
 html {
   min-height: 100%;
-  background: radial-gradient(circle at 85% 6%, rgba(201, 221, 3, 0.12) 0%, transparent 34%),
-    linear-gradient(135deg, #161616 0%, #1e2636 45%, #263f6a 100%);
+  background: var(--page-bg);
   /* Místo pro posuvník i na krátké stránce – obsah se při přechodu na delší stránku neposune do strany */
   scrollbar-gutter: stable;
 }
@@ -16,7 +100,7 @@ html {
   gap: 12px;
   min-height: 44px;
   margin: 0 0 20px;
-  color: #eef2f7;
+  color: var(--head-fg);
 }
 
 .app-header > img {
@@ -26,6 +110,7 @@ html {
   padding: 3px;
   border-radius: 10px;
   background: #fff;
+  box-shadow: var(--logo-ring);
 }
 
 .app-title {
@@ -40,7 +125,7 @@ html {
 .app-sub {
   display: block;
   margin: 0;
-  color: #aab4c3;
+  color: var(--head-sub);
   font-size: 12.5px;
   line-height: 1.45;
 }

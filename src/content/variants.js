@@ -153,6 +153,22 @@ Object.assign(AlzaPriceTracker, {
     return `${steps.join(" · ")} (-${percent} %)`;
   },
 
+  // Tabulka stupňů množstevní slevy jako u Alzy (rozsah kusů | cena za kus), řádek s aktuálním počtem kusů
+  // zvýrazněný. Na kartě detailu (Alza ji ukáže až po přidání do košíku) a v tooltipu v košíku
+  createQuantityTiersTable(tiers, count = 1) {
+    const unit = this.translate("pieceUnit");
+    const table = this.createEl("div", "alza-price-tracker-tiers");
+    table.appendChild(this.createEl("div", "alza-price-tracker-tiers-title", this.translate("quantityTiersTitle")));
+    tiers.forEach(([from, to, price]) => {
+      const range = to >= 100000 ? this.translate("quantityTierFrom", from, unit) : from === to ? `${from} ${unit}` : `${from}–${to} ${unit}`;
+      const row = this.createEl("div", "alza-price-tracker-tiers-row");
+      if (count >= from && count <= to) row.classList.add("alza-price-tracker-tiers-row--current");
+      row.append(this.createEl("span", null, range), this.createEl("span", null, `${this.formatPrice(price)}/${unit}`));
+      table.appendChild(row);
+    });
+    return table;
+  },
+
   // Cena za kus na setiny jako u Alzy ("3,32 Kč")
   formatUnitPrice(price) {
     return AlzaCore.formatUnitPrice(price, this.getAlzaDomain());

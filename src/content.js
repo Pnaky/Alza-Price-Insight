@@ -115,7 +115,12 @@ const AlzaPriceTracker = {
     // jen seznamy (Order1.htm) a detail produktu (*-d<číslo>.htm). Ostatní stránky nechat být
     const isListPage = this.config.targetUrlPattern.test(window.location.href);
     const isProductPage = !isListPage && Boolean(AlzaCore.getProductId(window.location.pathname + window.location.search)) && AlzaCore.isProductDocument(document);
-    if (!isListPage && !isProductPage) return;
+    // Jinde (výpisy kategorií, vyhledávání, úvodní stránka) jen naše tooltipy – štítky ceny za kus a lišta
+    // kategorie (category.js) mají nápovědu v title; místo systémového tooltipu karta jako na seznamu
+    if (!isListPage && !isProductPage) {
+      this.setupPriceCards();
+      return;
+    }
 
     if (!chrome?.storage?.local) {
       console.error("❌ Rozšíření nemůže být inicializováno - chrome.storage.local není dostupné");
@@ -155,10 +160,14 @@ const AlzaPriceTracker = {
         this.observePageChanges().catch((error) => console.error("Error observing page changes:", error));
         this.setupWatchBells();
         this.setupCartWarnings();
+        this.setupPriceCards();
+        this.setupBasketCodes();
+        this.setupBasketInsights();
         this.watchPriceRecords();
         this.removeLegacyPriceChanges().catch((error) => console.error("Error removing legacy keys:", error));
       } else {
         this.setupProductPage().catch((error) => console.error("Error setting up product page:", error));
+        this.setupPriceCards(); // Tooltipy karty na detailu (dlaždice, srovnávače, hlídání)
       }
     } catch (error) {
       console.error("Chyba při inicializaci:", error);
@@ -194,6 +203,10 @@ const AlzaPriceTracker = {
     // nebo už se vyměnily dřív, než se změnila adresa), ceny zobrazit, ale hlídaný seznam nepřepisovat –
     // položky starého seznamu by se uložily pod nový listId. Nové načtení stránky adresu vždy odpovídá
     const loadList = (switched = false) => {
+      // Jiný seznam (i přes záložku Košík) = filtr v liště zpět na „Vše“ – filtr patří k jednomu seznamu, řazení zůstává
+      const viewKey = window.location.search;
+      if (this.state.listViewKey !== undefined && this.state.listViewKey !== viewKey) this.state.listView.filter = "all";
+      this.state.listViewKey = viewKey;
       if (!window.location.href.includes("Order1.htm?listId=")) return;
       const listId = new URLSearchParams(window.location.search).get("listId") || "Neznámé ID";
       this.state.listId = listId;
@@ -511,7 +524,7 @@ const AlzaPriceTracker = {
     this.state.saveBlocked = reasonKey;
     console.warn("Ukládání cen pozastaveno:", reasonKey);
 
-    const warning = this.createEl("div", "alza-price-tracker-notification alza-price-tracker-notification--warning", `⚠️ ${this.translate(reasonKey)}`);
+    const warning = AlzaIcons.prepend(this.createEl("div", "alza-price-tracker-notification alza-price-tracker-notification--warning", this.translate(reasonKey)), "warning", { tone: true });
     warning.title = this.translate("close");
     warning.addEventListener("click", () => warning.remove());
     document.body.appendChild(warning);
@@ -543,6 +556,7 @@ const AlzaPriceTracker = {
     }
 
     // Bez přihlášení nebo s cenami bez DPH nic neukládat – rozbilo by to historii i min/max
+    page.saveProblem = await AlzaCore.resolveSaveProblem(page.saveProblem, page.vatSignMissing, page.prices, this.getAlzaDomain(), productUrl);
     if (page.saveProblem) {
       this.blockSaving(page.saveProblem);
       this.removeSpinnerFromItem(itemElement);
@@ -779,6 +793,13 @@ const AlzaPriceTracker = {
     // Použití CSS tříd místo inline stylů
     priceElement.classList.add("alza-price-tracker-price");
     priceElement.dataset.priceType = priceObj.type; // Podle typu se označí podezřelá cena (markSuspiciousPrices)
+    if (priceObj.code) priceElement.dataset.code = priceObj.code; // Slevový kód – karta při najetí myší (price-card.js)
+    // Cashback: stránka akce – karta při najetí myší ukáže konec nákupu a lhůtu registrace (price-card.js)
+    const cashbackTerms = priceObj.type === "cashback" ? AlzaCore.resolveCashbackTerms(priceObj.terms, this.getAlzaDomain()) : null;
+    if (cashbackTerms) {
+      priceElement.dataset.cashbackTerms = cashbackTerms;
+      if (priceObj.title) priceElement.dataset.cashbackTitle = priceObj.title;
+    }
 
     // Přidat třídu pro original pouze pokud existuje více cen
     if (priceObj.type === "original" && hasMultiplePrices) {
@@ -787,7 +808,12 @@ const AlzaPriceTracker = {
       priceElement.classList.add(`alza-price-tracker-price-${priceObj.type}`);
     }
 
-    const icon = priceObj.icon ? this.createIconElement(priceObj.icon) : null;
+    // Ikona akce z Alzy; slevový kód ji jako obrázek nemá (Alza kreslí kupón vlastním SVG) – pak naše ikona kupónu
+    let icon = priceObj.icon ? this.createIconElement(priceObj.icon) : null;
+    if (!icon && priceObj.type === "discount") {
+      icon = this.createEl("span", "alza-price-tracker-price-icon alza-price-tracker-price-icon--voucher");
+      icon.setAttribute("aria-hidden", "true");
+    }
     if (icon) priceElement.appendChild(icon);
 
     const textNode = document.createTextNode(` ${formattedPrice}`);
@@ -846,6 +872,14 @@ const AlzaPriceTracker = {
         highestEl.title = this.formatMinMaxText(min, max, " / ");
       }
 
+      // Název typu ceny na první řádek tooltipu (Benefit, Slevový kód, Black Friday…) – až po zápisech výše,
+      // které title přepisují; řádek s historií přidá pozdější attachHistoryTrigger na konec
+      priceContainer.querySelectorAll(".alza-price-tracker-price").forEach((element, index) => {
+        const key = `type_${formattedPrices[index]?.type}`;
+        const label = this.translate(key);
+        if (label && label !== key) this.appendTitle(element, label, { first: true });
+      });
+
       // Cena za kus u každé ceny – Alza ji počítá jen z jedné z nich (bez AlzaPlus+ a slevových kódů)
       const packCount = this.getStoredPackCount(productData);
       if (packCount) {
@@ -887,6 +921,7 @@ const AlzaPriceTracker = {
         packCount,
         quantityTiers,
         cheaperConditions,
+        discountCode: formattedPrices.find(({ type }) => type === "discount")?.code || null, // Vložení do košíku s kódem
       });
       this.updateTargetMarker(itemElement);
       this.scheduleListToolbar();
@@ -911,6 +946,8 @@ const AlzaPriceTracker = {
     priceContainer.dataset.alzaPriceTrackerQuantity = String(quantity);
     itemElement.classList.toggle("alza-price-tracker-multi", quantity > 1);
     priceContainer.querySelector(".alza-price-tracker-quantity-total")?.remove();
+    priceContainer.querySelector(".alza-price-tracker-quantity-price")?.remove();
+    priceContainer.querySelectorAll(".alza-price-tracker-price--quantity-struck").forEach((element) => element.classList.remove("alza-price-tracker-price--quantity-struck"));
     const lowestElement = priceContainer.querySelector(".alza-price-tracker-price");
     const previousText = lowestElement?.dataset.alzaPriceTrackerTotalText;
     if (previousText) {
@@ -923,6 +960,23 @@ const AlzaPriceTracker = {
     if (!(payNow > 0)) return;
     const unitPrice = AlzaCore.getQuantityUnitPrice(quantityTiers, payNow, quantity);
     const total = this.formatPrice(unitPrice * quantity);
+    // Platí stupeň množstevní slevy: cena za kus při tomto počtu zeleně před ostatními (Alza v seznamu ukazuje
+    // „od …“ a součet za plnou cenu); v tooltipu tabulka stupňů a úspora
+    if (quantityTiers && unitPrice < payNow) {
+      const unit = this.translate("pieceUnit");
+      const quantityPrice = this.createEl("span", "alza-price-tracker-quantity-price", this.formatPrice(unitPrice));
+      quantityPrice.title = this.translate("quantityTotalHint", quantity, this.formatPrice(unitPrice), total);
+      Object.assign(quantityPrice.dataset, {
+        tiers: JSON.stringify(quantityTiers),
+        count: String(quantity),
+        saving: this.translate("quantityTierSaving", quantity, unit, this.formatPrice((payNow - unitPrice) * quantity)),
+      });
+      priceContainer.prepend(quantityPrice);
+      // Dražší ceny přeškrtnout – při tomto počtu kusů neplatí
+      priceContainer.querySelectorAll(".alza-price-tracker-price").forEach((element) => {
+        if (AlzaCore.parsePositivePrice(element.textContent) > unitPrice) element.classList.add("alza-price-tracker-price--quantity-struck");
+      });
+    }
     // Skrytý, dokud fitQuantityTotals nezměří, že se vejde (jinak by krátce problikl)
     const element = this.createEl("span", "alza-price-tracker-quantity-total alza-price-tracker-quantity-total--hidden");
     element.append(

@@ -105,6 +105,10 @@ Object.assign(AlzaPriceTracker, {
       const chip = this.createEl("button", "alza-price-tracker-toolbar-chip");
       chip.type = "button";
       chip.dataset.filter = filter;
+      // Nápověda v kartě po najetí myší: název filtru jako nadpis, pod ním co filtruje (jen jednou – počet v textu
+      // pilulky se mění, title by se při překreslení přepisoval i během zobrazené karty)
+      const name = `${filter[0].toUpperCase()}${filter.slice(1)}`;
+      chip.title = `${this.translate(`filter${name}`)}\n${this.translate(`filterHint${name}`)}`;
       chip.addEventListener("click", () => {
         this.state.listView.filter = filter;
         this.renderListToolbar();
@@ -126,7 +130,9 @@ Object.assign(AlzaPriceTracker, {
     sortLabel.appendChild(select);
 
     controls.append(filters, sortLabel);
-    toolbar.append(summary, controls);
+    const body = this.createEl("div", "alza-price-tracker-toolbar-body");
+    body.append(summary, controls);
+    toolbar.append(AlzaCore.createToolbarLogo(document), body);
     return toolbar;
   },
 

@@ -6,7 +6,7 @@
     <title data-i18n="pageTitle">Nastavení – Alza Price Insight</title>
     <link rel="stylesheet" href="../shared/page.css" />
     <style>
-      /* Vzhled jako průvodce nastavením (src/welcome/): tmavé pozadí s přechodem z barev ikony, bílé karty se stínem */
+      /* Vzhled jako průvodce nastavením (src/welcome/): ploché pozadí podle systému (světlé / tmavé), bílé karty */
       :root {
         --ink: #1e1e1e;
         --navy: #263f6a;
@@ -35,14 +35,14 @@
 
       /* Pozadí a záhlaví: ../shared/page.css */
 
-      /* Průvodce a nápověda vpravo v hlavičce – průsvitná tlačítka na tmavém pozadí */
+      /* Průvodce a nápověda vpravo v hlavičce – barvy podle světlého / tmavého režimu (../shared/page.css) */
       .help-link {
         margin-left: auto;
         padding: 7px 14px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid var(--head-btn-border);
         border-radius: 9px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #eef2f7;
+        background: var(--head-btn-bg);
+        color: var(--head-btn-fg);
         font-size: 13px;
         font-weight: 600;
         text-decoration: none;
@@ -55,9 +55,8 @@
       }
 
       .help-link:hover {
-        border-color: var(--lime);
-        background: rgba(255, 255, 255, 0.14);
-        color: #fff;
+        border-color: var(--head-btn-hover-border);
+        background: var(--head-btn-hover-bg);
       }
 
       .grid {
@@ -71,9 +70,10 @@
       section {
         position: relative;
         padding: 22px 26px 18px;
+        border: 1px solid var(--card-border);
         border-radius: 16px;
         background: #fff;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        box-shadow: var(--card-shadow);
       }
 
       h2 {
@@ -419,7 +419,8 @@
         color: var(--muted);
       }
 
-      /* Záložky pod nastavením – na tmavém pozadí, vybraná splyne s bílým panelem pod ní */
+      /* Záložky pod nastavením – na pozadí stránky (světlé / tmavé podle systému), vybraná splyne s bílým panelem pod ní:
+         má stejný rámeček jako karta a o 1 px přesahuje dolů přes horní hranu panelu */
       .tabs {
         display: flex;
         flex-wrap: wrap;
@@ -428,23 +429,28 @@
       }
 
       .tab {
+        position: relative;
+        z-index: 1;
+        margin-bottom: -1px;
         padding: 10px 16px 9px;
-        border: 0;
+        border: 1px solid transparent;
+        border-bottom: 0;
         border-radius: 12px 12px 0 0;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--tab-bg);
         font-weight: 600;
-        color: #d5dbe5;
+        color: var(--tab-fg);
       }
 
       .tab:hover {
-        background: rgba(255, 255, 255, 0.16);
-        color: #fff;
+        background: var(--tab-hover-bg);
+        color: var(--tab-hover-fg);
       }
 
       .tab[aria-selected="true"] {
+        border-color: var(--card-border);
         background: #fff;
         color: var(--text);
-        box-shadow: inset 0 3px 0 var(--lime);
+        box-shadow: inset 0 3px 0 var(--blue);
       }
 
       .tab-count {
@@ -556,7 +562,7 @@
         color: #c62828;
       }
 
-      /* 📈 před názvem produktu – dialog historie cen (stejný jako na Alze) */
+      /* Ikona grafu před názvem produktu – dialog historie cen (stejný jako na Alze) */
       .history-button {
         margin-right: 4px;
         padding: 0 3px;
@@ -591,15 +597,15 @@
         <h1 class="app-title">Alza Price Insight</h1>
         <span class="app-sub version" id="version"></span>
       </div>
-      <a class="help-link" href="../welcome/welcome.html#check" target="_blank" data-i18n="welcomeLink" data-i18n-title="welcomeLinkTitle">🧭 Průvodce</a>
-      <a class="help-link" id="helpLink" href="../help/help.html" target="_blank" data-i18n="helpLink" data-i18n-title="helpLinkTitle">❓ Nápověda</a>
+      <a class="help-link" href="../welcome/welcome.html#check" target="_blank" data-i18n="welcomeLink" data-i18n-title="welcomeLinkTitle">Průvodce</a>
+      <a class="help-link" id="helpLink" href="../help/help.html" target="_blank" data-i18n="helpLink" data-i18n-title="helpLinkTitle">Nápověda</a>
     </header>
 
     <!-- Texty: data-i18n (text), data-i18n-title, data-i18n-tip (bublina „?“ + aria-label), data-i18n-placeholder –
          slovník v options-texts.js; čeština tady jen do spuštění skriptu (shodu s cz hlídá tests/options-i18n.test.js) -->
     <form id="settings" class="grid">
       <section>
-        <h2 data-i18n="tracking">📈 Sledování cen</h2>
+        <h2 data-i18n="tracking">Sledování cen</h2>
         <div class="row">
           <span class="label"
             ><span data-i18n="checkSchedule">Kontrola hlídaných produktů</span> <span class="info" tabindex="0" role="note" data-i18n-tip="checkScheduleTip">?</span></span
@@ -622,8 +628,22 @@
           >
           <span class="controls"><input type="checkbox" class="switch" name="saveBrowsing" /></span>
         </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="watchPurchases">Hlídat cenu po nákupu</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="watchPurchasesTip">?</span></span
+          >
+          <span class="controls"><input type="checkbox" class="switch" name="watchPurchases" /></span>
+        </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="remindCashback">Připomínat registraci cashbacku</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="remindCashbackTip">?</span></span
+          >
+          <span class="controls" id="cashbackRow"><input type="checkbox" class="switch" name="remindCashback" /></span>
+        </div>
 
-        <h2 style="margin-top: 8px" data-i18n="notifications">🔔 Notifikace</h2>
+        <h2 style="margin-top: 8px" data-i18n="notifications">Notifikace</h2>
         <div class="row">
           <span class="label"><span data-i18n="drops">Zlevnění</span> <span class="info" tabindex="0" role="note" data-i18n-tip="dropsTip">?</span></span>
           <span class="controls"
@@ -662,10 +682,10 @@
           /></span>
         </div>
         <div class="buttons">
-          <button type="button" id="testNotifications" data-i18n="testNotifications" data-i18n-title="testNotificationsTitle">🔔 Vyzkoušet notifikace</button>
+          <button type="button" id="testNotifications" data-i18n="testNotifications" data-i18n-title="testNotificationsTitle">Vyzkoušet notifikace</button>
         </div>
 
-        <h2 style="margin-top: 8px" data-i18n="categories">🛒 Výpisy kategorií</h2>
+        <h2 style="margin-top: 8px" data-i18n="categories">Výpisy kategorií</h2>
         <div class="row">
           <span class="label"
             ><span data-i18n="unitPrice">Skutečná cena za jednotku</span>
@@ -673,12 +693,19 @@
           >
           <span class="controls"><input type="checkbox" class="switch" name="categoryUnitPrice" /></span>
         </div>
+        <div class="row">
+          <span class="label"
+            ><span data-i18n="discountFilter">Filtr slev</span>
+            <span class="info" tabindex="0" role="note" data-i18n-tip="discountFilterTip">?</span></span
+          >
+          <span class="controls"><input type="checkbox" class="switch" name="categoryDiscountFilter" /></span>
+        </div>
 
         <div class="saved" data-saved></div>
       </section>
 
       <section>
-        <h2 data-i18n="language">🌐 Jazyk</h2>
+        <h2 data-i18n="language">Jazyk</h2>
         <div class="row">
           <span class="label"
             ><span data-i18n="uiLanguage">Jazyk rozšíření</span> <span class="info" tabindex="0" role="note" data-i18n-tip="uiLanguageTip">?</span></span
@@ -710,32 +737,32 @@
 
         <h2 style="margin-top: 8px">
           <span class="label"
-            ><span data-i18n="backup">💾 Záloha dat</span> <span class="info" tabindex="0" role="note" data-i18n-tip="backupNote">?</span></span
+            ><span data-i18n="backup">Záloha dat</span> <span class="info" tabindex="0" role="note" data-i18n-tip="backupNote">?</span></span
           >
         </h2>
         <div class="buttons">
-          <button type="button" id="exportJson" data-i18n="exportJson">⬇️ Záloha (JSON)</button>
-          <button type="button" id="exportCsv" data-i18n="exportCsv">⬇️ Historie (CSV)</button>
-          <button type="button" id="importJson" data-i18n="importJson">⬆️ Obnovit ze zálohy…</button>
-          <button type="button" id="pruneData" data-i18n="pruneData">🧹 Uklidit stará data…</button>
+          <button type="button" id="exportJson" data-i18n="exportJson">Záloha (JSON)</button>
+          <button type="button" id="exportCsv" data-i18n="exportCsv">Historie (CSV)</button>
+          <button type="button" id="importJson" data-i18n="importJson">Obnovit ze zálohy…</button>
+          <button type="button" id="pruneData" data-i18n="pruneData">Uklidit stará data…</button>
         </div>
         <div class="saved" id="backupInfo"></div>
 
         <h2 style="margin-top: 8px">
           <span class="label"
-            ><span data-i18n="diagnostics">🩺 Diagnostika</span>
+            ><span data-i18n="diagnostics">Diagnostika</span>
             <span class="info" tabindex="0" role="note" data-i18n-tip="diagnosticsNote">?</span></span
           >
         </h2>
         <p class="note" id="errorSummary"></p>
         <div class="buttons">
-          <button type="button" id="reportBug" data-i18n="reportBug" data-i18n-title="reportBugTitle">🐞 Nahlásit chybu</button>
-          <button type="button" id="exportDiagnostics" data-i18n="exportDiagnostics">⬇️ Stáhnout diagnostiku</button>
+          <button type="button" id="reportBug" data-i18n="reportBug" data-i18n-title="reportBugTitle">Nahlásit chybu</button>
+          <button type="button" id="exportDiagnostics" data-i18n="exportDiagnostics">Stáhnout diagnostiku</button>
           <button type="button" id="clearErrorLog" data-i18n="clearErrorLog">Vymazat log chyb</button>
         </div>
 
         <details class="danger">
-          <summary data-i18n="wipeSummary">⚠️ Smazat všechna data…</summary>
+          <summary data-i18n="wipeSummary">Smazat všechna data…</summary>
           <p class="note">
             <span data-i18n="wipeNote"
               >Smaže historii cen, uložené ceny, hlídané seznamy a produkty i cílové ceny (nastavení zůstane). Nejdřív se stáhne záloha, ze
@@ -745,7 +772,7 @@
           </p>
           <div class="buttons">
             <input type="text" id="wipeConfirm" autocomplete="off" spellcheck="false" placeholder="SMAZAT" data-i18n-placeholder="wipeWord" />
-            <button type="button" id="wipeData" class="danger-button" disabled>🗑️ Smazat</button>
+            <button type="button" id="wipeData" class="danger-button" disabled>Smazat</button>
           </div>
         </details>
       </section>
@@ -754,16 +781,16 @@
 
     <nav class="tabs" role="tablist">
       <button type="button" class="tab" role="tab" data-tab="lists">
-        <span data-i18n="tabLists">📋 Hlídané seznamy</span> <span class="tab-count" id="countLists"></span>
+        <span data-i18n="tabLists">Hlídané seznamy</span> <span class="tab-count" id="countLists"></span>
       </button>
       <button type="button" class="tab" role="tab" data-tab="products">
-        <span data-i18n="tabProducts">🔔 Hlídané produkty</span> <span class="tab-count" id="countProducts"></span>
+        <span data-i18n="tabProducts">Hlídané produkty</span> <span class="tab-count" id="countProducts"></span>
       </button>
       <button type="button" class="tab" role="tab" data-tab="data">
-        <span data-i18n="tabData">📦 Uložená data</span> <span class="tab-count" id="countData"></span>
+        <span data-i18n="tabData">Uložená data</span> <span class="tab-count" id="countData"></span>
       </button>
       <button type="button" class="tab" role="tab" data-tab="log">
-        <span data-i18n="tabLog">📜 Logy běhů</span> <span class="tab-count" id="countLog"></span>
+        <span data-i18n="tabLog">Logy běhů</span> <span class="tab-count" id="countLog"></span>
       </button>
     </nav>
 
@@ -778,7 +805,7 @@
 
     <section class="tab-panel" id="tab-products" role="tabpanel" hidden>
       <p class="note" style="margin: 0 0 6px" data-i18n="productsNote">
-        Jednotlivé produkty hlídané i bez nákupního seznamu: na detailu produktu na Alze klikněte na „🔔 Hlídat na pozadí“ v kartě
+        Jednotlivé produkty hlídané i bez nákupního seznamu: na detailu produktu na Alze klikněte na „Hlídat na pozadí“ v kartě
         rozšíření pod fotkami. Patří sem i produkty s cílovou cenou (nastavuje se v dialogu historie). Produkty z hlídaných seznamů
         tu nejsou.
       </p>
@@ -788,18 +815,18 @@
     <section class="tab-panel stored" id="tab-data" role="tabpanel" hidden>
       <p class="note" style="margin: 0 0 6px" data-i18n="dataNote">
         Všechny produkty, o kterých rozšíření něco ví – historie cen a ceny z nákupních seznamů – a proč se ukládají. Nehlídaný produkt se
-        uloží při otevření nákupního seznamu a se zapnutým „Ukládat ceny z procházení“ i při procházení Alzy (👀 – výpisy kategorií,
+        uloží při otevření nákupního seznamu a se zapnutým „Ukládat ceny z procházení“ i při procházení Alzy (výpisy kategorií,
         vyhledávání, detail, karusely, úvodní stránka).
       </p>
       <div class="cleanup-banner" id="cleanupBanner" hidden>
-        <span data-i18n="cleanupBannerStart">🧹 Navrženo ke smazání:</span> <strong id="cleanupCount"></strong>
+        <span data-i18n="cleanupBannerStart">Navrženo ke smazání:</span> <strong id="cleanupCount"></strong>
         <span data-i18n="cleanupBannerEnd"
           >produktů. Nehlídáte je (nejsou v hlídaném seznamu, nehlídáte je z detailu, nemají cílovou cenu) a přes 3 měsíce se
           nekontrolovaly ani neotevřely – uložené při procházení přes rok. Smaže se jejich historie cen a uložené ceny.</span
         >
         <div class="buttons">
           <button type="button" id="cleanupShow" data-i18n="cleanupShow">Zobrazit navržené</button>
-          <button type="button" id="cleanupDelete" class="danger-button" data-i18n="cleanupDelete">🗑️ Smazat navržené…</button>
+          <button type="button" id="cleanupDelete" class="danger-button" data-i18n="cleanupDelete">Smazat navržené…</button>
           <span class="saved" id="cleanupInfo"></span>
         </div>
       </div>
@@ -829,6 +856,7 @@
     </section>
 
     <script src="../shared/core.js"></script>
+    <script src="../shared/icons.js"></script>
     <script src="../shared/store.js"></script>
     <!-- Kvůli dialogu historie cen (AlzaPriceTracker.openHistoryDialog) – mimo Alzu se content script sám nespustí.
          Stejné soubory a pořadí jako content_scripts v manifestu (hlídá tests/content-scripts.test.js) -->
@@ -836,6 +864,9 @@
     <script src="../content.js"></script>
     <script src="../content/variants.js"></script>
     <script src="../content/cart-warning.js"></script>
+    <script src="../content/price-card.js"></script>
+    <script src="../content/basket-codes.js"></script>
+    <script src="../content/basket-insights.js"></script>
     <script src="../content/history.js"></script>
     <script src="../content/targets.js"></script>
     <script src="../content/list-toolbar.js"></script>

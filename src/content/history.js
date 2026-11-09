@@ -161,8 +161,9 @@ Object.assign(AlzaPriceTracker, {
     productLink.href = product.url;
     productLink.target = "_blank";
     productLink.rel = "noopener";
-    heading.append(this.createEl("div", "alza-price-tracker-history-eyebrow", this.translate("historyTitle")), productLink);
-    const closeButton = this.createEl("button", "alza-price-tracker-history-close", "×");
+    // Nad názvem logo rozšíření a „Price Insight · Historie cen“ (logo v css/main.css – jako štítek lišt a karty)
+    heading.append(this.createEl("div", "alza-price-tracker-history-eyebrow", `Price Insight · ${this.translate("historyTitle")}`), productLink);
+    const closeButton = AlzaIcons.prepend(this.createEl("button", "alza-price-tracker-history-close"), "close");
     closeButton.type = "button";
     closeButton.title = this.translate("close");
     closeButton.setAttribute("aria-label", this.translate("close"));
@@ -275,9 +276,10 @@ Object.assign(AlzaPriceTracker, {
     const lowest30 = AlzaCore.getLowestInWindow(entries);
     if (lowest30) {
       const warning = AlzaCore.getDiscountWarning(entries, priceMap);
-      const sub = lowest30.complete
-        ? this.formatDate(lowest30.at)
-        : `${this.formatDate(lowest30.at)} · ${this.translate("discountPartial", this.formatDays(Math.max(1, lowest30.days)))}`;
+      // Datum a čas jako u ostatních dlaždic, „údaj za X dní“ (historie kratší než 30 dní) na dalším řádku
+      const sub = [this.formatDateTime(lowest30.at), !lowest30.complete && this.translate("discountPartial", this.formatDays(Math.max(1, lowest30.days)))]
+        .filter(Boolean)
+        .join("\n");
       const stat = addStat(
         this.translate("statLowest30"),
         this.formatPrice(lowest30.value),

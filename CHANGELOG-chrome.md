@@ -2,7 +2,25 @@
 
 ## Nevydáno
 
-## 2026.11.7 – 2026-11-07
+## 2026.11.9
+
+- Popup: trezor slevových kódů (kód, cena s kódem, Kopírovat), sbalený na jeden řádek; upozornění na nový kód hlídaného produktu obsahuje kód
+- Hlídání po nákupu: zboží z „Moje objednávky“ (14 dní) – když zlevní, upozornění, že jde vrátit a koupit znovu
+- Připomínka cashbacku: lhůta registrace ze stránky akce, upozornění, až jde nákup zaregistrovat, a týden před koncem; „Cashback k registraci“ v popupu
+- Cashback: termíny akce v tooltipu ceny a na detailu, varování po konci nákupního období
+- Košík: hodnocení ceny u položek, „+1 ks → cena za kus“ u množstevní slevy, upozornění na chybějící slevový kód před „Pokračovat“
+- Seznam: „Přidat s kódem“ vloží zboží do košíku i se slevovým kódem
+- Seznam: zeleně cena za kus podle stupně množstevní slevy; cena s kódem červeně s ikonou kupónu
+- Detail: bublina množstevních slev hned, „Kopírovat nabídku“, ikony srovnávačů (Heureka, Zboží.cz, Árukereső); karta řekne, proč se ceny neukládají
+- Kategorie a vyhledávání: filtr slev v panelu filtrů (sleva aspoň X %, jen s kupónem, s množstevní slevou), řazení za jednotku jako záložka „Za jednotku“
+- Hezčí a přehlednější vzhled: tooltipy jako na Alze (název ceny, rozdíl proti dražším cenám, stupně množstevní slevy, kód ke zkopírování), lišta seznamu s logem jako nastavení, ovládání v kategoriích přímo v záložkách a filtrech Alzy
+- Popup: název produktu s chybou kontroly je odkaz
+- Oprava: slevový kód výrobce („Koupit s kódem …“) se nepočítal
+- Oprava: cena za jednotku v kategoriích u ceny s AlzaPlus+
+- Oprava: ceny zboží bez DPH (knihy) se znovu ukládají; jeden takový produkt nezastaví kontrolu seznamu
+- Oprava: cena „od …“ u množstevní slevy kazila historii a minimum (staré záznamy se odstraní)
+
+## 2026.11.7
 
 - Po instalaci průvodce nastavením: hlavní Alza, ověření přihlášení a cen s DPH jedním kliknutím (co je hotové a co udělat), hlídání a notifikace ve 3 krocích
 - Nastavení: 🧭 Průvodce v záhlaví, volba Hlavní Alza
@@ -26,7 +44,7 @@
 - Malé zlevnění v procentech s desetinnými místy místo „-0 %“
 - Popup: odkaz na Alzu vede na hlavní Alzu z nastavení, když není otevřená záložka Alzy
 
-## 2026.11.6 – 2026-11-06
+## 2026.11.6
 
 - Oprava: seznam bez přihlášení (nebo s cenami bez DPH) se donekonečna načítal místo upozornění, že se ceny neukládají
 - Seznam: sloupec „ks celkem“ se už nepřekrývá se šipkami ▼ ▲ a ikonou změny ceny
@@ -59,12 +77,12 @@
 - Výstraha ⚠ u podezřelé (chybně načtené) ceny
 - Produkt bez cen ukazuje, od kdy trvá jeho dostupnost
 
-## 2026.11.4.2 – 2026-11-04
+## 2026.11.4.2
 
 - Rozšíření i anglicky na stránkách Alzy
 - Šipky ▼ ▲ u cen bez kroužků
 
-## 2026.11.4.1 – 2026-11-04
+## 2026.11.4.1
 
 - Nový název Alza Price Insight, nový popup a nastavení
 - Historie cen s grafem

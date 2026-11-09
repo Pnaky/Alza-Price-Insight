@@ -28,6 +28,8 @@ Object.assign(AlzaPriceTracker, {
     await this.recordProductPageVisit(false).catch((error) => console.error("Error recording product page:", error));
     await this.renderProductPanel().catch((error) => console.error("Error rendering product panel:", error));
     this.setupVariantUnitPrices();
+    this.setupQuantityTiers();
+    this.setupCashbackTerms();
 
     const keys = [
       AlzaCore.storageKeys.watchProducts,
@@ -39,6 +41,121 @@ Object.assign(AlzaPriceTracker, {
       if (area === "local" && keys.some((key) => changes[key])) this.scheduleProductPanel();
     });
   },
+
+  // Cashback: pod Alzin řádek „Cena s CashBack“ (do jeho rámečku) termíny akce – konec nákupu a lhůta registrace
+  // u výrobce. Název řádku už na stránku akce odkazuje, odkaz se neopakuje
+  setupCashbackTerms() {
+    const row = document.querySelector('.promo-action-prices__row[data-type="cashback"]');
+    if (!row || row.querySelector(".alza-price-tracker-cashback-detail")) return;
+    const promo = AlzaCore.getCashbackPromo(row);
+    const url = AlzaCore.resolveCashbackTerms(promo.terms, this.getAlzaDomain());
+    if (!url) return;
+    this.requestCashbackTerms(url, promo.title).then((terms) => {
+      const lines = this.getCashbackTermsLines(terms);
+      if (lines.length === 0 || !row.isConnected || row.querySelector(".alza-price-tracker-cashback-detail")) return;
+      const line = this.createEl("div", "alza-price-tracker-cashback-detail");
+      lines.forEach(({ text, warn }, index) => {
+        if (index > 0) line.append(" · ");
+        line.appendChild(this.createEl("span", warn ? "alza-price-tracker-cashback-terms-line--warn" : null, text));
+      });
+      // Zarovnat pod název akce (za ikonou)
+      const name = row.querySelector(".promo-action-prices__name");
+      if (name) line.style.paddingLeft = `${Math.max(0, name.getBoundingClientRect().left - row.getBoundingClientRect().left - parseFloat(getComputedStyle(row).paddingLeft || 0))}px`;
+      row.setAttribute("data-alza-price-tracker-cashback", "");
+      row.appendChild(line);
+    });
+  },
+
+  // Množstevní slevy: Alza tabulku stupňů ukáže až se zbožím v košíku – bublina nad tlačítkem košíku. Bez zboží
+  // v košíku stejná bublina od nás, 1:1 (místo, rozměry, texty z Alziny skryté tabulky .quantityRepeater), ať se nic
+  // neposune; banner „Kup víc, zaplať míň“ zůstává pod ní. Když Alza ukáže svou, naše zmizí
+  setupQuantityTiers() {
+    const selectors = this.quantityTiersSelectors;
+    const rows = [...document.querySelectorAll(selectors.alzaRows)]
+      .map((row) => ({
+        label: row.querySelector(".colLabel")?.textContent.replace(/\s+/g, " ").trim(),
+        value: row.querySelector(".colValue")?.textContent.replace(/\s+/g, " ").trim(),
+        current: row.classList.contains("sel"),
+      }))
+      .filter(({ label, value }) => label && value);
+    if (rows.length < 2 || !document.querySelector(selectors.anchor)) return;
+    const saving = document.querySelector(selectors.alzaSaving)?.textContent.replace(/\s+/g, " ").trim() || null;
+
+    let bubble = null;
+    const build = () => {
+      const box = this.createEl("div", "alza-price-tracker-tiers-bubble");
+      box.setAttribute("role", "tooltip");
+      rows.forEach(({ label, value, current }) => {
+        const row = this.createEl("div", `alza-price-tracker-tiers-bubble-row${current ? " alza-price-tracker-tiers-bubble-row--current" : ""}`);
+        row.append(this.createEl("span", null, label), this.createEl("span", null, value));
+        box.appendChild(row);
+      });
+      if (saving) {
+        const row = this.createEl("div", "alza-price-tracker-tiers-bubble-row alza-price-tracker-tiers-bubble-row--saving");
+        row.append(this.createEl("span", null, this.translate("quantityTierTotalSaving")), this.createEl("span", null, saving));
+        box.appendChild(row);
+      }
+      box.appendChild(this.createEl("span", "alza-price-tracker-tiers-bubble-arrow"));
+      return box;
+    };
+    const sync = () => {
+      const anchor = document.querySelector(selectors.anchor);
+      const alzaShows = [...document.querySelectorAll(selectors.alzaPopup)].some((popup) => popup.getBoundingClientRect().width > 0);
+      const banner = document.querySelector(selectors.banner);
+      if (!anchor || alzaShows) {
+        bubble?.remove();
+        bubble = null;
+        banner?.removeAttribute(this.quantityTiersAttribute);
+        return;
+      }
+      // Text banneru pod bublinou jako u Alzy schovaný (místo zůstane – nic se neposune), ikona „Kup víc“ zůstává
+      if (banner && !banner.hasAttribute(this.quantityTiersAttribute)) banner.setAttribute(this.quantityTiersAttribute, "");
+      // V bloku ceny (posouvá se s ním, i když se stránka nad ním dočte), nad tlačítkem košíku, stejně široká
+      const scope = document.querySelector(selectors.scope);
+      if (!scope) return;
+      if (getComputedStyle(scope).position === "static" && !scope.hasAttribute(this.quantityTiersScopeAttribute)) scope.setAttribute(this.quantityTiersScopeAttribute, "");
+      if (!bubble) bubble = build();
+      if (bubble.parentElement !== scope) scope.appendChild(bubble);
+      const rect = anchor.getBoundingClientRect();
+      const base = scope.getBoundingClientRect();
+      const left = `${Math.round(rect.left - base.left) + this.quantityTiersOffsetX}px`;
+      const width = `${Math.round(rect.width)}px`;
+      const top = `${Math.round(rect.top - base.top - this.quantityTiersGap - bubble.offsetHeight)}px`;
+      if (bubble.style.left !== left) bubble.style.left = left;
+      if (bubble.style.width !== width) bubble.style.width = width;
+      if (bubble.style.top !== top) bubble.style.top = top;
+    };
+    sync();
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        sync();
+      });
+    };
+    // Bublina Alzy se objeví v React části (tlačítka košíku); poloha se mění se šířkou okna
+    new MutationObserver(schedule).observe(document.querySelector(selectors.scope) || document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+    window.addEventListener("resize", schedule, { passive: true });
+  },
+
+  quantityTiersSelectors: {
+    scope: ".price-detail", // Cena, banner i tlačítka košíku
+    anchor: ".price-detail__buy-actions .buy-button-placeholder", // Tlačítko košíku – bublina nad ním
+    alzaRows: ".quantityRepeater .row[data-cntfrom]", // Alzina skrytá tabulka: „1 balení | 89,-/balení“
+    alzaSaving: ".quantityRepeater .discountAmount",
+    banner: ".quantityDiscountPromoCont", // „Kup víc, zaplať míň – Množstevní slevy – Sleva už od 2 balení“
+    alzaPopup: ".price-detail__buy-actions .MuiTooltip-popper", // Alzina bublina se zbožím v košíku
+  },
+  quantityTiersAttribute: "data-alza-price-tracker-tiers", // Banner pod naší bublinou (main.css)
+  quantityTiersScopeAttribute: "data-alza-price-tracker-tiers-scope", // Blok ceny jako základ polohy bubliny (main.css)
+  quantityTiersGap: 14,
+  quantityTiersOffsetX: 1, // Alzina bublina je o 1 px vpravo od tlačítka // Mezera pro šipku mezi bublinou a tlačítkem (jako u Alzy)
 
   scheduleProductPanel() {
     clearTimeout(this.state.productPanelTimeout);
@@ -78,13 +195,24 @@ Object.assign(AlzaPriceTracker, {
     if (this.state.saveBrowsing && typeof AlzaBrowsing !== "undefined") AlzaBrowsing.rememberProduct(this.state.product);
 
     const prices = this.getProductPagePrices();
-    if (AlzaCore.getSaveProblem(document, prices)) return; // nepřihlášen / ceny bez DPH – nic neukládat
+    // Nepřihlášen / ceny bez DPH – nic neukládat; důvod ukáže karta místo „Zatím bez historie“
+    const problem = await AlzaCore.resolveSaveProblem(AlzaCore.getSaveProblem(document, prices), AlzaCore.isVatSignMissing(document), prices, this.getAlzaDomain(), url);
+    if (problem !== this.state.productSaveProblem) {
+      this.state.productSaveProblem = problem;
+      this.scheduleProductPanel?.();
+    }
+    if (problem) return;
     const availability = this.classifyAvailability(AlzaCore.extractAvailabilityFromDocument(document));
     if (AlzaCore.getPriceEntries(prices).length === 0 && availability === null) return;
 
     // Bez názvu – nadpis živé stránky se může lišit od staženého HTML (seznam, služba na pozadí)
     // a název by se v historii střídal; název dodá seznam a kontrola na pozadí
     await this.recordPriceHistory(url, prices, availability, this.state.productData);
+  },
+
+  // Důvod, proč se ceny neukládají – text kontroly na pozadí bez dovětku „kontrola přerušena“ (na detailu nic neběží)
+  getSaveProblemNote(key) {
+    return AlzaCore.translate(this.state.language || "cz", key).replace(/,\s*(kontrola přerušena|kontrola prerušená|ellenőrzés megszakítva|check stopped)$/, "");
   },
 
   async setProductWatched(enabled) {
@@ -119,14 +247,19 @@ Object.assign(AlzaPriceTracker, {
     const card = this.createEl("div", "alza-price-tracker-product");
 
     const head = this.createEl("div", "alza-price-tracker-product-head");
-    head.appendChild(this.createEl("span", "alza-price-tracker-product-title", this.translate("productHistory")));
+    // Štítek na hraně karty stejný jako u lišt („Price Insight“), co karta ukazuje říká bublina
+    const title = this.createEl("span", "alza-price-tracker-product-title", "Price Insight");
+    title.title = this.translate("productHistory");
+    head.appendChild(title);
     const watchButton = this.createEl("button", "alza-price-tracker-product-button alza-price-tracker-product-watch");
     watchButton.type = "button";
     if (watch.lists.length > 0) {
       watchButton.textContent = this.translate("productWatchedInList", watch.lists.join(", "));
+      AlzaIcons.prepend(watchButton, "bell");
       watchButton.disabled = true;
     } else {
       watchButton.textContent = this.translate(watch.watched ? "productUnwatch" : "productWatch");
+      AlzaIcons.prepend(watchButton, watch.watched ? "bell-off" : "bell");
       watchButton.title = this.translate("productWatchHint");
       watchButton.addEventListener("click", () => {
         watchButton.disabled = true;
@@ -137,24 +270,25 @@ Object.assign(AlzaPriceTracker, {
         });
       });
     }
-    head.appendChild(watchButton);
+    head.append(this.createComparatorLinks(product.name), watchButton);
     card.appendChild(head);
 
     const stats = this.createEl("div", "alza-price-tracker-product-stats");
     const addStat = (label, value, sub, color, subColor) => this.appendStat(stats, "product", label, value, sub, color, subColor);
     const verdict = hasHistory ? AlzaCore.getPriceVerdict(entries, plausibleNow) : null;
     if (lowestNow !== null) {
-      // Pod aktuální cenou hodnocení vůči obvyklé ceně (zeleně / červeně); podezřelá cena oranžově s ⚠
+      // Pod aktuální cenou hodnocení vůči obvyklé ceně (zeleně / červeně); podezřelá cena oranžově s ikonou výstrahy
       // Hodnocení se týká věrohodné ceny – pod nesmyslně nízkou by mátlo (zůstává v dlaždici Obvyklá cena)
       const lowestSuspicious = suspicious.find(({ price }) => price === lowestNow);
       const verdictText = verdict && lowestSuspicious?.reason !== "gap" && this.getVerdictText(verdict, plausibleNow);
       const stat = addStat(
         this.translate("productCurrent"),
-        `${lowestSuspicious ? "⚠️ " : ""}${format(lowestNow)}`,
+        format(lowestNow),
         verdictText?.label,
         lowestSuspicious ? this.config.historyMilestoneColors.target : null,
         verdictText?.color
       );
+      if (lowestSuspicious) AlzaIcons.prepend(stat.querySelector(".alza-price-tracker-product-stat-value"), "warning", { tone: true });
       if (verdictText) stat.title = verdictText.hint;
       if (lowestSuspicious) stat.title = [this.getSuspiciousText(lowestSuspicious), stat.title].filter(Boolean).join("\n");
     }
@@ -187,10 +321,11 @@ Object.assign(AlzaPriceTracker, {
         const { label, hint } = this.getDiscountWarningText(warning);
         const note = this.createEl("div", "alza-price-tracker-product-note alza-price-tracker-product-note--warning", label);
         note.title = hint;
-        card.appendChild(note);
+        card.appendChild(AlzaIcons.prepend(note, "warning", { tone: true }));
       }
       if (strikethrough) {
-        card.appendChild(this.createEl("div", "alza-price-tracker-product-note alza-price-tracker-product-note--warning", this.getStrikethroughText(strikethrough)));
+        const note = this.createEl("div", "alza-price-tracker-product-note alza-price-tracker-product-note--warning", this.getStrikethroughText(strikethrough));
+        card.appendChild(AlzaIcons.prepend(note, "warning", { tone: true }));
       }
       const saleCycle = AlzaCore.getSaleCycle(entries, plausibleNow);
       if (saleCycle && verdict) {
@@ -202,13 +337,14 @@ Object.assign(AlzaPriceTracker, {
     } else {
       // Bez historie jen aktuální cena a cena za kus – samotná aktuální cena by jen opakovala stránku
       if (packCount && lowestNow !== null) card.appendChild(stats);
-      card.appendChild(this.createEl("div", "alza-price-tracker-product-note", this.getNoPriceNote(entries) || this.translate("productNoHistory")));
+      card.appendChild(this.createEl("div", "alza-price-tracker-product-note", this.getNoPriceNote(entries) || (this.state.productSaveProblem ? this.getSaveProblemNote(this.state.productSaveProblem) : this.translate("productNoHistory"))));
     }
 
     // Podezřelá cena i bez historie (pod polovinou další ceny se pozná z jediného načtení)
-    suspicious.forEach((item) =>
-      card.appendChild(this.createEl("div", "alza-price-tracker-product-note alza-price-tracker-product-note--warning", this.getSuspiciousText(item)))
-    );
+    suspicious.forEach((item) => {
+      const note = this.createEl("div", "alza-price-tracker-product-note alza-price-tracker-product-note--warning", this.getSuspiciousText(item));
+      card.appendChild(AlzaIcons.prepend(note, "warning", { tone: true }));
+    });
 
     // Stejný produkt levněji rozbalený / zánovní (přepínač stavu na stránce)
     const cheaperConditions = AlzaCore.getCheaperConditions(AlzaCore.getDocumentConditions(document, window.location.href), plausibleNow);
@@ -216,27 +352,33 @@ Object.assign(AlzaPriceTracker, {
       card.appendChild(this.createEl("div", "alza-price-tracker-product-note", this.getCheaperConditionsText(cheaperConditions)));
     }
 
-    // Množstevní slevy ze stránky – Alza ukáže jednotlivé stupně až po rozkliknutí
-    const quantityTiers = AlzaCore.getDocumentQuantityTiers(document);
-    if (quantityTiers) {
-      card.appendChild(this.createEl("div", "alza-price-tracker-product-note", this.translate("quantityTiers", this.formatQuantityTiers(quantityTiers))));
-    }
 
     if (target) {
       const status = this.getTargetStatus(target, lowestNow);
       const note = this.createEl("div", "alza-price-tracker-product-note", this.translate("productTarget", this.formatTargetValue(target.price, target), status));
       if (lowestNow !== null && lowestNow <= target.price) note.classList.add("alza-price-tracker-product-note--reached");
-      card.appendChild(note);
+      card.appendChild(AlzaIcons.prepend(note, "target", { tone: true }));
     }
 
     const foot = this.createEl("div", "alza-price-tracker-product-foot");
     const historyButton = this.createEl("button", "alza-price-tracker-product-button", this.translate("productShowHistory"));
     historyButton.type = "button";
     historyButton.addEventListener("click", () => openDialog(false));
-    const targetButton = this.createEl("button", "alza-price-tracker-product-button", target ? `🎯 ${this.translate("targetLabel")}` : this.translate("productSetTarget"));
+    const targetButton = this.createEl("button", "alza-price-tracker-product-button", this.translate(target ? "targetLabel" : "productSetTarget"));
+    AlzaIcons.prepend(targetButton, "target");
     targetButton.type = "button";
     targetButton.addEventListener("click", () => openDialog(true));
-    foot.append(historyButton, targetButton);
+    // Kopírovat nabídku – text pro chat / sociální sítě (název, ceny, kód, obvyklá cena, odkaz)
+    const offerButton = this.createEl("button", "alza-price-tracker-product-button", this.translate("offerCopy"));
+    offerButton.type = "button";
+    offerButton.addEventListener("click", async () => {
+      const verdictNow = hasHistory ? AlzaCore.getPriceVerdict(entries, plausibleNow) : null;
+      const lowest30Now = hasHistory ? AlzaCore.getLowestInWindow(entries) : null;
+      const copied = await this.copyText(this.buildOfferText(product, this.getProductPagePrices(), verdictNow, lowest30Now));
+      offerButton.textContent = this.translate(copied ? "offerCopied" : "codeCopyFailed");
+      setTimeout(() => (offerButton.textContent = this.translate("offerCopy")), 1800);
+    });
+    foot.append(historyButton, targetButton, offerButton);
     card.appendChild(foot);
 
     const existing = document.querySelector(".alza-price-tracker-product");
@@ -256,6 +398,56 @@ Object.assign(AlzaPriceTracker, {
       card.classList.add("alza-price-tracker-product--floating");
       document.body.appendChild(card);
     }
+  },
+
+  // Ikony srovnávačů v záhlaví karty – vyhledání produktu podle názvu v nové záložce
+  createComparatorLinks(productName) {
+    const wrap = this.createEl("span", "alza-price-tracker-product-compare");
+    AlzaCore.getComparatorLinks(this.getAlzaDomain(), productName).forEach(({ id, name, url, icon }) => {
+      const link = this.createEl("a", `alza-price-tracker-product-compare-link alza-price-tracker-product-compare-link--${id}`);
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.title = this.translate("compareOn", name);
+      // Favicona živě ze srovnávače (do rozšíření se nebalí – práva k logům); když se nenačte, zůstane název
+      const label = this.createEl("span", "alza-price-tracker-product-compare-label", name);
+      // Výsledek načtení si panel pamatuje – při překreslení (změna ve storage) by ikona jinak problikla textem
+      const loaded = (this.state.comparatorIcons ||= {});
+      link.appendChild(label);
+      if (loaded[icon] !== false) {
+        const img = document.createElement("img");
+        img.className = "alza-price-tracker-product-compare-icon";
+        img.alt = "";
+        img.referrerPolicy = "no-referrer";
+        const showIcon = () => link.classList.add("alza-price-tracker-product-compare-link--icon");
+        if (loaded[icon]) showIcon();
+        img.addEventListener("load", () => ((loaded[icon] = true), showIcon()), { once: true });
+        img.addEventListener("error", () => ((loaded[icon] = false), img.remove(), link.classList.remove("alza-price-tracker-product-compare-link--icon")), { once: true });
+        img.src = icon;
+        link.prepend(img);
+      }
+      wrap.appendChild(link);
+    });
+    return wrap;
+  },
+
+  // Text nabídky ke sdílení: název, cena bez podmínek, ceny s kódem / AlzaPlus+ / cashbackem, obvyklá cena
+  // a nejnižší za 30 dní (z historie), odkaz na produkt
+  buildOfferText(product, prices, verdict, lowest30) {
+    const entries = AlzaCore.getPriceEntries(prices || {});
+    const conditional = this.conditionalPriceTypes || ["discount", "applus", "cashback", "scrappage"];
+    const regular = entries.filter(({ type }) => !conditional.includes(type));
+    const lines = [product.name];
+    if (regular.length > 0) lines.push(this.translate("offerPrice", this.formatPrice(regular[0].price)));
+    entries
+      .filter(({ type }) => conditional.includes(type))
+      .forEach(({ type, price, code }) => {
+        lines.push(code ? this.translate("offerWithCode", code, this.formatPrice(price)) : `${this.translate(`type_${type}`)}: ${this.formatPrice(price)}`);
+      });
+    if (verdict) lines.push(this.translate("offerTypical", this.formatPrice(verdict.typical)));
+    if (lowest30) lines.push(this.translate("offerLowest30", this.formatPrice(lowest30.value)));
+    lines.push(product.url);
+    return lines.join("\n");
   },
 
   // Malý schodový graf nejnižší (prodejní) ceny s minimem a cílem – jen orientační, detail je v dialogu
@@ -303,7 +495,7 @@ Object.assign(AlzaPriceTracker, {
       svg.appendChild(text);
     };
     if (min) addLevel(min.value, this.config.historyMilestoneColors.min, `Min ${this.formatPrice(min.value)}`, false);
-    if (target) addLevel(target.price, this.config.historyMilestoneColors.target, `🎯 ${this.formatPrice(target.price)}`, true);
+    if (target) addLevel(target.price, this.config.historyMilestoneColors.target, `${this.translate("milestoneTarget")} ${this.formatPrice(target.price)}`, true);
 
     [first.t, last.end].forEach((t, index) => {
       const label = this.createSvgEl("text", { x: index === 0 ? m.l : W - m.r, y: H - 4, "text-anchor": index === 0 ? "start" : "end" });

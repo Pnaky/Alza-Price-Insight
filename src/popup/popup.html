@@ -5,9 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alza Price Insight</title>
     <style>
-      /* Světlé pozadí s bílými kartami; tmavý pruh záhlaví s logem ladí s průvodcem, nastavením a nápovědou */
+      /* Světlé pozadí s bílými kartami; záhlaví s logem podle systému (světlé / tmavé) jako průvodce, nastavení a nápověda */
+      :root {
+        --head-bg: #fff;
+        --head-line: #e8eaee;
+        --head-fg: #1e1e1e;
+        --head-btn-fg: #212121;
+        --head-btn-border: #cfd3da;
+        --head-btn-bg: #fff;
+        --head-btn-hover-border: #9aa3b0;
+        --head-btn-hover-bg: #f8f9fb;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --head-bg: #1b1d21;
+          --head-line: #1b1d21;
+          --head-fg: #eef2f7;
+          --head-btn-fg: #eef2f7;
+          --head-btn-border: rgba(255, 255, 255, 0.22);
+          --head-btn-bg: rgba(255, 255, 255, 0.06);
+          --head-btn-hover-border: rgba(255, 255, 255, 0.45);
+          --head-btn-hover-bg: rgba(255, 255, 255, 0.14);
+        }
+      }
+
       html {
         background: #f3f5f7;
+      }
+
+      /* Ikony (src/shared/icons.js) – plné, navy; --tone = barva okolního textu (výstraha, zlevnění…) */
+      .alza-price-tracker-icon {
+        display: inline-block;
+        flex: none;
+        width: 1.15em;
+        height: 1.15em;
+        margin-right: 0.35em;
+        vertical-align: -0.2em;
+        fill: currentColor;
+        color: #263f6a;
+      }
+
+      .alza-price-tracker-icon--tone {
+        color: inherit;
+      }
+
+      /* Ozubené kolo v záhlaví – barva tlačítka, bez okraje */
+      .icon-button .alza-price-tracker-icon {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        color: inherit;
       }
 
       body {
@@ -25,8 +73,8 @@
         gap: 8px;
         margin: -12px -12px 12px;
         padding: 10px 12px;
-        background: radial-gradient(circle at 92% 0%, rgba(201, 221, 3, 0.16) 0%, transparent 55%),
-          linear-gradient(135deg, #161616 0%, #1e2636 55%, #263f6a 100%);
+        border-bottom: 1px solid var(--head-line);
+        background: var(--head-bg);
       }
 
       .logo {
@@ -36,6 +84,7 @@
         padding: 2px;
         border-radius: 8px;
         background: #fff;
+        box-shadow: 0 0 0 1px var(--head-line);
       }
 
       .brand {
@@ -50,31 +99,31 @@
         white-space: nowrap;
         font-size: 16px;
         font-weight: 700;
-        color: #eef2f7;
+        color: var(--head-fg);
       }
 
-      /* Odkaz na Alzu: její favicona v rámečku jako tlačítko vedle ⚙️ (bez načtené ikony text domény) */
+      /* Odkaz na Alzu: její favicona v rámečku jako tlačítko vedle ozubeného kola (bez načtené ikony text domény) */
       .alza-link {
         flex: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        min-width: 34px; /* Stejně velké jako ⚙️ (.icon-button); bez ikony je širší o text domény */
+        min-width: 34px; /* Stejně velké jako ozubené kolo (.icon-button); bez ikony je širší o text domény */
         height: 30px;
         padding: 0 6px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid var(--head-btn-border);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        color: #eef2f7;
+        background: var(--head-btn-bg);
+        color: var(--head-btn-fg);
         font-size: 12px;
         font-weight: 600;
         text-decoration: none;
       }
 
       .alza-link:hover {
-        border-color: #c9dd03;
-        background: rgba(255, 255, 255, 0.16);
+        border-color: var(--head-btn-hover-border);
+        background: var(--head-btn-hover-bg);
       }
 
       .alza-link img {
@@ -115,16 +164,17 @@
         width: 34px;
         height: 30px;
         padding: 0;
-        border-color: rgba(255, 255, 255, 0.25);
+        border-color: var(--head-btn-border);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--head-btn-bg);
+        color: var(--head-btn-fg);
         font-size: 16px;
         line-height: 1;
       }
 
       .icon-button:hover {
-        border-color: #c9dd03;
-        background: rgba(255, 255, 255, 0.16);
+        border-color: var(--head-btn-hover-border);
+        background: var(--head-btn-hover-bg);
       }
 
       .actions {
@@ -153,6 +203,11 @@
 
       .watch-problem {
         color: #c62828;
+      }
+
+      .watch-problem a {
+        color: inherit;
+        text-decoration: underline;
       }
 
       .watch-lists {
@@ -330,6 +385,87 @@
         background: #f5f5f5;
       }
 
+      /* Trezor slevových kódů sbalený na jeden řádek – rozbalí se kliknutím; bez vlastního posuvníku (roluje popup) */
+      .codes-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: none;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+      }
+
+      .codes-toggle::after {
+        content: "▾";
+        font-size: 13px;
+        transition: transform 0.15s;
+      }
+
+      .codes-toggle[aria-expanded="true"]::after {
+        transform: rotate(180deg);
+      }
+
+      .codes .changes-list {
+        max-height: none;
+      }
+
+      /* Trezor slevových kódů: kód jako na detailu Alzy (červený čárkovaný), cena s kódem, Kopírovat */
+      .code-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 3px;
+      }
+
+      .code-pill {
+        padding: 1px 7px;
+        border: 1px dashed #e8a2a3;
+        border-radius: 5px;
+        background: #f9e8e8;
+        color: #c51718;
+        font: 700 12px/1.5 ui-monospace, Consolas, monospace;
+        user-select: all;
+      }
+
+      .code-price {
+        color: #424242;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .code-copy {
+        margin-left: auto;
+        padding: 2px 8px;
+        border: 1px solid #cfd3da;
+        border-radius: 6px;
+        background: #fff;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .code-copy:hover {
+        border-color: #0094e7;
+        color: #0094e7;
+      }
+
+      /* Cashback k registraci: odkaz na podmínky akce vedle lhůty, Hotovo vpravo */
+      .cashback-terms {
+        color: #0094e7;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      #cashbacks .code-price {
+        white-space: normal;
+      }
+
       .change img {
         flex: none;
         width: 40px;
@@ -417,30 +553,43 @@
         <h1 data-i18n="title">Alza Price Insight</h1>
       </div>
       <a id="openAlza" class="alza-link" href="https://www.alza.cz/" target="_blank"></a>
-      <button id="openOptions" class="icon-button" data-i18n-title="openOptionsTitle" title="Nastavení, hlídané produkty, cílové ceny, záloha">⚙️</button>
+      <button id="openOptions" class="icon-button" data-i18n-title="openOptionsTitle" title="Nastavení, hlídané produkty, cílové ceny, záloha" data-icon="settings"></button>
     </header>
 
     <div id="cleanupNotice" class="cleanup" hidden>
       <div id="cleanupText"></div>
       <div class="cleanup-actions">
-        <button id="cleanupReview" data-i18n="cleanupReview">🧹 Prohlédnout a smazat</button>
+        <button id="cleanupReview" data-i18n="cleanupReview">Prohlédnout a smazat</button>
         <button id="cleanupSnooze" data-i18n="cleanupSnooze">Připomenout za měsíc</button>
       </div>
     </div>
+
+    <!-- Cashback k registraci u koupeného zboží (renderCashbacks) – úkol pro uživatele, proto nahoře -->
+    <section id="cashbacks" class="changes codes" hidden>
+      <h2 id="cashbacksTitle"></h2>
+      <div id="cashbacksList" class="changes-list"></div>
+    </section>
 
     <section id="changes" class="changes" hidden>
       <h2 id="changesTitle" data-i18n="changes">Změny cen</h2>
       <div id="changesList" class="changes-list"></div>
     </section>
 
+    <!-- Trezor slevových kódů z prohlédnutých produktů (renderCodes) -->
+    <section id="codes" class="changes codes" hidden>
+      <h2><button type="button" id="codesToggle" class="codes-toggle" aria-expanded="false" aria-controls="codesList"></button></h2>
+      <div id="codesList" class="changes-list" hidden></div>
+    </section>
+
     <div class="actions">
-      <button id="toggleWatch" disabled data-i18n="watchList">🔔 Hlídat seznam</button>
-      <button id="runWatchNow" data-i18n="runNow" data-i18n-title="runNowTitle" title="Zkontrolovat hlídané produkty teď">▶️ Zkontrolovat</button>
+      <button id="toggleWatch" disabled data-i18n="watchList">Hlídat seznam</button>
+      <button id="runWatchNow" data-i18n="runNow" data-i18n-title="runNowTitle" title="Zkontrolovat hlídané produkty teď">Zkontrolovat</button>
     </div>
     <ul id="watchLists" class="watch-lists"></ul>
     <div id="watchStatus" class="watch-info"></div>
 
     <script src="../shared/core.js"></script>
+    <script src="../shared/icons.js"></script>
     <script src="../shared/store.js"></script>
     <script src="popup.js"></script>
   </body>

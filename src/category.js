@@ -1,7 +1,12 @@
-// Content script: cena za jednotku ve výpisech kategorií a vyhledávání. Alza ji počítá z ceny pro všechny
-// (akce, Black Friday) – AlzaPlus+ ani slevový kód do ní nezahrne, ani když členovi AlzaPlus+ ukáže jeho
-// cenu jako hlavní. Před Alzinu cenu za jednotku doplní přepočet z nejnižší ceny v boxu produktu a nad
-// výpis lištu, která načte všechny produkty (Alzino "24 dalších…") a seřadí je podle skutečné ceny
+// Content script: lišta nad výpisy kategorií a vyhledávání.
+// 1) Cena za jednotku (volba categoryUnitPrice, jen výpisy, kde ji Alza ukazuje): Alza ji počítá z ceny pro
+//    všechny (akce, Black Friday) – AlzaPlus+ ani slevový kód do ní nezahrne, ani když členovi AlzaPlus+ ukáže
+//    jeho cenu jako hlavní. Před Alzinu cenu za jednotku doplní přepočet z nejnižší ceny v boxu produktu
+//    a v liště řazení podle skutečné ceny.
+// 2) Filtr slev (volba categoryDiscountFilter, všechny výpisy): „Sleva aspoň X %“, „Jen s kupónem“ a „S množstevní slevou“ –
+//    sleva z nejnižší ceny k zaplacení proti obvyklé ceně z historie, jinak proti přeškrtnuté ceně
+//    (AlzaCore.getListingDiscount). Nevyhovující produkty jen skryje, DOM Alzy zůstává.
+// Řazení i filtr nejdřív načtou celý výpis (Alzino "24 dalších…")
 const AlzaUnitPrice = {
   selectors: {
     item: ".browsingitem", // box produktu ve výpisu
@@ -21,7 +26,7 @@ const AlzaUnitPrice = {
   loadStepTimeoutMs: 10000,
   loadStepDelayMs: 300, // Pauza mezi načtením stránek, ať se Alza nezahltí
   // Kupóny s cenou → text u přepočtu. Cashback cenu nemá ("až 650,-"), ostatní typy neznáme
-  couponTypes: { applus: "withAlzaPlus", discountcode: "withCode", discountcouponpaywall: "withCode" },
+  couponTypes: { applus: "withAlzaPlus", discountcode: "withCode", discountcoupon: "withCode", discountcouponpaywall: "withCode" },
   // Hlavní cena, ze které Alza cenu za jednotku nepočítá (cena pro člena, benefit, B2B)
   personalPriceHeader: /alza\s*plus|benefit|b2b/i,
   memberPriceHeader: /alza\s*plus/i,
@@ -30,6 +35,8 @@ const AlzaUnitPrice = {
   // setiny zkreslí výsledek nanejvýš o 0,5 % (u "0,04 Kč/útržek" by to bylo až 12 %)
   minRatioUnitPrice: 1,
   elementClass: "alza-price-tracker-unit-price",
+  discountSteps: [0, 10, 20, 30, 40, 50], // Volby filtru „Sleva aspoň X %“ (0 = vše)
+  filteredAttribute: "data-alza-price-tracker-discount-hidden", // Produkt skrytý filtrem slev (main.css)
 
   translations: {
     cz: {
@@ -44,6 +51,18 @@ const AlzaUnitPrice = {
       sortPartial: "Seřazeno {0} z {1} produktů",
       sortLoadRest: "Načíst zbývající",
       sortLoadFailed: "Další produkty se nepodařilo načíst – seřazeno {0} z {1}",
+      sortTab: "Za jednotku",
+      sortTabActiveHint: "Price Insight: seřazeno podle skutečné ceny za jednotku (i s AlzaPlus+ a slevovými kódy). Kliknutím znovu řazení zrušíte.",
+      discountLabel: "Sleva",
+      discountAll: "vše",
+      discountMin: "aspoň {0} %",
+      discountHint: "Sleva z nejnižší ceny, kterou zaplatíte (i s AlzaPlus+ a slevovým kódem). U produktů s historií cen proti obvyklé ceně, u ostatních proti přeškrtnuté ceně Alzy. Načte celý výpis.",
+      couponOnly: "Jen s kupónem",
+      couponOnlyHint: "Jen produkty s cenou s AlzaPlus+ nebo se slevovým kódem",
+      bulkOnly: "S množstevní slevou",
+      bulkOnlyHint: "Jen produkty s množstevní slevou Alzy „Kup víc, zaplať míň“ – při více kusech je kus levnější",
+      filterStatus: "Vyhovuje {0} z {1}",
+      filterPartial: "Vyhovuje {0} z {1} načtených (výpis má {2})",
     },
     sk: {
       withAlzaPlus: "s AlzaPlus+",
@@ -57,6 +76,18 @@ const AlzaUnitPrice = {
       sortPartial: "Zoradených {0} z {1} produktov",
       sortLoadRest: "Načítať zvyšné",
       sortLoadFailed: "Ďalšie produkty sa nepodarilo načítať – zoradených {0} z {1}",
+      sortTab: "Za jednotku",
+      sortTabActiveHint: "Zoradené podľa skutočnej ceny za jednotku (aj s AlzaPlus+ a zľavovými kódmi). Kliknutím znova zoradenie zrušíte.",
+      discountLabel: "Zľava",
+      discountAll: "všetko",
+      discountMin: "aspoň {0} %",
+      discountHint: "Zľava z najnižšej ceny, ktorú zaplatíte (aj s AlzaPlus+ a zľavovým kódom). Pri produktoch s históriou cien voči obvyklej cene, pri ostatných voči prečiarknutej cene Alzy. Načíta celý výpis.",
+      couponOnly: "Len s kupónom",
+      couponOnlyHint: "Len produkty s cenou s AlzaPlus+ alebo so zľavovým kódom",
+      bulkOnly: "S množstevnou zľavou",
+      bulkOnlyHint: "Len produkty s množstevnou zľavou Alzy „Kúp viac, zaplať menej“ – pri viacerých kusoch je kus lacnejší",
+      filterStatus: "Vyhovuje {0} z {1}",
+      filterPartial: "Vyhovuje {0} z {1} načítaných (výpis má {2})",
     },
     hu: {
       withAlzaPlus: "AlzaPlus+-szal",
@@ -70,6 +101,18 @@ const AlzaUnitPrice = {
       sortPartial: "{0} / {1} termék rendezve",
       sortLoadRest: "A többi betöltése",
       sortLoadFailed: "A további termékeket nem sikerült betölteni – {0} / {1} rendezve",
+      sortTab: "Egységár",
+      sortTabActiveHint: "Valós egységár szerint rendezve (AlzaPlus+-szal és kuponkódokkal együtt). Újra kattintva a rendezés megszűnik.",
+      discountLabel: "Kedvezmény",
+      discountAll: "mind",
+      discountMin: "legalább {0} %",
+      discountHint: "Kedvezmény a legalacsonyabb fizetendő árból (AlzaPlus+-szal és kuponkóddal együtt). Árelőzménnyel rendelkező termékeknél a szokásos árhoz, a többinél az Alza áthúzott árához képest. Betölti a teljes listát.",
+      couponOnly: "Csak kuponnal",
+      couponOnlyHint: "Csak AlzaPlus+ vagy kuponkódos árral rendelkező termékek",
+      bulkOnly: "Mennyiségi kedvezménnyel",
+      bulkOnlyHint: "Csak az Alza mennyiségi kedvezményével kínált termékek – több darabnál olcsóbb a darabár",
+      filterStatus: "{0} / {1} megfelel",
+      filterPartial: "{0} / {1} betöltött megfelel (a lista {2} tételes)",
     },
     en: {
       withAlzaPlus: "with AlzaPlus+",
@@ -83,6 +126,18 @@ const AlzaUnitPrice = {
       sortPartial: "{0} of {1} products sorted",
       sortLoadRest: "Load the rest",
       sortLoadFailed: "Couldn't load more products – {0} of {1} sorted",
+      sortTab: "Unit price",
+      sortTabActiveHint: "Sorted by the real unit price (including AlzaPlus+ and discount codes). Click again to cancel the sorting.",
+      discountLabel: "Discount",
+      discountAll: "all",
+      discountMin: "at least {0} %",
+      discountHint: "Discount from the lowest price you pay (including AlzaPlus+ and discount codes). Products with price history are compared with the usual price, others with Alza's crossed-out price. Loads the whole listing.",
+      couponOnly: "Coupon only",
+      couponOnlyHint: "Only products with an AlzaPlus+ or discount code price",
+      bulkOnly: "Volume discount",
+      bulkOnlyHint: "Only products with an Alza volume discount – more pieces, lower price per piece",
+      filterStatus: "{0} of {1} match",
+      filterPartial: "{0} of {1} loaded match (the listing has {2})",
     },
   },
 
@@ -91,17 +146,23 @@ const AlzaUnitPrice = {
     lang: "cz", // Jazyk textů (AlzaCore.getDisplayLanguage – volba v nastavení, jinak jazyk domény)
     scheduled: false,
     rendered: new WeakMap(), // Box produktu → { signature, shown, sortKey } posledního přepočtu
-    sort: { active: false, loading: false, failed: false, anchor: null }, // anchor = box z řazeného výpisu
+    load: { loading: false, failed: false }, // Načítání celého výpisu (řazení i filtr)
+    sort: { active: false, anchor: null }, // anchor = box z řazeného výpisu
+    filter: { min: 0, coupon: false, bulk: false }, // Filtr slev: aspoň min %, jen s kupónem, jen s množstevní slevou
+    filterCounts: null, // { shown, total } posledního průchodu filtru (stav v liště)
+    histories: new Map(), // Klíč produktu → historie (getPriceChangeHistory) pro obvyklou cenu; null = načítá se / není
     toolbar: null,
-    enabled: false, // Vypínač v nastavení (categoryUnitPrice)
+    unitEnabled: false, // Vypínače v nastavení (categoryUnitPrice, categoryDiscountFilter)
+    discountEnabled: false,
+    enabled: false, // Aspoň jedna z funkcí
     observer: null,
   },
 
   async init() {
-    // Jen stránky s výpisem produktů s cenou za jednotku (drogerie, potraviny…); jinde nic nesledovat
-    if (!document.querySelector(`${this.selectors.item} ${this.selectors.unitPrice}`)) return;
+    // Jen stránky s výpisem produktů (kategorie, vyhledávání); jinde nic nesledovat
+    if (!document.querySelector(this.selectors.item)) return;
     // Lišta předchozí verze skriptu (Firefox ho po aktualizaci rozšíření vloží znovu) – mrtvá, pryč
-    document.querySelectorAll(".alza-price-tracker-unit-toolbar").forEach((element) => element.remove());
+    document.querySelectorAll(".alza-price-tracker-unit-toolbar, .alza-price-tracker-sort-tab, .alza-price-tracker-filter-block").forEach((element) => element.remove());
 
     this.state.domainKey = AlzaCore.getDomainKey(window.location.hostname);
     // Změna v nastavení se projeví hned i v otevřené stránce
@@ -109,7 +170,7 @@ const AlzaUnitPrice = {
     const domainLang = AlzaCore.domains[this.state.domainKey].lang;
     const apply = (settings) => {
       this.state.lang = AlzaCore.getDisplayLanguage(settings, domainLang);
-      this.setEnabled(settings.categoryUnitPrice);
+      this.setFeatures(settings.categoryUnitPrice, settings.categoryDiscountFilter);
     };
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === "local" && changes[key]) apply({ ...AlzaCore.defaultSettings, ...changes[key].newValue });
@@ -117,28 +178,36 @@ const AlzaUnitPrice = {
     apply(await AlzaCore.getSettings());
   },
 
-  setEnabled(enabled) {
-    if (enabled === this.state.enabled) return;
-    this.state.enabled = enabled;
-    // Úprava výšky bloku ceny Alzy (main.css) jen se zapnutou cenou za jednotku
-    document.documentElement.toggleAttribute("data-alza-price-tracker-unit-price", enabled);
-
-    if (enabled) {
-      this.update();
-      // Další produkty ("24 dalších…"), filtry a řazení Alza dokreslí bez načtení stránky
-      this.state.observer = AlzaCore.createObserver(() => this.scheduleUpdate(), { ignoreOwn: true });
-      this.state.observer.observe(document.body, { childList: true, subtree: true });
-      return;
+  setFeatures(unitEnabled, discountEnabled) {
+    const { state } = this;
+    if (state.unitEnabled && !unitEnabled) {
+      // Cena za jednotku vypnutá: pryč se štítky a naším řazením – výpis zůstane, jak ho Alza vykreslila
+      Object.assign(state.sort, { active: false, anchor: null });
+      this.clearSortOrder();
+      document.querySelectorAll(`.${this.elementClass}`).forEach((element) => element.remove());
+      state.rendered = new WeakMap();
     }
+    if (state.discountEnabled && !discountEnabled) {
+      Object.assign(state.filter, { min: 0, coupon: false, bulk: false });
+      this.clearFilter();
+    }
+    state.unitEnabled = Boolean(unitEnabled);
+    state.discountEnabled = Boolean(discountEnabled);
+    // Úprava výšky bloku ceny Alzy (main.css) jen se zapnutou cenou za jednotku
+    document.documentElement.toggleAttribute("data-alza-price-tracker-unit-price", state.unitEnabled);
 
-    // Vypnuto: pryč se štítky, lištou i naším řazením – výpis zůstane, jak ho Alza vykreslila
-    this.state.observer?.disconnect();
-    this.state.observer = null;
-    Object.assign(this.state.sort, { active: false, failed: false, anchor: null });
-    this.clearSortOrder();
-    this.state.toolbar?.remove();
-    document.querySelectorAll(`.${this.elementClass}`).forEach((element) => element.remove());
-    this.state.rendered = new WeakMap();
+    const enabled = state.unitEnabled || state.discountEnabled;
+    if (enabled && !state.enabled) {
+      // Další produkty ("24 dalších…"), filtry a řazení Alza dokreslí bez načtení stránky
+      state.observer = AlzaCore.createObserver(() => this.scheduleUpdate(), { ignoreOwn: true });
+      state.observer.observe(document.body, { childList: true, subtree: true });
+    } else if (!enabled && state.enabled) {
+      state.observer?.disconnect();
+      state.observer = null;
+      this.removeControls();
+    }
+    state.enabled = enabled;
+    if (enabled) this.update();
   },
 
   // Změna jen v našich prvcích (přepočet, lišta) nebo jejich vložení další průchod nepotřebuje. Odebrání
@@ -159,23 +228,26 @@ const AlzaUnitPrice = {
 
   update() {
     if (!this.state.enabled) return; // Naplánovaný průchod po vypnutí v nastavení
-    document.querySelectorAll(this.selectors.item).forEach((item) => {
-      try {
-        this.updateItem(item);
-      } catch (error) {
-        console.error("Alza Price Tracker – cena za jednotku:", error);
-      }
-    });
+    if (this.state.unitEnabled) {
+      document.querySelectorAll(this.selectors.item).forEach((item) => {
+        try {
+          this.updateItem(item);
+        } catch (error) {
+          console.error("Alza Price Tracker – cena za jednotku:", error);
+        }
+      });
+    }
 
     // Alza výpis nahradila (filtr, vlastní řazení) – naše řazení skončilo; order nesmí zůstat na
-    // bannerech a dalším obsahu kontejneru, který výměnu přežil
-    const { sort } = this.state;
-    if (sort.active && !sort.loading && !sort.anchor?.isConnected) {
+    // bannerech a dalším obsahu kontejneru, který výměnu přežil. Filtr slev platí dál i pro nový výpis
+    const { sort, load } = this.state;
+    if (sort.active && !load.loading && !sort.anchor?.isConnected) {
       sort.active = false;
-      sort.failed = false;
+      load.failed = false;
       this.clearSortOrder();
     }
     if (sort.active) this.applySort();
+    this.applyFilter();
     this.updateToolbar();
   },
 
@@ -216,6 +288,8 @@ const AlzaUnitPrice = {
       description: this.getText(item, this.selectors.description),
       primary: this.getPrice(item, this.selectors.primaryPrice),
       compare: this.getPrice(item, this.selectors.comparePrice),
+      // „Bez členství: 499,-“ u ceny s AlzaPlus+ – cena pro všechny, ze které Alza cenu za jednotku spočítala
+      nonMember: this.getPrice(item, ".ads-pb__original-price:not(.ads-pb__original-price--strike)"),
       header: this.getText(item, this.selectors.priceHeader),
       coupons: [...item.querySelectorAll(this.selectors.coupon)].map((coupon) => ({
         type: [...coupon.classList].find((name) => name.startsWith("coupon-block--"))?.slice("coupon-block--".length) || null,
@@ -254,7 +328,7 @@ const AlzaUnitPrice = {
     if (isCountUnit) {
       // Hlavní cena pro všechny je přesně ta, ze které Alza počítala. U ceny pro člena (benefitu…) cenu pro
       // všechny nevidíme – leží někde mezi nejnižší a přeškrtnutou cenou
-      const prices = [data.primary, data.compare, ...offers.map(({ price }) => price)].filter(Boolean);
+      const prices = [data.primary, data.compare, data.nonMember, ...offers.map(({ price }) => price)].filter(Boolean);
       const [min, max] = isPublicPrice ? [data.primary, data.primary] : [Math.min(...prices), Math.max(...prices)];
       const count = AlzaCore.getPackCount([data.description, data.name], unitPrice, min, max);
       if (count) return count;
@@ -348,20 +422,26 @@ const AlzaUnitPrice = {
     });
   },
 
-  async startSort() {
-    const { sort } = this.state;
-    if (sort.loading) return;
-    sort.loading = true;
-    sort.failed = false;
+  // Načte celý výpis pro řazení i filtr; false = už se načítá (nebo vypnuto)
+  async loadAll() {
+    const { load } = this.state;
+    if (load.loading) return false;
+    load.loading = true;
+    load.failed = false;
     this.updateToolbar();
     try {
-      sort.failed = !(await this.loadAllItems());
+      load.failed = !(await this.loadAllItems());
     } catch (error) {
       console.error("Alza Price Tracker – načtení výpisu:", error);
-      sort.failed = true;
+      load.failed = true;
     }
-    sort.loading = false;
-    if (!this.state.enabled) return;
+    load.loading = false;
+    return this.state.enabled;
+  },
+
+  async startSort() {
+    if (!(await this.loadAll())) return;
+    const { sort } = this.state;
     sort.active = true;
     sort.anchor = this.getListItems()[0] || null;
     this.update();
@@ -369,9 +449,88 @@ const AlzaUnitPrice = {
   },
 
   cancelSort() {
-    Object.assign(this.state.sort, { active: false, failed: false, anchor: null });
+    Object.assign(this.state.sort, { active: false, anchor: null });
+    this.state.load.failed = false;
     this.clearSortOrder();
     this.updateToolbar();
+  },
+
+  // "Načíst zbývající" – po výpadku načítání nebo po Alzině výměně výpisu
+  async loadRest() {
+    if (!(await this.loadAll())) return;
+    // Návrat na první stránku výpis vymění – řazení se musí navázat na nový
+    if (this.state.sort.active) this.state.sort.anchor = this.getListItems()[0] || null;
+    this.update();
+  },
+
+  isFilterActive() {
+    const { filter } = this.state;
+    return this.state.discountEnabled && (filter.min > 0 || filter.coupon || filter.bulk);
+  },
+
+  // Změna filtru slev – zapnutí filtru načte celý výpis, ať vybírá ze všech produktů. Další změny už nenačítají
+  // (velký výpis má tisíce produktů – načtení je po maxLoadSteps krocích, dál tlačítkem „Načíst zbývající“)
+  async setFilter(change) {
+    const wasActive = this.isFilterActive();
+    Object.assign(this.state.filter, change);
+    this.update();
+    if (!wasActive && this.isFilterActive() && (this.hasMoreItems() || this.getFirstLoadedPage() > 1) && (await this.loadAll())) {
+      if (this.state.sort.active) this.state.sort.anchor = this.getListItems()[0] || null;
+      this.update();
+    }
+  },
+
+  clearFilter() {
+    document.querySelectorAll(`[${this.filteredAttribute}]`).forEach((item) => item.removeAttribute(this.filteredAttribute));
+  },
+
+  // Klíč produktu (doména + číslo) z odkazu v boxu – stejně jako ukládání z procházení (browsing.js)
+  getItemProductKey(item) {
+    const href = item.querySelector(this.selectors.name)?.getAttribute("href");
+    if (!href) return null;
+    const url = new URL(href, window.location.origin);
+    const variant = url.searchParams.get("dq");
+    const path = url.pathname + (variant ? `?dq=${variant}` : "");
+    return AlzaCore.getProductId(path) ? AlzaCore.getProductKey(this.state.domainKey, path) : null;
+  },
+
+  // Historie produktů výpisu pro obvyklou cenu – jedním čtením, jen ty, které ještě nejsou načtené
+  async loadHistories(keys) {
+    const missing = keys.filter((key) => key && !this.state.histories.has(key));
+    if (missing.length === 0) return;
+    missing.forEach((key) => this.state.histories.set(key, null));
+    const prefix = AlzaCore.storagePrefixes.history;
+    const data = await chrome.storage.local.get(missing.map((key) => `${prefix}${key}`));
+    const lang = AlzaCore.domains[this.state.domainKey].lang;
+    missing.forEach((key) => {
+      const raw = data[`${prefix}${key}`];
+      if (raw) this.state.histories.set(key, AlzaCore.getPriceChangeHistory(AlzaCore.normalizeHistory(raw, lang)));
+    });
+    this.scheduleUpdate();
+  },
+
+  // Skryje produkty, které filtru nevyhovují (jen atribut – DOM Alzy zůstává); { shown, total } | null
+  applyFilter() {
+    if (!this.isFilterActive()) {
+      this.clearFilter();
+      this.state.filterCounts = null;
+      return;
+    }
+    const { min, coupon, bulk } = this.state.filter;
+    const items = this.getListItems();
+    const keys = items.map((item) => this.getItemProductKey(item));
+    this.loadHistories(keys).catch((error) => console.error("Alza Price Tracker – historie pro filtr slev:", error));
+    let shown = 0;
+    items.forEach((item, index) => {
+      const priceMap = AlzaCore.toPriceMap(AlzaCore.extractPricesFromListingItem(item));
+      const discount = AlzaCore.getListingDiscount(priceMap, this.state.histories.get(keys[index]) || []);
+      // Jen „S množstevní slevou“ slevu nevyžaduje; sleva a kupón ano
+      const discountOk = (min === 0 && !coupon) || (Boolean(discount) && discount.percent >= min && (!coupon || discount.coupon));
+      const matches = discountOk && (!bulk || AlzaCore.hasListingQuantityDiscount(item));
+      if (matches) shown++;
+      if (item.hasAttribute(this.filteredAttribute) === matches) item.toggleAttribute(this.filteredAttribute, !matches);
+    });
+    this.state.filterCounts = { shown, total: items.length };
   },
 
   clearSortOrder() {
@@ -419,42 +578,192 @@ const AlzaUnitPrice = {
     const more = document.createElement("button");
     more.type = "button";
     more.className = "alza-price-tracker-toolbar-chip alza-price-tracker-unit-toolbar-more";
-    more.addEventListener("click", () => this.startSort());
-    toolbar.append(button, status, more);
+    more.addEventListener("click", () => this.loadRest());
+
+    // Filtr slev: „Sleva [vše | aspoň X %]“ a „Jen s kupónem“
+    const discount = document.createElement("span");
+    discount.className = "alza-price-tracker-unit-toolbar-discount";
+    const label = document.createElement("label");
+    label.className = "alza-price-tracker-toolbar-sort";
+    const labelText = document.createElement("span");
+    const select = document.createElement("select");
+    this.discountSteps.forEach((step) => {
+      const option = document.createElement("option");
+      option.value = String(step);
+      select.appendChild(option);
+    });
+    select.addEventListener("change", () => this.setFilter({ min: Number(select.value) }));
+    label.append(labelText, select);
+    // „Jen s kupónem“ a „S množstevní slevou“ jako zaškrtávátka filtrů Alzy (čtvereček 18 px), ne tlačítka
+    const createCheck = (name, key) => {
+      const check = document.createElement("label");
+      check.className = `alza-price-tracker-check alza-price-tracker-unit-toolbar-${name}`;
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.addEventListener("change", () => this.setFilter({ [key]: input.checked }));
+      check.append(input, document.createElement("span"));
+      return check;
+    };
+    discount.append(label, createCheck("coupon", "coupon"), createCheck("bulk", "bulk"));
+
+    toolbar.append(AlzaCore.createToolbarLogo(document), button, discount, status, more);
+    // Odkazy na prvky – při umístění do Alzy (záložka řazení, levý panel) nejsou v liště
+    this.state.ui = { button, discount, status, more };
     return toolbar;
+  },
+
+  // Pryč s naším ovládáním (lišta, záložka, blok v panelu) a zhasnutá záložka Alzy zpět
+  removeControls() {
+    this.state.toolbar?.remove();
+    this.state.sortTab?.remove();
+    this.state.filterBlock?.remove();
+    document.querySelectorAll("[data-alza-price-tracker-active]").forEach((link) => {
+      link.classList.add("sorting__item-link--active");
+      link.removeAttribute("data-alza-price-tracker-active");
+    });
+  },
+
+  // Ovládání na místech Alzy: řazení jako další záložka řazení, filtry slev, stav a „Načíst zbývající“ jako blok
+  // „Price Insight“ na začátku levého panelu filtrů. Bez záložek nebo panelu (jiný typ výpisu) zůstane lišta.
+  // true = umístěno do Alzy
+  mountInAlza(sorting, unitAvailable) {
+    const wrapper = sorting.querySelector(".sorting__wrapper");
+    const panel = document.querySelector(".js-basic-filters");
+    if (!wrapper || !panel) return false;
+    const { button, discount, status, more } = this.state.ui;
+
+    if (!this.state.sortTab) {
+      this.state.sortTab = document.createElement("li");
+      this.state.sortTab.className = "sorting__item alza-price-tracker-sort-tab";
+    }
+    const tab = this.state.sortTab;
+    button.classList.add("sorting__item-link");
+    if (button.parentElement !== tab) tab.appendChild(button);
+    if (unitAvailable && tab.parentElement !== wrapper) wrapper.appendChild(tab);
+    if (!unitAvailable) tab.remove();
+    // Během našeho řazení je aktivní naše záložka, Alzina se jen zhasne; po zrušení se vrátí – pokud si mezitím
+    // Alza neaktivovala jinou (klik na její záložku ukončí naše řazení)
+    if (this.state.sort.active) {
+      wrapper.querySelectorAll(".js-sort-item.sorting__item-link--active").forEach((link) => {
+        link.classList.remove("sorting__item-link--active");
+        link.setAttribute("data-alza-price-tracker-active", "");
+      });
+    } else {
+      const otherActive = wrapper.querySelector(".js-sort-item.sorting__item-link--active");
+      wrapper.querySelectorAll("[data-alza-price-tracker-active]").forEach((link) => {
+        if (!otherActive) link.classList.add("sorting__item-link--active");
+        link.removeAttribute("data-alza-price-tracker-active");
+      });
+    }
+    button.classList.toggle("sorting__item-link--active", this.state.sort.active);
+
+    if (!this.state.filterBlock) {
+      const block = document.createElement("div");
+      block.className = "basic-filter alza-price-tracker-filter-block";
+      const name = document.createElement("div");
+      name.className = "name alza-price-tracker-filter-block-name";
+      name.append(AlzaCore.createToolbarLogo(document));
+      block.append(name);
+      this.state.filterBlock = block;
+    }
+    const block = this.state.filterBlock;
+    [discount, status, more].forEach((element) => element.parentElement !== block && block.appendChild(element));
+    block.classList.toggle("alza-price-tracker-hidden", !this.state.discountEnabled);
+    if (block.parentElement !== panel || panel.firstElementChild !== block) panel.prepend(block);
+    this.state.toolbar?.remove();
+    return true;
   },
 
   // Lišta pod záložkami řazení; Alza je může překreslit, pak se vloží znovu
   updateToolbar() {
     const sorting = document.querySelector(this.selectors.sorting);
     if (!sorting || !document.querySelector(this.selectors.container)) return;
+    // Řazení podle ceny za jednotku jen ve výpisech, kde ji Alza ukazuje; bez něj a bez filtru slev lišta není
+    const unitAvailable = this.state.unitEnabled && Boolean(document.querySelector(`${this.selectors.item} ${this.selectors.unitPrice}`));
+    if (!unitAvailable && !this.state.discountEnabled) {
+      this.removeControls();
+      return;
+    }
     if (!this.state.toolbar) this.state.toolbar = this.createToolbar();
     const toolbar = this.state.toolbar;
-    if (toolbar.previousElementSibling !== sorting) sorting.after(toolbar);
+    // Přednostně na místa Alzy (záložka řazení, levý panel), jinak lišta pod záložkami
+    const inAlza = this.mountInAlza(sorting, unitAvailable);
+    if (!inAlza && toolbar.previousElementSibling !== sorting) sorting.after(toolbar);
+    if (!inAlza && this.state.ui.button.parentElement !== toolbar) {
+      // Zpět do lišty (výpis bez panelu filtrů) – tlačítko a filtry na původní místa
+      const { button, discount, status, more } = this.state.ui;
+      button.classList.remove("sorting__item-link", "sorting__item-link--active");
+      toolbar.append(button, discount, status, more);
+      this.state.sortTab?.remove();
+      this.state.filterBlock?.remove();
+    }
+    // Záložka má vzhled záložek Alzy, v liště je to chip
+    this.state.ui.button.classList.toggle("alza-price-tracker-toolbar-chip", !inAlza);
 
-    const { active, loading, failed } = this.state.sort;
+    const { loading, failed } = this.state.load;
+    const { active } = this.state.sort;
+    const filterActive = this.isFilterActive();
     const loaded = this.getListItems().length;
     const total = this.getTotalCount() || loaded;
-    const button = toolbar.querySelector(".alza-price-tracker-unit-toolbar-sort");
-    const status = toolbar.querySelector(".alza-price-tracker-unit-toolbar-status");
-    const more = toolbar.querySelector(".alza-price-tracker-unit-toolbar-more");
+    const complete = loaded >= total || !this.hasMoreItems();
+    const { button, discount, status, more } = this.state.ui;
 
-    let statusText = "";
-    if (loading) statusText = this.translate("sortLoading", loaded, total);
-    else if (active && failed) statusText = this.translate("sortLoadFailed", loaded, total);
-    else if (active) statusText = loaded >= total || !this.hasMoreItems() ? this.translate("sortDone", loaded) : this.translate("sortPartial", loaded, total);
+    button.classList.toggle("alza-price-tracker-hidden", !unitAvailable);
+    discount.classList.toggle("alza-price-tracker-hidden", !this.state.discountEnabled);
 
-    this.setText(button, this.translate(active ? "sortCancel" : "sortStart"));
-    button.title = active ? "" : this.translate("sortStartHint");
+    const parts = [];
+    if (loading) parts.push(this.translate("sortLoading", loaded, total));
+    else {
+      if (active && failed) parts.push(this.translate("sortLoadFailed", loaded, total));
+      else if (active) parts.push(complete ? this.translate("sortDone", loaded) : this.translate("sortPartial", loaded, total));
+      const counts = this.state.filterCounts;
+      if (filterActive && counts) {
+        parts.push(complete ? this.translate("filterStatus", counts.shown, counts.total) : this.translate("filterPartial", counts.shown, counts.total, total));
+      }
+    }
+
+    // V záložkách Alzy název jako jejich záložky (opětovný klik řazení zruší), v liště tlačítko Seřadit / Zrušit
+    // V záložce naše ikona (logo přes CSS) místo ikony řazení
+    if (inAlza) button.querySelector(".alza-price-tracker-icon")?.remove();
+    this.setText(button, this.translate(inAlza ? "sortTab" : active ? "sortCancel" : "sortStart"), inAlza ? null : "sort");
+    if (inAlza && !button.querySelector(".alza-price-tracker-sort-tab-icon")) {
+      const icon = document.createElement("span");
+      icon.className = "alza-price-tracker-sort-tab-icon";
+      icon.setAttribute("aria-hidden", "true");
+      button.prepend(icon);
+    }
+    if (!inAlza) button.querySelector(".alza-price-tracker-sort-tab-icon")?.remove();
+    button.title = inAlza ? this.translate(active ? "sortTabActiveHint" : "sortStartHint") : active ? "" : this.translate("sortStartHint");
     button.disabled = loading;
     button.classList.toggle("alza-price-tracker-toolbar-chip--active", active);
-    this.setText(status, statusText);
+
+    const [labelText, select] = discount.querySelector("label").children;
+    this.setText(labelText, this.translate("discountLabel"));
+    [...select.options].forEach((option) => {
+      const step = Number(option.value);
+      this.setText(option, step === 0 ? this.translate("discountAll") : this.translate("discountMin", step));
+    });
+    if (select.value !== String(this.state.filter.min)) select.value = String(this.state.filter.min);
+    select.title = this.translate("discountHint");
+    select.disabled = loading;
+    [["coupon", "couponOnly"], ["bulk", "bulkOnly"]].forEach(([key, text]) => {
+      const check = discount.querySelector(`.alza-price-tracker-unit-toolbar-${key}`);
+      const input = check.querySelector("input");
+      this.setText(check.querySelector("span"), this.translate(text));
+      check.title = this.translate(`${text}Hint`);
+      input.disabled = loading;
+      if (input.checked !== this.state.filter[key]) input.checked = this.state.filter[key];
+    });
+
+    this.setText(status, parts.join(" · "));
     this.setText(more, this.translate("sortLoadRest"));
-    more.classList.toggle("alza-price-tracker-hidden", !active || loading || !this.hasMoreItems());
+    more.classList.toggle("alza-price-tracker-hidden", !(active || filterActive) || loading || !this.hasMoreItems());
   },
 
-  setText(element, text) {
+  // Text prvku lišty jen při změně (lišta se překresluje často); icon = ikona před textem – vloží se jen když chybí
+  setText(element, text, icon) {
     if (element.textContent !== text) element.textContent = text;
+    if (icon && !element.querySelector(".alza-price-tracker-icon")) AlzaIcons.prepend(element, icon);
   },
 };
 

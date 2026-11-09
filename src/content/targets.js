@@ -80,7 +80,7 @@ Object.assign(AlzaPriceTracker, {
 
     const section = this.createEl("div", "alza-price-tracker-history-target");
     const form = this.createEl("div", "alza-price-tracker-history-target-form");
-    const label = this.createEl("label", "alza-price-tracker-history-target-label", `🎯 ${this.translate("targetLabel")}`);
+    const label = AlzaIcons.prepend(this.createEl("label", "alza-price-tracker-history-target-label", this.translate("targetLabel")), "target");
     const input = this.createEl("input", "alza-price-tracker-history-target-input");
     input.id = "alza-price-tracker-target-input";
     input.type = "number";
@@ -186,7 +186,7 @@ Object.assign(AlzaPriceTracker, {
     if (!target) return;
 
     const lowest = AlzaCore.getLowestPrice(data.priceMap);
-    const marker = this.createEl("span", "alza-price-tracker-target-marker alza-price-tracker-target-marker--icon", "🎯");
+    const marker = AlzaIcons.prepend(this.createEl("span", "alza-price-tracker-target-marker alza-price-tracker-target-marker--icon"), "target", { tone: true });
     marker.title = `${this.translate("targetLabel")}: ${this.formatTargetValue(target.price, target)}`;
     if (lowest !== null) marker.title += `\n${this.getTargetStatus(target, lowest)}`;
     if (lowest !== null && lowest <= target.price) marker.classList.add("alza-price-tracker-target-marker--reached");

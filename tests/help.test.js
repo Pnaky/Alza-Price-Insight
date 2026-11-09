@@ -86,6 +86,7 @@ const REFERENCED_LABELS = [
   "testNotifications",
   "categories",
   "unitPrice",
+  "discountFilter",
   "saveBrowsing",
   "exportJson",
   "importJson",

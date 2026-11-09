@@ -117,7 +117,7 @@ Object.assign(AlzaPriceTracker, {
         class: "alza-price-tracker-history-milestone-label",
       });
       text.style.fill = color;
-      text.textContent = `🎯 ${this.translate("milestoneTarget")} ${this.formatPrice(target.price)}`;
+      text.textContent = `${this.translate("milestoneTarget")} ${this.formatPrice(target.price)}`;
       svg.appendChild(text);
     }
 

@@ -94,15 +94,49 @@ const AlzaStore = {
     return Object.keys(updates).length;
   },
 
+  // Jednorázové opravy uložených dat (storageKeys.cleanups – co proběhlo, už se nespouští). Vrací počet změn
+  async runCleanups() {
+    const key = AlzaCore.storageKeys.cleanups;
+    const { [key]: done = {} } = await chrome.storage.local.get(key);
+    const name = "quantityTierListingPrices-2026-11";
+    if (done[name]) return 0;
+    const all = await chrome.storage.local.get(null);
+    const pricePrefix = AlzaCore.storagePrefixes.price;
+    const updates = {};
+    let removed = 0;
+    Object.entries(all).forEach(([storageKey, record]) => {
+      if (!storageKey.startsWith(pricePrefix) || !record?.quantityTiers || !record.url) return;
+      const productKey = storageKey.slice(pricePrefix.length);
+      const domainKey = Object.keys(AlzaCore.domains).find((domain) => productKey.startsWith(`${domain}_`));
+      if (!domainKey) return;
+      const historyKey = AlzaCore.getHistoryKey(domainKey, record.url);
+      if (!Array.isArray(all[historyKey])) return;
+      const entries = structuredClone(all[historyKey]);
+      const count = AlzaCore.removeQuantityTierEntries(entries, record.quantityTiers);
+      if (count > 0) {
+        updates[historyKey] = entries;
+        removed += count;
+      }
+    });
+    await chrome.storage.local.set({ ...updates, [key]: { ...done, [name]: Date.now() } });
+    return removed;
+  },
+
   // === Operace ===
   ops: {
     // Sloučí nově načtené ceny do záznamů produktů (AlzaCore.mergePriceRecord). records = { url: ceny + meta }.
     // Vrací { url: { before, record } } – before = záznam před sloučením (šipka změny, první záznam historie)
     async mergePrices({ domain, records, listId = null, now = Date.now() }) {
       const keys = Object.fromEntries(Object.keys(records).map((url) => [url, AlzaCore.getPriceKey(domain, url)]));
-      const stored = await chrome.storage.local.get(Object.values(keys));
+      const codesKey = AlzaCore.storageKeys.codes;
+      const cashbacksKey = AlzaCore.storageKeys.cashbacks;
+      const stored = await chrome.storage.local.get([...Object.values(keys), codesKey, cashbacksKey]);
       const updates = {};
       const result = {};
+      const codes = stored[codesKey] && typeof stored[codesKey] === "object" ? stored[codesKey] : {};
+      const cashbacks = stored[cashbacksKey] && typeof stored[cashbacksKey] === "object" ? stored[cashbacksKey] : {};
+      let codesChanged = false;
+      let cashbacksChanged = false;
       Object.entries(records).forEach(([url, incoming]) => {
         const key = keys[url];
         const current = updates[key] || stored[key];
@@ -111,7 +145,12 @@ const AlzaStore = {
         record.url = current?.url || url;
         updates[key] = record;
         result[url] = { before, record };
+        if (AlzaCore.updateCodeRegistry(codes, AlzaCore.getProductKey(domain, url), record, record.url, domain, now)) codesChanged = true;
+        // Cashback s odkazem na podmínky – připomínka registrace po nákupu (background.js updateCashbackReminders)
+        if (AlzaCore.updateCashbackRegistry(cashbacks, AlzaCore.getProductKey(domain, url), record, domain, now)) cashbacksChanged = true;
       });
+      if (codesChanged) updates[codesKey] = codes;
+      if (cashbacksChanged) updates[cashbacksKey] = cashbacks;
       if (Object.keys(updates).length > 0) await chrome.storage.local.set(updates);
       return result;
     },

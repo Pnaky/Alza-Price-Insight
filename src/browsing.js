@@ -103,6 +103,8 @@ const AlzaBrowsing = {
     // Produkt otevřeného detailu zapisuje content.js (přesnější ceny) – dva zápisy do jedné historie by se přepsaly
     if (id === AlzaCore.getProductId(window.location.pathname + window.location.search)) return null;
 
+    // Cena „od …“ u množstevní slevy není cena kusu – takový produkt si cenu zapíše až z detailu
+    if (AlzaCore.hasListingQuantityDiscount(item)) return null;
     const prices = AlzaCore.extractPricesFromListingItem(item);
     if (AlzaCore.getPriceEntries(prices).length === 0) return null; // Box bez ceny (reklama, nedostupné bez ceny)
     const image = item.querySelector(this.selectors.image)?.getAttribute("src");

@@ -1,4 +1,4 @@
-/* Vzhled jako průvodce nastavením a nastavení: tmavé pozadí s přechodem z barev ikony, bílé karty se stínem */
+/* Vzhled jako průvodce nastavením a nastavení: ploché pozadí podle systému (světlé / tmavé), bílé karty */
 :root {
   --ink: #1e1e1e;
   --navy: #263f6a;
@@ -36,7 +36,7 @@ main {
   padding: 28px 16px 56px;
 }
 
-/* Obsah – průsvitné štítky na tmavém pozadí */
+/* Obsah – štítky na pozadí stránky (barvy podle světlého / tmavého režimu: ../shared/page.css) */
 nav {
   display: flex;
   flex-wrap: wrap;
@@ -46,27 +46,27 @@ nav {
 
 nav a {
   padding: 6px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid var(--head-btn-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #eef2f7;
+  background: var(--head-btn-bg);
+  color: var(--head-btn-fg);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
 }
 
 nav a:hover {
-  border-color: var(--lime);
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  border-color: var(--head-btn-hover-border);
+  background: var(--head-btn-hover-bg);
 }
 
 section {
   margin-bottom: 16px;
   padding: 24px 30px 20px;
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   background: #fff;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--card-shadow);
   scroll-margin-top: 16px;
 }
 
@@ -206,9 +206,9 @@ kbd {
   display: flex;
   margin-left: auto;
   align-self: center;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--head-btn-border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--head-btn-bg);
   overflow: hidden;
   font-size: 13px;
   font-weight: 600;
@@ -221,18 +221,18 @@ kbd {
 }
 
 .languages strong {
-  background: #fff;
-  color: var(--text);
+  background: var(--head-btn-active-bg);
+  color: var(--head-btn-active-fg);
 }
 
 .languages a {
-  color: #d5dbe5;
+  color: var(--tab-fg);
   text-decoration: none;
 }
 
 .languages a:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
+  background: var(--head-btn-hover-bg);
+  color: var(--tab-hover-fg);
 }
 
 /* Upozornění na strojový překlad (sk, hu, en) */

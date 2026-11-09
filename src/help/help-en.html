@@ -22,7 +22,7 @@
       </header>
 
       <p class="machine">
-        🤖 This is a machine translation from Czech. If anything doesn't match, the <a href="help.html" lang="cs">Czech version</a> applies. To see the extension in English on Alza pages
+        <span data-icon="translate"></span> This is a machine translation from Czech. If anything doesn't match, the <a href="help.html" lang="cs">Czech version</a> applies. To see the extension in English on Alza pages
         too, choose English in the settings (Extension language).
       </p>
 
@@ -40,8 +40,8 @@
       </nav>
 
       <section id="zaciname">
-        <h2>🚀 Getting started</h2>
-        <p class="tip">After installation, the <strong>🧭 Setup guide</strong> opens: you pick your main Alza, it checks your sign-in and prices incl. VAT in one click (each item says what's done and what to do) and walks you through watching and notifications. Run it again from the settings (🧭 Setup guide, top right); change the main Alza in the settings next to the language.</p>
+        <h2><span data-icon="flag"></span> Getting started</h2>
+        <p class="tip">After installation, the <strong><span data-icon="explore"></span> Setup guide</strong> opens: you pick your main Alza, it checks your sign-in and prices incl. VAT in one click (each item says what's done and what to do) and walks you through watching and notifications. Run it again from the settings (<span data-icon="explore"></span> Setup guide, top right); change the main Alza in the settings next to the language.</p>
         <ol>
           <li><strong>Log in to Alza.</strong> Prices are saved only when you are logged in – Alza shows different prices to different accounts (AlzaPlus+, benefits, B2B).</li>
           <li><strong>Show prices including VAT.</strong> With "show prices without VAT" turned on, prices are not saved so they don't get mixed up.</li>
@@ -56,14 +56,17 @@
       </section>
 
       <section id="seznam">
-        <h2>📋 Shopping list</h2>
+        <h2><span data-icon="list"></span> Shopping list</h2>
         <ul>
           <li><strong>All prices of an item</strong> – besides the regular price also the sale price, price with a discount code, AlzaPlus+ price, cashback… sorted from the lowest.</li>
+          <li><strong>Hovering over a price</strong> shows a card: the price name (Benefit, Discount code, Black Friday…), the difference to higher prices, the minimum and maximum, and for a discount code the code with a Copy button.</li>
           <li><strong>Click a price or the availability</strong> to open the product's price history.</li>
-          <li><strong>Arrows next to the price:</strong> <span class="badge good">▼</span> cheaper than usual right now, <span class="badge high">▲</span> more expensive than usual (hover for details). 🎯 = you set a target price, green = it has been reached.</li>
+          <li><strong>Arrows next to the price:</strong> <span class="badge good">▼</span> cheaper than usual right now, <span class="badge high">▲</span> more expensive than usual (hover for details). <span data-icon="target"></span> = you set a target price, green = it has been reached.</li>
           <li><strong>Changes since last time</strong> – items that got cheaper or more expensive since the last load show the previous price and the difference.</li>
-          <li><strong>Several pieces</strong> – prices stay per piece, with a "3 pcs total" column and the total to their left (including volume discounts). Nothing in the row moves.</li>
-          <li><strong>Conditional price and the cart</strong> – when the lowest price applies only with a discount code, with AlzaPlus+ or after cashback / trade-in, the extension warns you before adding the item to the cart from the list (with a discount code, add it from the product page). You can still add it.</li>
+          <li><strong>Several pieces</strong> – prices stay per piece, with a "3 pcs total" column and the total to their left (including volume discounts). Once a volume discount tier applies, the price per piece for that quantity is shown in green before the prices – hover for the tier table and your savings. Nothing in the row moves.</li>
+          <li><strong>Conditional price and the cart</strong> – when the lowest price applies only with a discount code, with AlzaPlus+ or after cashback / trade-in, the extension warns you before adding the item to the cart from the list You can still add it. With a discount code, the warning shows the code with a Copy button and an <strong>Add with code</strong> button that puts the item in the cart and applies the code right away (like “Buy with code” on the product page).</li>
+          <li><strong>Code check in the cart</strong> – when the cart contains an item for which the extension knows a discount code from the product page and the discount is missing, it warns you after clicking “Continue”. Apply the code with one click, or continue without it.</li>
+          <li><strong>Ratings in the cart</strong> – under the price of each cart item you see the same as in the list: ▼▲ against the usual price, worth waiting, suspicious discount, a cheaper unpacked / used piece. With a volume discount there is a “+1 pc → lower price per piece” button under the quantity that adds the piece right away. Hover for details.</li>
         </ul>
         <h3>Bar above the list</h3>
         <ul>
@@ -75,19 +78,22 @@
       </section>
 
       <section id="detail">
-        <h2>🔎 Product page</h2>
-        <p>On a product page, the left column (below the gallery) has a <strong>📈 Price history</strong> card:</p>
+        <h2><span data-icon="search"></span> Product page</h2>
+        <p>On a product page, the left column (below the gallery) has a <strong><span data-icon="chart"></span> Price history</strong> card:</p>
         <ul>
           <li><strong>Current</strong> – the lowest price you can pay, with a rating against the usual price below it.</li>
           <li><strong>Per piece</strong> – the real price per piece for multipacks (even without history).</li>
           <li><strong>Usual price, lowest in 30 days, all-time low</strong> and a small chart – click the chart to open the full history.</li>
-          <li><strong>🔔 Watch in background</strong> – the product is checked regularly even if it is not in any list.</li>
-          <li><strong>🎯 Set target price</strong> – see <a href="#cil">Target price</a>.</li>
+          <li><strong>Price comparison icons</strong> (Heureka, Zboží.cz on alza.cz; Heureka.sk; Árukereső) – search for the product by name in a new tab. The icons are loaded directly from the comparison site; if they fail to load, the site's name is shown instead.</li>
+          <li><strong>Copy offer</strong> – copies the name, price, price with a code or AlzaPlus+, usual price, lowest price in 30 days and the link to the clipboard. Handy for a chat or social media.</li>
+          <li><strong>Volume discount</strong> – the table of “buy more, pay less” tiers (price per piece at 1, 2, 3… pieces) is shown right away in a bubble above the cart button; Alza shows it only once the product is in the cart. When prices aren't being saved (e.g. not signed in), the card says why.</li>
+          <li><strong><span data-icon="bell"></span> Watch in background</strong> – the product is checked regularly even if it is not in any list.</li>
+          <li><strong><span data-icon="target"></span> Set target price</strong> – see <a href="#cil">Target price</a>.</li>
         </ul>
       </section>
 
       <section id="historie">
-        <h2>📈 Price history</h2>
+        <h2><span data-icon="chart"></span> Price history</h2>
         <p>Open the history dialog by clicking a price in a list or the "full history and chart" button on a product page.</p>
         <ul>
           <li><strong>Tiles at the top:</strong> all-time low, highest selling and list price, lowest price in 30 days, usual price, tracked since and last check.</li>
@@ -108,7 +114,7 @@
       </section>
 
       <section id="dobra-cena">
-        <h2>✅ Is the price really good?</h2>
+        <h2><span data-icon="check-circle"></span> Is the price really good?</h2>
         <h3>Usual price and rating</h3>
         <p>
           The usual price is the price the product sold at for the longest time in the last 180 days – a short sale doesn't pull it down. The current price
@@ -121,17 +127,19 @@
         </ul>
         <p>Hover to also see how many times the product was cheaper than usual and how long it lasted.</p>
         <h3>Sale rhythm – worth waiting?</h3>
-        <p>When the product had at least 3 sales in the last 180 days, the extension works out how often, how long and how deep its sales are (e.g. "On sale roughly once every 6 weeks, usually −15 % for 7 days") and when the next one can be expected. If the next sale is due within 3 weeks, it shows <strong>⏳ worth waiting</strong> – next to the price and as a filter in lists, in blue in the history card on the product page. Irregular sales are not predicted.</p>
+        <p>When the product had at least 3 sales in the last 180 days, the extension works out how often, how long and how deep its sales are (e.g. "On sale roughly once every 6 weeks, usually −15 % for 7 days") and when the next one can be expected. If the next sale is due within 3 weeks, it shows <strong><span data-icon="hourglass"></span> worth waiting</strong> – next to the price and as a filter in lists, in blue in the history card on the product page. Irregular sales are not predicted.</p>
         <h3>The same product in another condition</h3>
         <p>Alza sells some products unpacked or like new too (each condition is a separate product). When another condition is cheaper than the lowest price you pay for this item (including AlzaPlus+ and benefit), you see it in the card on the product page and when hovering the price in a list (e.g. “Cheaper in another condition: Like new 6 459 Kč (231 Kč less)”); lists also have a <em>Cheaper in another condition</em> filter.</p>
+        <h3>Discount filter in categories</h3>
+        <p>In the left filter panel (the Price Insight block at the top), choose <strong>Discount at least X %</strong> or tick <strong>Coupon only</strong> (a price with AlzaPlus+ or a discount code) or <strong>Volume discount</strong> (“buy more, pay less”). The extension loads the whole listing and hides products that don't match. The discount is calculated from the lowest price you pay – including AlzaPlus+ and discount codes. Products with history are compared with the usual price, so a crossed-out price that hasn't been charged for a long time can't inflate the discount; others with Alza's crossed-out price. A large listing loads about 500 products at a time, the rest with “Load the rest”. You can turn it off in the settings (Category listings → Discount filter).</p>
         <h3>Suspicious discount</h3>
         <ul>
           <li><strong>Cheaper within 30 days:</strong> the product is "on sale", but in the last 30 days it could be bought for less than now.</li>
-          <li><strong>Made-up strikethrough price:</strong> the product never sold at the struck-through price while tracked, or last did more than 90 days ago.</li>
+          <li><strong>Crossed-out price not charged lately:</strong> the product never sold at the struck-through price while tracked, or last did more than 90 days ago.</li>
         </ul>
         <p>Suspicious discounts appear in the list's "suspicious discount" filter, as an orange bar in the history and on the product page card.</p>
-        <h3>⚠️ Suspicious price</h3>
-        <p>When Alza changes its website, the extension may read a wrong number, for example a monthly instalment instead of the price. Such a price is not hidden, so you don't miss a real discount. It is marked with ⚠️ and a dashed frame, and hovering over it shows why:</p>
+        <h3><span data-icon="warning"></span> Suspicious price</h3>
+        <p>When Alza changes its website, the extension may read a wrong number, for example a monthly instalment instead of the price. Such a price is not hidden, so you don't miss a real discount. It is marked with <span data-icon="warning"></span> and a dashed frame, and hovering over it shows why:</p>
         <ul>
           <li><strong>Less than half of the next price:</strong> the price is lower than half of the next higher price from the same check. It is left out of the minimum, the change arrow, the price rating and the suspicious discount.</li>
           <li><strong>Less than half of the usual price:</strong> the lowest price dropped below half of the usual price over the last 30 days. It counts normally, it is only marked. If the price stays, the warning disappears.</li>
@@ -141,9 +149,9 @@
       </section>
 
       <section id="cil">
-        <h2>🎯 Target price</h2>
+        <h2><span data-icon="target"></span> Target price</h2>
         <ol>
-          <li>Open the product's price history (or click "🎯 set target price" on the product page).</li>
+          <li>Open the product's price history (or click "<span data-icon="target"></span> set target price" on the product page).</li>
           <li>Enter the price you want to buy at and click <strong>Watch</strong>.</li>
         </ol>
         <p>
@@ -158,26 +166,29 @@
       </section>
 
       <section id="hlidani">
-        <h2>🔔 Background watching and notifications</h2>
+        <h2><span data-icon="bell"></span> Background watching and notifications</h2>
         <ul>
-          <li><strong>Watched list:</strong> open the list and click <strong>🔔 Watch list</strong> in the extension popup, or click the bell on the list's tab. The whole list is watched; newly added items are included the next time you open the list.</li>
-          <li><strong>Watched product:</strong> the "🔔 watch in background" button on a product page, or a target price.</li>
-          <li>The check runs <strong>every hour</strong> while the browser is running. In the settings you can change it to every 3, 6 or 12 hours or to <strong>once a day at a chosen time</strong> – if the browser is closed then, it runs a few minutes after it starts. The popup shows when the next one is due. Run it right away with ▶️ Check now in the popup.</li>
+          <li><strong>Watched list:</strong> open the list and click <strong><span data-icon="bell"></span> Watch list</strong> in the extension popup, or click the bell on the list's tab. The whole list is watched; newly added items are included the next time you open the list.</li>
+          <li><strong>Watched product:</strong> the "<span data-icon="bell"></span> watch in background" button on a product page, or a target price.</li>
+          <li>The check runs <strong>every hour</strong> while the browser is running. In the settings you can change it to every 3, 6 or 12 hours or to <strong>once a day at a chosen time</strong> – if the browser is closed then, it runs a few minutes after it starts. The popup shows when the next one is due. Run it right away with <span data-icon="refresh"></span> Check now in the popup.</li>
           <li><strong>The number on the icon</strong> = products with a change since you last opened the popup, which lists the changes. Its colour: <strong>green</strong> = at least one product got cheaper, came back in stock, has a new sale or reached its target price, <strong>red</strong> = none got cheaper but at least one got more expensive, <strong>grey</strong> = only sales ended or unavailability. <strong>A blue number</strong> = old products suggested for deletion.</li>
-          <li><strong>Changes in the popup:</strong> price drops, back in stock, a new sale and a reached target price in green, price increases in red (no notification for increases), end of sale and unavailability in grey. New changes have a coloured background, ones you've seen only coloured text. Watched lists show how many products got cheaper (▼) and more expensive (▲) over the last 7 days. Stop watching a list with 🔕 Stop watching list in the popup on the open list, or in the settings (Watched lists tab). If you watch more than one Alza, lists, changes and watched products get a <strong>CZ / SK / HU</strong> label (hover it to see the Alza address). Help is in the settings (❓ top right).</li>
+          <li><strong>Changes in the popup:</strong> price drops, back in stock, a new sale and a reached target price in green, price increases in red (no notification for increases), end of sale and unavailability in grey. New changes have a coloured background, ones you've seen only coloured text. Watched lists show how many products got cheaper (▼) and more expensive (▲) over the last 7 days. Stop watching a list with <span data-icon="bell-off"></span> Stop watching list in the popup on the open list, or in the settings (Watched lists tab). If you watch more than one Alza, lists, changes and watched products get a <strong>CZ / SK / HU</strong> label (hover it to see the Alza address). Help is in the settings (<span data-icon="help"></span> top right).</li>
+          <li><strong>Discount codes in the popup:</strong> codes from products you have seen in the last 30 days (product page, list, background check) – collapsed to one line; click to expand the product, code, price with the code and a Copy button. When a watched product gets a new code, the notification includes the code.</li>
+          <li><strong>Watch after purchase:</strong> the extension takes items bought in the last 14 days from “My orders” and watches their price. If it drops, you get “You bought it for X, now it costs Y. You can return it and buy it again until D.” Items bought online can be returned within 14 days. Turn it off in the settings (Watch price after purchase); orders are read only in your browser.</li>
+          <li><strong>Cashback reminder:</strong> when you buy an item that showed a cashback price on its product page, the extension reads the manufacturer’s registration deadline from the promotion page. It notifies you when the purchase can be registered (some promotions ask you to wait e.g. 30 days) and a week before the deadline; clicking opens the promotion terms. The “Cashback to register” list is in the extension window – tick it off with Done after registering. We read the deadline from the promotion text; if we can’t recognise it, the notification points you to the terms. You see the promotion dates – buy by and register by – before buying, too: in the tooltip of the cashback price in the list (with a link to the terms) and under the cashback row on the product page. Turn it off in the settings (Remind me to register cashback).</li>
         </ul>
         <p>In the settings you choose what you want to hear about: price drops (optionally from a given percentage), new prices (sale, code, cashback), availability and quiet hours.</p>
-        <p class="tip">No notifications? In the settings click <strong>🔔 Test notifications</strong>. If nothing arrives, check Windows "Do not disturb" / Focus assist and notification permission for your browser (Chrome, Firefox).</p>
+        <p class="tip">No notifications? In the settings click <strong><span data-icon="bell"></span> Test notifications</strong>. If nothing arrives, check Windows "Do not disturb" / Focus assist and notification permission for your browser (Chrome, Firefox).</p>
       </section>
 
       <section id="za-kus">
-        <h2>⚖️ Real price per piece</h2>
+        <h2><span data-icon="compare"></span> Real price per piece</h2>
         <p>
           Alza calculates the unit price only from the price for everyone – it ignores the AlzaPlus+ discount and discount codes. When stocking up you can't
           tell which pack is really the best deal. The extension works it out:
         </p>
         <ul>
-          <li><strong>Categories and search:</strong> an orange label with the real price, e.g. <span class="unit">2,50 Kč/ks</span>, sits before Alza's unit price. The <strong>"sort by real unit price"</strong> button loads the whole category and sorts it.</li>
+          <li><strong>Categories and search:</strong> an orange label with the real price, e.g. <span class="unit">2,50 Kč/ks</span>, sits before Alza's unit price. The <strong>“Unit price”</strong> tab with the extension icon next to Alza’s sort tabs loads the whole category and sorts it (click again to cancel).</li>
           <li><strong>Shopping list:</strong> price per piece for every price on hover, and "cheapest per piece" sorting.</li>
           <li><strong>Product page:</strong> a "per piece" tile with the price per piece for each price type. The pack size selector shows the price per piece (per metre for lengths) for every size in a column on the right – the best value in green, the most expensive in red. The closed selector shows the unit price of the chosen size right away too, including the best value / most expensive label.</li>
         </ul>
@@ -185,22 +196,22 @@
       </section>
 
       <section id="nastaveni">
-        <h2>⚙️ Settings and data</h2>
-        <p>Open the settings with the ⚙️ icon in the extension popup.</p>
+        <h2><span data-icon="settings"></span> Settings and data</h2>
+        <p>Open the settings with the <span data-icon="settings"></span> icon in the extension popup.</p>
         <ul>
           <li><strong>Save prices while browsing</strong> (Price tracking) – prices of products you see in category listings, search results, product pages, carousels and on the home page are quietly saved to the history even if you don't watch them. When you come back to a product, you'll see how its price developed. Nothing is shown or notified. On by default.</li>
-          <li><strong>Stored data</strong> – an overview of all products with a history and why they are stored (📋 list, 🔔 product page, 🎯 target price, 👀 browsing). Search, filters, price history via 📈 and deleting the data of a single product.</li>
+          <li><strong>Stored data</strong> – an overview of all products with a history and why they are stored (<span data-icon="list"></span> list, <span data-icon="bell"></span> product page, <span data-icon="target"></span> target price, <span data-icon="visibility"></span> browsing). Search, filters, price history via <span data-icon="chart"></span> and deleting the data of a single product.</li>
           <li><strong>Backup (JSON)</strong> – all data to a file; <strong>Restore from backup</strong> adds it back (deletes nothing, history is merged).</li>
           <li><strong>History (CSV)</strong> – all prices for Excel.</li>
           <li><strong>Clean up old data</strong> – deletes products you don't watch that haven't been opened or checked for over 3 months (those saved while browsing only after a year). The extension suggests them itself with a blue number on the icon and a notice in the popup.</li>
           <li><strong>Delete all data</strong> – only after typing the word DELETE; a backup is downloaded automatically first.</li>
-          <li><strong>Diagnostics</strong> – if something doesn't work, click <strong>🐞 Report a bug</strong>: a pre-filled report opens on GitHub (version, browser, recent errors). Or download the diagnostics and send them to the author (version, settings, check log and errors; no passwords or cookies).</li>
+          <li><strong>Diagnostics</strong> – if something doesn't work, click <strong><span data-icon="bug"></span> Report a bug</strong>: a pre-filled report opens on GitHub (version, browser, recent errors). Or download the diagnostics and send them to the author (version, settings, check log and errors; no passwords or cookies).</li>
         </ul>
         <p class="tip">All data stays in your browser only. The extension talks only to Alza websites and sends nothing anywhere else.</p>
       </section>
 
       <section id="faq">
-        <h2>❓ FAQ</h2>
+        <h2><span data-icon="help"></span> FAQ</h2>
         <details>
           <summary>Prices are not saved / the check reports an error</summary>
           <p>
@@ -231,12 +242,14 @@
         <details>
           <summary>Why are there products I don't watch in Stored data?</summary>
           <p>
-            They are products from shopping lists you opened and, with the “Save prices while browsing” option, products you saw while browsing Alza (👀).
+            They are products from shopping lists you opened and, with the “Save prices while browsing” option, products you saw while browsing Alza (<span data-icon="visibility"></span>).
             Their history comes in handy when you come back to the product. You can turn saving while browsing off in the settings; products you don't
             watch are suggested for deletion automatically (those saved while browsing only after a year).
           </p>
         </details>
       </section>
     </main>
+    <script src="../shared/icons.js"></script>
+    <script src="help.js"></script>
   </body>
 </html>

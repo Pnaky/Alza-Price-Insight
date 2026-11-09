@@ -169,3 +169,22 @@ test("findStaleProducts vidí záznamy cen po produktech", () => {
   const stale = AlzaCore.findStaleProducts({ alzaPrice_alza_cz_5: { original: 1, lastUpdated: old }, alzaPrice_alza_cz_6: { original: 1, lastUpdated: now } }, now);
   assert.deepEqual(plain(stale), [{ key: "alza_cz_5", historyKey: null, priceKey: "alzaPrice_alza_cz_5", browsed: false, checkedAt: old }]);
 });
+
+test("runCleanups: jednou odstraní z historie ceny „od …“ produktů s množstevní slevou", async () => {
+  const { AlzaStore, data } = setup({
+    alzaPrice_alza_cz_101: { url: URL_A, original: 89, quantityTiers: [[1, 1, 89], [2, 2, 83], [3, 100000, 76]] },
+    alzaHistory_alza_cz_101: [
+      { t: 1, s: 2, p: { original: 89 }, a: "in" },
+      { t: 3, s: 4, p: { original: 76 }, a: "in" },
+    ],
+    alzaPrice_alza_cz_202: { url: URL_B, original: 50 },
+    alzaHistory_alza_cz_202: [{ t: 1, s: 2, p: { original: 50 }, a: "in" }],
+  });
+  assert.equal(await AlzaStore.runCleanups(), 1);
+  assert.deepEqual(plain(data.alzaHistory_alza_cz_101).map(({ p }) => p.original), [89]);
+  assert.deepEqual(plain(data.alzaHistory_alza_cz_202).map(({ p }) => p.original), [50]);
+  // Podruhé už neběží
+  data.alzaHistory_alza_cz_101.push({ t: 5, s: 6, p: { original: 76 }, a: "in" });
+  assert.equal(await AlzaStore.runCleanups(), 0);
+  assert.equal(data.alzaHistory_alza_cz_101.length, 2);
+});

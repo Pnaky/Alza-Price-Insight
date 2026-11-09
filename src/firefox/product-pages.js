@@ -12,6 +12,7 @@ const ProductPages = {
     keepAliveTimer ??= setInterval(() => chrome.runtime.getPlatformInfo(), KEEP_ALIVE_INTERVAL_MS);
   },
   fetch: (url) => fetchProductPage(url),
+  terms: (url) => fetchTermsPage(url), // Stránka akce s cashbackem jako text
   async close() {
     clearInterval(keepAliveTimer);
     keepAliveTimer = null;

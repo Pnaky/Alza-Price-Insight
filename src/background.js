@@ -5,6 +5,9 @@
 
 const WATCH_LISTS_KEY = AlzaCore.storageKeys.watchLists; // { "<doména>|<listId>": { domain, listId, name, url, since, syncedAt, products: { url: { name, image } } } }
 const WATCH_PRODUCTS_KEY = AlzaCore.storageKeys.watchProducts;
+const PURCHASES_KEY = AlzaCore.storageKeys.purchases;
+// Hlídání po nákupu: nejnižší cena, o které už přišlo upozornění – zapíše se na konci běhu (savePurchaseStates)
+let purchaseUpdates = {};
 const TARGETS_KEY = AlzaCore.storageKeys.targets;
 // Stav posledního běhu pro popup; pendingNotifications = změny odložené v tichých hodinách,
 // unseen = klíče produktů ("<doména>_<id>") se změnou od posledního otevření popupu/seznamu (číslo na ikoně)
@@ -44,7 +47,10 @@ const withStateLock = (task) => AlzaStore.exclusive(task);
 // Jako první ve frontě: převod starého formátu uložených cen (alzaPrices_<doména> → záznam za produkt)
 const storeReady = AlzaStore.exclusive(() => AlzaStore.migrate())
   .then((count) => count > 0 && console.info(`Uložené ceny převedeny na záznamy po produktech: ${count}`))
-  .catch((error) => console.error("Převod uložených cen se nepodařil:", error));
+  .catch((error) => console.error("Převod uložených cen se nepodařil:", error))
+  .then(() => AlzaStore.exclusive(() => AlzaStore.runCleanups()))
+  .then((count) => count > 0 && console.info(`Z historie odstraněny ceny „od …“ z výpisů (množstevní sleva): ${count}`))
+  .catch((error) => console.error("Oprava historie se nepodařila:", error));
 
 // Service worker může Chrome ukončit i uprostřed běhu – uložené running: true by pak v popupu
 // navždy ukazovalo "Probíhá kontrola". Po startu workeru žádný běh neprobíhá.
@@ -134,6 +140,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.action === "fetchProductPage") {
     withProductPages(() => ProductPages.fetch(message.url))
       .then(sendResponse, (error) => sendResponse({ ok: false, status: 0, error: String(error?.message || error) }));
+    return true;
+  }
+  // Termíny akce s cashbackem pro tooltip v seznamu / řádek cashbacku na detailu (getCashbackTerms)
+  if (message?.action === "cashbackTerms") {
+    getCashbackTerms(message.url, message.title).then(sendResponse, () => sendResponse(null));
     return true;
   }
   if (message?.action === "watchTestNotifications") {
@@ -238,6 +249,7 @@ async function runWatch({ force, trigger }) {
   const problems = [];
   const log = { start: state.lastRunStart, trigger, total: 0, skipped: 0, aborted: false, offline: false, items: [] };
   const targetUpdates = {};
+  purchaseUpdates = {};
   let checked = 0;
   let productPagesAcquired = false;
 
@@ -305,6 +317,7 @@ async function runWatch({ force, trigger }) {
 async function finishRun({ state, log, checked, changes, problems, targetUpdates, force, productPagesAcquired }) {
   if (productPagesAcquired) await releaseProductPages();
   await saveTargetStates(targetUpdates);
+  await savePurchaseStates(purchaseUpdates);
 
   const end = Date.now();
   // V tichých hodinách se notifikace odkládají (odešlou se po jejich konci), problémy se ohlásí až po nich (pokud trvají)
@@ -356,6 +369,159 @@ async function finishRun({ state, log, checked, changes, problems, targetUpdates
   await updateCleanup().catch((error) => console.error("Návrh čistky se nepodařilo přepočítat:", error)); // Nastaví i číslo na ikoně
   if (!quiet) await notifyChanges(pending).catch((error) => console.error("Chyba při odesílání notifikací:", error));
   if (notifyProblemsNow) await notifyProblems(problems).catch((error) => console.error("Chyba při odesílání notifikace o problému:", error));
+  await updateCashbackReminders(settings, quiet).catch((error) => console.error("Připomínky cashbacku se nepodařilo zpracovat:", error));
+}
+
+// === Připomínka cashbacku ===
+
+// Koupené zboží (hlídání po nákupu), u kterého jsme kolem data nákupu viděli cashback (storageKeys.cashbacks):
+// připomínka s lhůtou registrace ze stránky akce. Upozorní, když jde nákup zaregistrovat, a cashbackSoonDays
+// před koncem registrace; kliknutí otevře podmínky akce. V tichých hodinách se upozornění odloží na další běh
+async function updateCashbackReminders(settings, quiet) {
+  if (!settings.watchPurchases || !settings.remindCashback) return;
+  const remindersKey = AlzaCore.storageKeys.cashbackReminders;
+  const {
+    [PURCHASES_KEY]: purchases = {},
+    [AlzaCore.storageKeys.cashbacks]: cashbacks = {},
+    [remindersKey]: stored = {},
+  } = await chrome.storage.local.get([PURCHASES_KEY, AlzaCore.storageKeys.cashbacks, remindersKey]);
+  const reminders = stored && typeof stored === "object" ? stored : {};
+  const set = {};
+  const merge = {};
+  const remove = [];
+
+  Object.entries(purchases || {}).forEach(([key, purchase]) => {
+    if (reminders[key] || !purchase) return;
+    const entry = AlzaCore.getPurchaseCashback(purchase, cashbacks?.[key]);
+    if (entry) set[key] = AlzaCore.createCashbackReminder(purchase, entry);
+  });
+
+  // Lhůta registrace ze stránky akce – u nových připomínek a u těch, kde se načtení zatím nepovedlo. Nákup po konci
+  // nákupního období akce do ní nepatří – připomínka se uzavře bez upozornění
+  const unread = Object.entries({ ...reminders, ...set }).filter(
+    ([, reminder]) => reminder?.terms && !reminder.termsRead && (reminder.termsTries || 0) < AlzaCore.cashbackTermsTries && !reminder.done
+  );
+  if (unread.length > 0 && navigator.onLine) {
+    for (const [key, reminder] of unread) {
+      const terms = await getCashbackTerms(reminder.terms, reminder.title).catch(() => null);
+      let update;
+      if (terms?.ok) {
+        const dates = AlzaCore.getCashbackDates(terms, reminder.boughtAt);
+        update = { registerFrom: dates.registerFrom, registerUntil: dates.registerUntil, termsRead: true, ...(dates.purchaseEnded && { done: true, outsidePromo: true }) };
+      } else {
+        update = { termsTries: (reminder.termsTries || 0) + 1 };
+      }
+      if (set[key]) Object.assign(set[key], update);
+      else merge[key] = update;
+    }
+  }
+
+  const now = Date.now();
+  const notify = [];
+  Object.entries({ ...reminders, ...set }).forEach(([key, base]) => {
+    const reminder = { ...base, ...merge[key] };
+    const step = AlzaCore.getCashbackReminderStep(reminder, now);
+    if (step === "expired") {
+      if (set[key]) delete set[key];
+      else remove.push(key);
+      return;
+    }
+    if (!step || quiet) return;
+    // Registrace se otevřela až těsně před koncem – druhé upozornění by přišlo hned po prvním
+    const soonToo = reminder.registerUntil > 0 && now >= reminder.registerUntil - AlzaCore.cashbackSoonDays * AlzaCore.dayMs;
+    const flags = { notifiedOpen: true, ...((step === "soon" || soonToo) && { notifiedSoon: true }) };
+    if (set[key]) Object.assign(set[key], flags);
+    else merge[key] = { ...merge[key], ...flags };
+    notify.push({ reminder, step });
+  });
+
+  if (Object.keys(set).length > 0 || Object.keys(merge).length > 0 || remove.length > 0) {
+    await AlzaStore.run({ type: "patchMap", key: remindersKey, set, merge, remove });
+  }
+  for (const { reminder, step } of notify) {
+    await notifyCashback(reminder, step, settings).catch((error) => console.error("Připomínku cashbacku se nepodařilo odeslat:", error));
+  }
+}
+
+// Termíny akce s cashbackem (konec nákupu, lhůta registrace) ze stránky akce – sdílí tooltip cashbacku v seznamu,
+// řádek cashbacku na detailu i připomínky. Mezipaměť storageKeys.cashbackTerms: úspěch platí den, neúspěch hodinu.
+// Souběžné dotazy na stejnou akci (víc produktů v seznamu) čekají na jedno stažení. Vrací záznam { ok, … } nebo null
+const cashbackTermsInFlight = new Map();
+// Stažený text stránky akce podle adresy – víc produktů stejné akce s různým popiskem (klíč termínů) ji nestahuje
+// znovu; jen v paměti služby na pozadí, krátce
+const cashbackPageText = new Map(); // url → { at, request: Promise<výsledek ProductPages.terms> }
+const CASHBACK_PAGE_TEXT_MS = 10 * 60 * 1000;
+
+function fetchCashbackPage(url) {
+  const now = Date.now();
+  cashbackPageText.forEach((entry, key) => now - entry.at > CASHBACK_PAGE_TEXT_MS && cashbackPageText.delete(key));
+  if (!cashbackPageText.has(url)) {
+    const request = withProductPages(() => ProductPages.terms(url))
+      .catch((error) => ({ ok: false, error: String(error?.message || error) }))
+      .then((result) => {
+        if (!result?.ok) cashbackPageText.delete(url); // Nepovedené stažení si nepamatovat – další dotaz zkusí znovu
+        return result;
+      });
+    cashbackPageText.set(url, { at: now, request });
+  }
+  return cashbackPageText.get(url).request;
+}
+
+async function getCashbackTerms(url, title) {
+  if (!AlzaCore.isAlzaUrl(url)) return null;
+  const termsKey = AlzaCore.storageKeys.cashbackTerms;
+  const key = AlzaCore.getCashbackTermsKey(url, title);
+  const { [termsKey]: cache = {} } = await chrome.storage.local.get(termsKey);
+  const cached = cache?.[key];
+  const age = Date.now() - (cached?.fetchedAt || 0);
+  const current = cached?.v === AlzaCore.cashbackTermsVersion; // Termíny ze starší verze čtení stránky – načíst znovu
+  if (cached && current && age < (cached.ok ? AlzaCore.cashbackTermsMaxAgeMs : AlzaCore.cashbackTermsRetryMs)) return cached;
+  if (!navigator.onLine) return cached || null;
+  if (cashbackTermsInFlight.has(key)) return cashbackTermsInFlight.get(key);
+
+  const task = (async () => {
+    const result = await fetchCashbackPage(url);
+    const now = Date.now();
+    // Popisek řádku cashbacku („Akce platí do 3. 1. 2027 nebo do vyprodání zásob.“) doplní, co stránka akce nemá
+    const fromTitle = title ? AlzaCore.readCashbackTerms(title, null, now) : null;
+    const retryAt = now - AlzaCore.cashbackTermsMaxAgeMs + AlzaCore.cashbackTermsRetryMs; // Platí jen hodinu – zkusit znovu
+    const v = AlzaCore.cashbackTermsVersion;
+    // Starší termíny zůstanou, když se stránka zrovna nenačetla (Cloudflare, výpadek)
+    const entry = result?.ok
+      ? { ok: true, v, fetchedAt: now, ...AlzaCore.mergeCashbackTerms(AlzaCore.readCashbackTerms(result.text, title, now), fromTitle) }
+      : cached?.ok
+        ? { ...cached, v, fetchedAt: retryAt }
+        : AlzaCore.hasCashbackTerms(fromTitle)
+          ? { ok: true, v, fetchedAt: retryAt, ...AlzaCore.mergeCashbackTerms(fromTitle, null) }
+          : { ok: false, v, fetchedAt: now };
+    const stale = Object.entries(cache || {})
+      .filter(([other, value]) => other !== key && !(value?.fetchedAt > now - AlzaCore.cashbackTermsKeepDays * AlzaCore.dayMs))
+      .map(([other]) => other);
+    await AlzaStore.run({ type: "patchMap", key: termsKey, set: { [key]: entry }, remove: stale });
+    return entry;
+  })().finally(() => cashbackTermsInFlight.delete(key));
+  cashbackTermsInFlight.set(key, task);
+  return task;
+}
+
+async function notifyCashback(reminder, step, settings) {
+  const domain = AlzaCore.isKnownDomain(reminder.domain) ? reminder.domain : "alza_cz";
+  const lang = AlzaCore.getDisplayLanguage(settings, AlzaCore.domains[domain].lang);
+  const refund = reminder.refund > 0 ? AlzaCore.formatPrice(reminder.refund, domain) : "–";
+  const until = reminder.registerUntil > 0
+    ? AlzaCore.formatTextDate(reminder.registerUntil, lang, true)
+    : null;
+  const message =
+    step === "soon"
+      ? AlzaCore.translate(lang, "notifyCashbackSoon", refund, until)
+      : until
+        ? AlzaCore.translate(lang, "notifyCashbackOpen", refund, until)
+        : AlzaCore.translate(lang, "notifyCashbackOpenNoDate", refund);
+  const iconUrl = await loadProductIcon(reminder.image);
+  await createNotification(
+    { title: reminder.name || reminder.title || "Cashback", message, requireInteraction: step === "soon", ...(iconUrl && { iconUrl }) },
+    AlzaCore.isAlzaUrl(reminder.terms) ? reminder.terms : reminder.url
+  );
 }
 
 // Konec tichých hodin: odložené notifikace hned, ne až s další kontrolou. Běžící kontrola je odešle sama
@@ -378,7 +544,8 @@ async function getWatchedProducts() {
     [WATCH_LISTS_KEY]: lists = {},
     [WATCH_PRODUCTS_KEY]: watchedProducts = {},
     [TARGETS_KEY]: targets = {},
-  } = await chrome.storage.local.get([WATCH_LISTS_KEY, WATCH_PRODUCTS_KEY, TARGETS_KEY]);
+    [PURCHASES_KEY]: purchases = {},
+  } = await chrome.storage.local.get([WATCH_LISTS_KEY, WATCH_PRODUCTS_KEY, TARGETS_KEY, PURCHASES_KEY]);
   const settings = await AlzaCore.getSettings();
   const products = new Map();
   const add = (url, name, domain, listUrl, image, list = null) => {
@@ -396,8 +563,35 @@ async function getWatchedProducts() {
   // Poškozená položka (null) nesmí shodit celý běh
   Object.values(watchedProducts).forEach((product) => product && add(product.url, product.name, product.domain, product.url, product.image));
   Object.values(targets).forEach((target) => target && add(target.url, target.name, target.domain, target.url, target.image));
+  // Koupené zboží ve lhůtě pro vrácení – i když už je hlídané jinak, dostane údaje o nákupu (checkPurchase)
+  if (settings.watchPurchases) {
+    const now = Date.now();
+    Object.values(purchases).forEach((purchase) => {
+      if (!purchase || !(purchase.returnUntil > now)) return;
+      add(purchase.url, purchase.name, purchase.domain, purchase.url, purchase.image);
+      const product = products.get(AlzaCore.getProductKey(purchase.domain, purchase.url));
+      if (product) product.purchase = purchase;
+    });
+  }
 
   return [...products.values()];
+}
+
+// Hlídání po nákupu: zlevnění pod nákupní cenu ve lhůtě pro vrácení – „Koupili jste za X, teď stojí Y. Do D ho
+// můžete vrátit a koupit znovu.“ Každé nové minimum jen jednou (notifiedPrice)
+function checkPurchase(product, priceMap) {
+  const drop = AlzaCore.getPurchaseDrop(product.purchase, priceMap);
+  if (!drop) return null;
+  purchaseUpdates[AlzaCore.getProductKey(product.domain, product.url)] = drop.lowest;
+  const format = (price) => AlzaCore.formatPrice(price, product.domain);
+  const lang = product.textLang || product.lang;
+  const until = AlzaCore.formatTextDate(product.purchase.returnUntil, lang);
+  return { kind: "purchase", text: AlzaCore.translate(lang, "notifyPurchaseDrop", format(product.purchase.price), format(drop.lowest), until) };
+}
+
+async function savePurchaseStates(updates) {
+  if (Object.keys(updates).length === 0) return;
+  await AlzaStore.run({ type: "patchMap", key: PURCHASES_KEY, merge: Object.fromEntries(Object.entries(updates).map(([key, price]) => [key, { notifiedPrice: price }])) });
 }
 
 // Stav cílové ceny (je pod hranicí?) zapsat až na konci běhu – mezitím ji mohl uživatel změnit
@@ -446,20 +640,23 @@ async function checkProduct(product, force, targets, targetUpdates) {
 
   if (!force && last && Date.now() - last.s < config.minCheckAgeMs) {
     const target = checkTarget(product, last.p, targets, targetUpdates);
-    const changes = target ? [target, ...describeSuspicious(before, last.p, product)] : [];
+    const purchase = checkPurchase(product, last.p);
+    const changes = target || purchase ? [target, purchase, ...describeSuspicious(before, last.p, product)].filter(Boolean) : [];
     return { skipped: true, changes, price: AlzaCore.getLowestPrice(last.p), name: AlzaCore.getLatestName(before) };
   }
 
   const result = await fetchProduct(url);
   if (!result.ok) return { problem: AlzaCore.translate(textLang, "notifyProblemFetch", result.error) };
+  // Zboží bez DPH (knihy – bez vedlejší ceny „bez DPH“): ověření z historie produktu nebo z jiné stránky
+  result.saveProblem = await AlzaCore.resolveSaveProblem(result.saveProblem, result.vatSignMissing, result.prices, domain, url);
 
   // Ověření DPH pro stránky bez jeho znaku (homepage – browsing.js). getSaveProblem ověřuje DPH jen u produktu s cenou
   const vatChecked = result.saveProblem === "notifyProblemWithoutVat" ? false : !result.saveProblem && AlzaCore.getPriceEntries(result.prices || {}).length > 0 ? true : null;
   if (vatChecked !== null) await AlzaCore.recordVatCheck(domain, vatChecked).catch((error) => console.error("Ověření DPH se nepodařilo uložit:", error));
 
-  // Ceny se smí zapsat jen za přihlášeného uživatele a s DPH. Obojí je nastavení účtu,
-  // takže by selhaly i další produkty – běh se přeruší
-  if (result.saveProblem) return { problem: AlzaCore.translate(textLang, result.saveProblem), abort: true };
+  // Ceny se smí zapsat jen za přihlášeného uživatele a s DPH. Obojí je nastavení účtu, takže by selhaly i další
+  // produkty – běh se přeruší. Neověřené DPH jednoho produktu (zboží bez DPH bez historie) ostatní nezastaví
+  if (result.saveProblem) return { problem: AlzaCore.translate(textLang, result.saveProblem), abort: result.saveProblem !== "notifyProblemVatUnknown" };
 
   if (!result.isProduct) return { problem: AlzaCore.translate(textLang, "notifyProblemNotProduct") };
 
@@ -468,9 +665,11 @@ async function checkProduct(product, force, targets, targetUpdates) {
   if (!hasPrices && availability === null) return { problem: AlzaCore.translate(textLang, "notifyProblemNoData") };
 
   const snapshot = AlzaCore.toPriceMap(result.prices);
-  const changes = describeChanges(last, snapshot, availability, product);
+  const changes = describeChanges(last, snapshot, availability, { ...product, discountCode: result.prices?.discount?.code || null });
   const target = checkTarget(product, snapshot, targets, targetUpdates);
   if (target) changes.push(target);
+  const purchase = checkPurchase(product, snapshot);
+  if (purchase) changes.push(purchase);
 
   // Zápis přes frontu úložiště – historii mezitím mohla zapsat otevřená stránka seznamu. Záznam ceny před
   // sloučením je potřeba jen pro první záznam historie
@@ -512,7 +711,7 @@ function describeSuspicious(entries, priceMap, { domain, lang, textLang }) {
 // kontrole jako [{ kind: drop|rise|new|availability, text, percent?, to? }]. Zdražení se neoznamuje –
 // jen přehled změn v popupu a log
 // Texty v jazyce textLang (volba v nastavení), jinak v jazyce domény
-function describeChanges(last, snapshot, availability, { domain, lang: domainLang, textLang }) {
+function describeChanges(last, snapshot, availability, { domain, lang: domainLang, textLang, discountCode = null }) {
   if (!last) return [];
   const lang = textLang || domainLang;
 
@@ -531,7 +730,9 @@ function describeChanges(last, snapshot, availability, { domain, lang: domainLan
     } else if (previous !== undefined && price > previous) {
       changes.push({ kind: "rise", text: AlzaCore.formatPriceRise(lang, label, previous, price, domain) });
     } else if (previous === undefined && (type !== "original" || !hadPrices)) {
-      changes.push({ kind: "new", text: AlzaCore.translate(lang, "notifyNewPrice", label, format(price)) });
+      // Nový slevový kód i se samotným kódem (trezor kódů v popupu) – „Nový slevový kód OPPOX10256GB: 26 490 Kč“
+      const text = type === "discount" && discountCode ? AlzaCore.translate(lang, "notifyNewCode", discountCode, format(price)) : AlzaCore.translate(lang, "notifyNewPrice", label, format(price));
+      changes.push({ kind: "new", text });
     }
   });
 

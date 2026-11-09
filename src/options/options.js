@@ -23,9 +23,52 @@ const formatDate = (ts) => new Date(ts).toLocaleDateString(ui.locale);
 
 // data-i18n = text, data-i18n-title = title, data-i18n-tip = bublina „?“ (data-tip) i aria-label,
 // data-i18n-placeholder = placeholder
+// Ikony před texty (src/shared/icons.js) – emoji v textech nejsou, ikonu přidá setText podle klíče textu;
+// tone = ikona v barvě textu (výstrahy a mazání)
+const OPTIONS_ICONS = {
+  helpLink: "help",
+  welcomeLink: "explore",
+  tracking: "chart",
+  notifications: "bell",
+  testNotifications: "bell",
+  categories: "cart",
+  language: "language",
+  backup: "save",
+  exportJson: "download",
+  exportCsv: "download",
+  importJson: "upload",
+  pruneData: "cleaning",
+  diagnostics: "build",
+  reportBug: "bug",
+  exportDiagnostics: "download",
+  wipeSummary: { icon: "warning", tone: true },
+  wipeButton: { icon: "delete", tone: true },
+  wipeButtonConfirm: { icon: "delete", tone: true },
+  tabLists: "list",
+  tabProducts: "bell",
+  tabData: "storage",
+  tabLog: "history",
+  cleanupBannerStart: "cleaning",
+  cleanupDelete: { icon: "delete", tone: true },
+  actionFailed: { icon: "warning", tone: true },
+  unwatch: "bell-off",
+};
+
+function setText(element, key, ...params) {
+  element.textContent = t(key, ...params);
+  const icon = OPTIONS_ICONS[key];
+  if (icon) AlzaIcons.prepend(element, icon.icon || icon, { tone: Boolean(icon.tone) });
+  return element;
+}
+
+// Text s ikonou do buňky tabulky (důvody sledování, cílová cena, počty v logu běhů)
+function iconText(icon, text, tone = false) {
+  return AlzaIcons.prepend(Object.assign(document.createElement("span"), { textContent: text }), icon, { tone });
+}
+
 function applyStaticTexts() {
   document.documentElement.lang = ui.locale.split("-")[0];
-  document.querySelectorAll("[data-i18n]").forEach((element) => (element.textContent = t(element.dataset.i18n)));
+  document.querySelectorAll("[data-i18n]").forEach((element) => setText(element, element.dataset.i18n));
   document.querySelectorAll("[data-i18n-title]").forEach((element) => (element.title = t(element.dataset.i18nTitle)));
   document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => (element.placeholder = t(element.dataset.i18nPlaceholder)));
   document.querySelectorAll("[data-i18n-tip]").forEach((element) => {
@@ -67,6 +110,7 @@ function updateDependentRows() {
   };
   toggle("dropRow", form.notifyDrops.checked);
   toggle("quietRow", form.quietHours.checked);
+  toggle("cashbackRow", form.watchPurchases.checked); // Připomínka cashbacku potřebuje objednávky
   form.checkTime.hidden = form.checkSchedule.value !== "daily"; // Čas jen u kontroly jednou denně
 }
 
@@ -87,7 +131,10 @@ async function loadSettings() {
   form.checkSchedule.value = Object.hasOwn(AlzaCore.checkSchedules, settings.checkSchedule) ? settings.checkSchedule : AlzaCore.defaultSettings.checkSchedule;
   form.checkTime.value = settings.checkTime;
   form.categoryUnitPrice.checked = settings.categoryUnitPrice;
+  form.categoryDiscountFilter.checked = settings.categoryDiscountFilter;
   form.saveBrowsing.checked = settings.saveBrowsing;
+  form.watchPurchases.checked = settings.watchPurchases;
+  form.remindCashback.checked = settings.remindCashback;
   form.uiLanguage.value = settings.uiLanguage;
   form.primaryDomain.value = Object.hasOwn(AlzaCore.domains, settings.primaryDomain) ? settings.primaryDomain : "auto";
   updateHelpLink(settings);
@@ -120,7 +167,10 @@ async function saveSettings(source) {
     checkSchedule: form.checkSchedule.value,
     checkTime: form.checkTime.value || AlzaCore.defaultSettings.checkTime,
     categoryUnitPrice: form.categoryUnitPrice.checked,
+    categoryDiscountFilter: form.categoryDiscountFilter.checked,
     saveBrowsing: form.saveBrowsing.checked,
+    watchPurchases: form.watchPurchases.checked,
+    remindCashback: form.remindCashback.checked,
     uiLanguage: form.uiLanguage.value,
     primaryDomain: form.primaryDomain.value,
   };
@@ -177,10 +227,10 @@ async function openHistory(product) {
   await tracker.openHistoryDialog({ url: product.url, name: product.name, image: AlzaCore.isAlzaImageUrl(product.image) ? product.image : null }, null);
 }
 
-// Buňka s názvem produktu: 📈 otevře historii cen přímo tady, název vede na Alzu
+// Buňka s názvem produktu: ikona grafu otevře historii cen přímo tady, název vede na Alzu
 function productCell(row, product) {
   const td = cell(row, "");
-  const button = smallButton("📈", t("historyButtonTitle"), () => openHistory(product));
+  const button = AlzaIcons.prepend(smallButton("", t("historyButtonTitle"), () => openHistory(product)), "chart");
   button.className = "history-button";
   td.append(button, productLink(product.url, product.name));
   td.title = product.name || "";
@@ -209,7 +259,7 @@ function showActionError(error) {
     toast.addEventListener("click", () => toast.remove());
     document.body.appendChild(toast);
   }
-  toast.textContent = t("actionFailed", error?.message || error);
+  setText(toast, "actionFailed", error?.message || error);
   clearTimeout(showActionError.timeout);
   showActionError.timeout = setTimeout(() => toast.remove(), 10000);
 }
@@ -335,11 +385,11 @@ async function renderProducts() {
 
       productCell(row, { url: info.url, name, image: info.image, domain: info.domain });
       cell(row, lowest === null ? "–" : format(lowest), target && lowest !== null && lowest <= target.price ? "reached" : null);
-      cell(row, target ? `🎯 ${AlzaCore.formatTargetValue(target.price, target, info.domain, AlzaCore.domains[info.domain]?.lang)}` : "–");
+      cell(row, target ? iconText("target", AlzaCore.formatTargetValue(target.price, target, info.domain, AlzaCore.domains[info.domain]?.lang)) : "–");
       cell(row, since ? formatDate(since) : "–");
 
       const actions = document.createElement("span");
-      if (watchedItem) actions.appendChild(smallButton(t("unwatch"), t("unwatchProductTitle"), removeFrom(WATCH_PRODUCTS_KEY, key)));
+      if (watchedItem) actions.appendChild(setText(smallButton("", t("unwatchProductTitle"), removeFrom(WATCH_PRODUCTS_KEY, key)), "unwatch"));
       if (target) actions.appendChild(smallButton(t("removeTarget"), t("removeTargetTitle"), removeFrom(TARGETS_KEY, key)));
       actions.style.display = "inline-flex";
       actions.style.gap = "4px";
@@ -488,7 +538,8 @@ function isValidPriceMeta(key, value, now = Date.now()) {
 
 // Záznam ceny: ceny jen číselné (u akcí { price, icon }), meta klíče (min/max, čas…) jen ve správném tvaru
 function sanitizePriceRecord(record) {
-  const isPriceValue = (price) => Number.isFinite(price) || (isPlainObject(price) && Number.isFinite(price.price) && isOptionalString(price.icon));
+  const isPriceValue = (price) =>
+    Number.isFinite(price) || (isPlainObject(price) && Number.isFinite(price.price) && isOptionalString(price.icon) && isOptionalString(price.code));
   return Object.fromEntries(
     Object.entries(record).filter(([key, price]) =>
       AlzaCore.metaKeys.includes(key) ? isValidPriceMeta(key, price) : PRICE_TYPE_PATTERN.test(key) && isPriceValue(price)
@@ -716,7 +767,7 @@ const DATA_COLUMNS = [
   { label: "colMax", key: "max", value: (product) => product.max },
   { label: "colHistory", key: "history", value: (product) => product.history?.length ?? null },
   { label: "colLastChecked", key: "checkedAt", value: (product) => product.checkedAt },
-  { label: "colTracked", key: "tracked", text: true, value: (product) => product.reasons.join(", ").toLowerCase() },
+  { label: "colTracked", key: "tracked", text: true, value: (product) => product.reasons.map(({ text }) => text).join(", ").toLowerCase() },
   { label: "" },
 ];
 
@@ -807,14 +858,17 @@ async function loadStoredProducts() {
     const recordPrices = product.record ? AlzaCore.toPriceMap(product.record) : {};
     const historyLows = history.map((entry) => AlzaCore.getLowestPrice(entry.p)).filter((price) => price !== null);
     const plausibleLows = history.map((entry) => AlzaCore.getPlausibleMinPrice(entry.p)).filter((price) => price !== null);
+    // Proč se produkt sleduje: { icon, text } – v tabulce ikona a text, k řazení a v bublině jen texty
     const reasons = [
-      ...product.lists.map((name) => `📋 ${name}`),
-      ...(product.watched ? [t("reasonDetail")] : []),
-      ...(product.target ? [`🎯 ${AlzaCore.formatTargetValue(product.target.price, product.target, product.domain, AlzaCore.domains[product.domain]?.lang)}`] : []),
-      ...(product.browsed ? [t("reasonBrowsed")] : []),
+      ...product.lists.map((name) => ({ icon: "list", text: name })),
+      ...(product.watched ? [{ icon: "bell", text: t("reasonDetail") }] : []),
+      ...(product.target
+        ? [{ icon: "target", text: AlzaCore.formatTargetValue(product.target.price, product.target, product.domain, AlzaCore.domains[product.domain]?.lang) }]
+        : []),
+      ...(product.browsed ? [{ icon: "visibility", text: t("reasonBrowsed") }] : []),
     ];
     const stale = staleKeys.has(product.key);
-    if (stale) reasons.push(t("reasonStale"));
+    if (stale) reasons.push({ icon: "cleaning", text: t("reasonStale") });
     return {
       ...product,
       reasons,
@@ -879,18 +933,22 @@ function renderStoredProducts() {
     cell(row, product.history ? String(product.history.length) : "–");
     cell(row, product.checkedAt ? formatDate(product.checkedAt) : "–");
 
-    const trackedBy = cell(row, product.reasons.join(", ") || "–", "tracked-by");
-    trackedBy.title = product.reasons.join("\n");
+    const trackedBy = cell(row, product.reasons.length ? "" : "–", "tracked-by");
+    product.reasons.forEach(({ icon, text }, index) => trackedBy.append(...(index ? [", "] : []), iconText(icon, text)));
+    trackedBy.title = product.reasons.map(({ text }) => text).join("\n");
 
     const hasData = Boolean(product.history || product.record);
     cell(
       row,
       hasData
-        ? smallButton("🗑️", t("deleteProductTitle"), async () => {
-            const note = product.tracked ? t("deleteProductStillTracked") : "";
-            if (!confirm(t("deleteProductConfirm", product.name) + note)) return;
-            await deleteProductData(product);
-          })
+        ? AlzaIcons.prepend(
+            smallButton("", t("deleteProductTitle"), async () => {
+              const note = product.tracked ? t("deleteProductStillTracked") : "";
+              if (!confirm(t("deleteProductConfirm", product.name) + note)) return;
+              await deleteProductData(product);
+            }),
+            "delete"
+          )
         : ""
     );
   });
@@ -1120,7 +1178,7 @@ let wipeBackup = null;
 
 // Text tlačítka podle kroku (i po změně jazyka); povolené jen s napsaným potvrzovacím slovem
 function updateWipeButton() {
-  wipeButton.textContent = t(wipeBackup ? "wipeButtonConfirm" : "wipeButton");
+  setText(wipeButton, wipeBackup ? "wipeButtonConfirm" : "wipeButton");
   wipeButton.disabled = !isWipeConfirmed();
 }
 
@@ -1234,11 +1292,14 @@ async function renderLists() {
         cell(row, list.since ? formatDate(list.since) : "–");
         cell(
           row,
-          smallButton(t("unwatch"), t("unwatchListTitle"), async () => {
-            if (!confirm(t("unwatchListConfirm", list.name))) return;
-            openLists.delete(list.key);
-            await removeFrom(WATCH_LISTS_KEY, list.key)();
-          })
+          setText(
+            smallButton("", t("unwatchListTitle"), async () => {
+              if (!confirm(t("unwatchListConfirm", list.name))) return;
+              openLists.delete(list.key);
+              await removeFrom(WATCH_LISTS_KEY, list.key)();
+            }),
+            "unwatch"
+          )
         );
       },
       detail: () => createListProducts(list, histories),
@@ -1337,8 +1398,8 @@ async function renderLog() {
         cell(row, expand).append(formatDateTime(run.start));
         cell(row, getRunTrigger(run));
         cell(row, `${run.items.length}/${run.total ?? run.items.length}`);
-        cell(row, run.changed.length ? `🔔 ${run.changed.length}` : "–");
-        cell(row, run.failed.length ? `⚠️ ${run.failed.length}` : "–");
+        cell(row, run.changed.length ? iconText("bell", String(run.changed.length)) : "–");
+        cell(row, run.failed.length ? iconText("warning", String(run.failed.length), true) : "–");
         cell(row, run.skipped ? String(run.skipped) : "–");
         cell(row, run.end ? t("durationSeconds", Math.max(1, Math.round((run.end - run.start) / 1000))) : "–");
         cell(row, getRunStatus(run));

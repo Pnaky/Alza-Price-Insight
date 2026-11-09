@@ -41,7 +41,7 @@
         margin: 0 auto;
       }
 
-      /* Výběr jazyka vpravo v záhlaví – 🌐 jako v nastavení, ať je jasné, co se tu volí */
+      /* Výběr jazyka vpravo v záhlaví – ikona glóbu jako v nastavení, ať je jasné, co se tu volí */
       .language {
         display: inline-flex;
         align-items: center;
@@ -53,10 +53,10 @@
 
       header select {
         padding: 5px 8px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid var(--head-btn-border);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #eef2f7;
+        background: var(--head-btn-bg);
+        color: var(--head-btn-fg);
         font: inherit;
         font-size: 13px;
       }
@@ -67,9 +67,10 @@
 
       .card {
         padding: 34px 38px 30px;
+        border: 1px solid var(--card-border);
         border-radius: 16px;
         background: #fff;
-        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--card-shadow);
       }
 
       h1 {
@@ -145,8 +146,8 @@
       }
 
       .steps span.done {
-        border-color: var(--lime);
-        color: #5b6500;
+        border-color: var(--ok);
+        color: var(--ok);
       }
 
       .step-of {
@@ -470,6 +471,12 @@
         color: #fff;
       }
 
+      /* Ikona na tmavém tlačítku v barvě textu (výchozí navy by na černé nebyla vidět) */
+      button.primary .alza-price-tracker-icon,
+      .button.primary .alza-price-tracker-icon {
+        color: inherit;
+      }
+
       button.primary:hover,
       .button.primary:hover {
         background: #333;
@@ -533,7 +540,7 @@
         <img src="../../img/icon-48.png" alt="" />
         <div><span class="app-title">Alza Price Insight</span><span class="app-sub" data-w="subtitle">Průvodce nastavením</span></div>
         <label class="language" id="languageLabel"
-          ><span aria-hidden="true">🌐</span>
+          ><span aria-hidden="true" data-icon="language"></span>
           <select id="language">
             <option value="auto" data-o="languageAuto">automaticky</option>
             <option value="cs" lang="cs">Čeština</option>
@@ -574,7 +581,7 @@
           </div>
           <p class="option-help" data-w="pickHelp"></p>
           <p class="lead" data-w="checkLead" style="margin-top: 22px"></p>
-          <button type="button" class="primary big" id="runCheck" data-w="checkButton">🔍 Ověřit</button>
+          <button type="button" class="primary big" id="runCheck" data-w="checkButton">Ověřit</button>
           <ul class="checks" id="checks">
             <li data-check="login"><span class="mark"></span><div><div class="check-name" data-w="checkLogin"></div><div class="check-status"></div><p class="check-help"></p><div class="check-actions"></div></div></li>
             <li data-check="vat"><span class="mark"></span><div><div class="check-name" data-w="checkVat"></div><div class="check-status"></div><p class="check-help"></p></div></li>
@@ -714,6 +721,7 @@
     </div>
 
     <script src="../shared/core.js"></script>
+    <script src="../shared/icons.js"></script>
     <script src="../shared/store.js"></script>
     <script src="../shared/product-page.js"></script>
     <script src="../options/options-texts.js"></script>

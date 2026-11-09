@@ -21,7 +21,7 @@
         </div>
       </header>
 
-      <p class="machine">🤖 Ez egy cseh nyelvről készült gépi fordítás. Eltérés esetén a <a href="help.html" lang="cs">cseh változat</a> az irányadó.</p>
+      <p class="machine"><span data-icon="translate"></span> Ez egy cseh nyelvről készült gépi fordítás. Eltérés esetén a <a href="help.html" lang="cs">cseh változat</a> az irányadó.</p>
 
       <nav>
         <a href="#zaciname">Kezdés</a>
@@ -37,8 +37,8 @@
       </nav>
 
       <section id="zaciname">
-        <h2>🚀 Kezdés</h2>
-        <p class="tip">Telepítés után megnyílik a <strong>🧭 Beállítási varázsló</strong>: kiválasztja a fő Alzát, egy kattintással ellenőrzi a bejelentkezést és az ÁFÁ-s árakat (minden tételnél leírja, mi van kész és mi a teendő), és végigvezet a figyelésen és az értesítéseken. Újra a beállításokban indíthatja (🧭 Beállítási varázsló jobbra fent), a fő Alzát a beállításokban a nyelv mellett módosíthatja.</p>
+        <h2><span data-icon="flag"></span> Kezdés</h2>
+        <p class="tip">Telepítés után megnyílik a <strong><span data-icon="explore"></span> Beállítási varázsló</strong>: kiválasztja a fő Alzát, egy kattintással ellenőrzi a bejelentkezést és az ÁFÁ-s árakat (minden tételnél leírja, mi van kész és mi a teendő), és végigvezet a figyelésen és az értesítéseken. Újra a beállításokban indíthatja (<span data-icon="explore"></span> Beállítási varázsló jobbra fent), a fő Alzát a beállításokban a nyelv mellett módosíthatja.</p>
         <ol>
           <li><strong>Jelentkezzen be az Alzán.</strong> Az árak csak bejelentkezett felhasználónál mentődnek – az Alza mindenkinek más árakat mutat (AlzaPlus+, benefit, B2B).</li>
           <li><strong>Az árak ÁFA-val jelenjenek meg.</strong> Ha az ÁFA nélküli árak megjelenítése be van kapcsolva, az árak nem mentődnek, hogy ne keveredjenek.</li>
@@ -54,14 +54,17 @@
       </section>
 
       <section id="seznam">
-        <h2>📋 Bevásárlólista</h2>
+        <h2><span data-icon="list"></span> Bevásárlólista</h2>
         <ul>
           <li><strong>Minden ár a tételnél</strong> – a normál ár mellett az akciós ár, a kuponkódos ár, az AlzaPlus+ ár, a cashback… a legalacsonyabbtól rendezve.</li>
+          <li><strong>Az árra mutatva</strong> megjelenik egy kártya: az ár neve (Benefit, Kuponkód, Black Friday…), a különbség a magasabb árakhoz képest, a minimum és a maximum, kuponkódnál pedig a kód Másolás gombbal.</li>
           <li><strong>Az árra vagy az elérhetőségre kattintva</strong> megnyílnak a termék árelőzményei.</li>
-          <li><strong>Nyilak az árnál:</strong> <span class="badge good">▼</span> most olcsóbb a szokásosnál, <span class="badge high">▲</span> drágább a szokásosnál (részletek az egérrel rámutatva). 🎯 = célárat állított be, zölden = elérte.</li>
+          <li><strong>Nyilak az árnál:</strong> <span class="badge good">▼</span> most olcsóbb a szokásosnál, <span class="badge high">▲</span> drágább a szokásosnál (részletek az egérrel rámutatva). <span data-icon="target"></span> = célárat állított be, zölden = elérte.</li>
           <li><strong>Változás legutóbb óta</strong> – az utolsó betöltés óta olcsóbb vagy drágább tételeknél látszik az eredeti ár és a különbség.</li>
-          <li><strong>Több darab</strong> – az árak darabárak maradnak, tőlük balra a „3 db összesen“ oszlop a végösszeggel (mennyiségi kedvezménnyel együtt). A sor nem mozdul el.</li>
-          <li><strong>Feltételes ár és kosár</strong> – ha a legalacsonyabb ár csak kuponkóddal, AlzaPlus+-szal vagy cashback / beszámítás után érvényes, a bővítmény figyelmeztet, mielőtt a listából a kosárba teszi (kuponkódnál a terméket a termékoldalról kell a kosárba tenni). Ettől még hozzáadhatja.</li>
+          <li><strong>Több darab</strong> – az árak darabárak maradnak, tőlük balra a „3 db összesen“ oszlop a végösszeggel (mennyiségi kedvezménnyel együtt). Ha már érvényes a mennyiségi kedvezmény egy lépcsője, az árak előtt zölden az adott darabszámhoz tartozó darabár látható – rámutatva a lépcsők táblázata és a megtakarítás. A sor nem mozdul el.</li>
+          <li><strong>Feltételes ár és kosár</strong> – ha a legalacsonyabb ár csak kuponkóddal, AlzaPlus+-szal vagy cashback / beszámítás után érvényes, a bővítmény figyelmeztet, mielőtt a listából a kosárba teszi Ettől még hozzáadhatja. Kuponkódnál a figyelmeztetésben ott a kód Másolás gombbal és a <strong>Kosárba kóddal</strong> gomb, amely a terméket a kosárba teszi, és a kódot azonnal érvényesíti (mint a termékoldalon a „Vásárlás kóddal”).</li>
+          <li><strong>Kódok ellenőrzése a kosárban</strong> – ha a kosárban olyan termék van, amelyhez a bővítmény a termékoldalról ismer kuponkódot, de a kedvezmény hiányzik, a „Folytatás” gombra kattintva figyelmeztet. A kódot egy kattintással beváltja, vagy folytatja nélküle.</li>
+          <li><strong>Értékelés a kosárban</strong> – a kosár minden tételének ára alatt ugyanaz, mint a listában: ▼▲ a szokásos árhoz képest, érdemes várni, gyanús kedvezmény, olcsóbb kibontott / újszerű darab. Mennyiségi kedvezménynél a darabszám alatt „+1 db → alacsonyabb darabár” gomb van, amely a darabot azonnal hozzáadja. Részletek az elemre mutatva.</li>
         </ul>
         <h3>Sáv a lista felett</h3>
         <ul>
@@ -73,19 +76,22 @@
       </section>
 
       <section id="detail">
-        <h2>🔎 Termékoldal</h2>
-        <p>A termékoldal bal oszlopában (a galéria alatt) található a <strong>📈 Árelőzmények</strong> kártya:</p>
+        <h2><span data-icon="search"></span> Termékoldal</h2>
+        <p>A termékoldal bal oszlopában (a galéria alatt) található a <strong><span data-icon="chart"></span> Árelőzmények</strong> kártya:</p>
         <ul>
           <li><strong>Jelenleg</strong> – a legalacsonyabb ár, amelyet kifizethet, alatta az értékelés a szokásos árhoz képest.</li>
           <li><strong>Darabár</strong> – a valós darabár kiszereléses termékeknél (előzmény nélkül is).</li>
           <li><strong>Szokásos ár, legalacsonyabb 30 nap alatt, legalacsonyabb ár</strong> és egy kis grafikon – a grafikonra kattintva megnyílik a teljes előzmény.</li>
-          <li><strong>🔔 Figyelés a háttérben</strong> – a terméket rendszeresen ellenőrzi akkor is, ha nincs egyik listán sem.</li>
-          <li><strong>🎯 Célár beállítása</strong> – lásd <a href="#cil">Célár</a>.</li>
+          <li><strong>Árösszehasonlító ikon</strong> (Árukereső) – új lapon megkeresi a terméket a neve alapján. Az ikon közvetlenül az árösszehasonlító oldaláról töltődik be; ha nem töltődik be, a neve jelenik meg.</li>
+          <li><strong>Ajánlat másolása</strong> – a vágólapra másolja a nevet, az árat, a kódos vagy AlzaPlus+ árat, a szokásos árat, a 30 napos legalacsonyabb árat és a linket. Csetbe vagy közösségi oldalra.</li>
+          <li><strong>Mennyiségi kedvezmény</strong> – a kedvezményes lépcsők táblázata (mennyibe kerül egy darab 1, 2, 3… darabnál) azonnal látható a kosár gomb feletti buborékban; az Alza csak akkor mutatja, ha a termék már a kosárban van. Ha az árak nem mentődnek (pl. bejelentkezés nélkül), a kártya megírja, miért.</li>
+          <li><strong><span data-icon="bell"></span> Figyelés a háttérben</strong> – a terméket rendszeresen ellenőrzi akkor is, ha nincs egyik listán sem.</li>
+          <li><strong><span data-icon="target"></span> Célár beállítása</strong> – lásd <a href="#cil">Célár</a>.</li>
         </ul>
       </section>
 
       <section id="historie">
-        <h2>📈 Árelőzmények</h2>
+        <h2><span data-icon="chart"></span> Árelőzmények</h2>
         <p>Az előzmények ablakát a listában az árra kattintva vagy a termékoldalon a „Teljes előzmény és grafikon“ gombbal nyithatja meg.</p>
         <ul>
           <li><strong>Csempék felül:</strong> legalacsonyabb ár, legmagasabb eladási és listaár, legalacsonyabb ár 30 nap alatt, szokásos ár, a figyelés kezdete és az utolsó ellenőrzés.</li>
@@ -106,7 +112,7 @@
       </section>
 
       <section id="dobra-cena">
-        <h2>✅ Valóban jó az ár?</h2>
+        <h2><span data-icon="check-circle"></span> Valóban jó az ár?</h2>
         <h3>Szokásos ár és értékelés</h3>
         <p>
           A szokásos ár az az ár, amelyen a termék az elmúlt 180 napban a legtovább volt kapható – egy rövid akció nem húzza le. A jelenlegi ár ezzel
@@ -119,17 +125,19 @@
         </ul>
         <p>Rámutatva azt is látja, hányszor volt a termék a szokásosnál olcsóbb, és mennyi ideig.</p>
         <h3>Akciók ritmusa – érdemes várni?</h3>
-        <p>Ha a terméknek az elmúlt 180 napban legalább 3 akciója volt, a bővítmény kiszámolja, milyen gyakran, mennyi ideig és mekkora kedvezménnyel akciós (pl. „Akció nagyjából 6 hét alatt egyszer, általában −15 %, 7 nap ideig“), és mikor várható a következő. Ha a következő akció 3 héten belül várható, megjelenik az <strong>⏳ érdemes várni</strong> jelzés – a listában az árnál és szűrőként, a termékoldalon kékkel az előzmények kártyáján. Rendszertelen akcióknál a következő akciót nem jelzi előre.</p>
+        <p>Ha a terméknek az elmúlt 180 napban legalább 3 akciója volt, a bővítmény kiszámolja, milyen gyakran, mennyi ideig és mekkora kedvezménnyel akciós (pl. „Akció nagyjából 6 hét alatt egyszer, általában −15 %, 7 nap ideig“), és mikor várható a következő. Ha a következő akció 3 héten belül várható, megjelenik az <strong><span data-icon="hourglass"></span> érdemes várni</strong> jelzés – a listában az árnál és szűrőként, a termékoldalon kékkel az előzmények kártyáján. Rendszertelen akcióknál a következő akciót nem jelzi előre.</p>
         <h3>Ugyanaz a termék más állapotban</h3>
         <p>Az Alza egyes termékeket kibontott vagy újszerű állapotban is árul (minden állapot külön termék). Ha más állapot olcsóbb annál a legalacsonyabb árnál, amelyet ezért a darabért fizet (AlzaPlus+-szal és benefittel együtt), a termékoldal kártyáján és a listában az árra mutatva látja (pl. „Más állapotban olcsóbb: Újszerű 89 990 Ft (3 200 Ft-tal olcsóbb)“); a listában a <em>Más állapotban olcsóbb</em> szűrő is elérhető.</p>
+        <h3>Kedvezményszűrő a kategóriákban</h3>
+        <p>A bal oldali szűrőpanelen (fent a Price Insight blokk) válassza a <strong>Kedvezmény legalább X %</strong> értéket, vagy jelölje be a <strong>Csak kuponnal</strong> (AlzaPlus+ vagy kuponkódos ár) vagy a <strong>Mennyiségi kedvezménnyel</strong> lehetőséget. A bővítmény betölti a teljes listát, és elrejti a nem megfelelő termékeket. A kedvezményt a legalacsonyabb fizetendő árból számolja – AlzaPlus+-szal és kuponkóddal együtt. Előzménnyel rendelkező termékeknél a szokásos árhoz hasonlítja, így a régóta nem érvényes áthúzott ár nem fújja fel a kedvezményt; a többinél az Alza áthúzott árához. Nagy listából nagyjából 500 termék töltődik be, a többi „A többi betöltése” gombbal. A beállításokban kapcsolható ki (Kategórialisták → Kedvezményszűrő).</p>
         <h3>Gyanús kedvezmény</h3>
         <ul>
           <li><strong>30 napon belül olcsóbb:</strong> a termék „akciós“, de az elmúlt 30 napban olcsóbban is meg lehetett venni, mint most.</li>
-          <li><strong>Kitalált áthúzott ár:</strong> az áthúzott áron a termék a figyelés alatt soha nem volt kapható, vagy utoljára több mint 90 napja.</li>
+          <li><strong>Az áthúzott ár régóta nem volt érvényben:</strong> az áthúzott áron a termék a figyelés alatt soha nem volt kapható, vagy utoljára több mint 90 napja.</li>
         </ul>
         <p>A gyanús kedvezményeket a lista „Gyanús kedvezmény“ szűrőjében, az előzményekben narancssárga sávként és a termékoldal kártyáján találja.</p>
-        <h3>⚠️ Gyanús ár</h3>
-        <p>Ha az Alza megváltoztatja a weboldalát, a bővítmény rossz számot olvashat be, például havi részletet ár helyett. Az ilyen ár nem rejtődik el, hogy ne maradjon le egy valódi kedvezményről. ⚠️ jellel és szaggatott kerettel viszont meg van jelölve, egérrel fölé állva látszik az oka:</p>
+        <h3><span data-icon="warning"></span> Gyanús ár</h3>
+        <p>Ha az Alza megváltoztatja a weboldalát, a bővítmény rossz számot olvashat be, például havi részletet ár helyett. Az ilyen ár nem rejtődik el, hogy ne maradjon le egy valódi kedvezményről. <span data-icon="warning"></span> jellel és szaggatott kerettel viszont meg van jelölve, egérrel fölé állva látszik az oka:</p>
         <ul>
           <li><strong>A következő ár felénél kevesebb:</strong> az ár kisebb, mint ugyanazon ellenőrzés legközelebbi magasabb árának fele. Nem számít bele a minimumba, a változás nyilába, az ár értékelésébe és a gyanús kedvezménybe.</li>
           <li><strong>A szokásos ár felénél kevesebb:</strong> a legalacsonyabb ár az elmúlt 30 nap szokásos árának fele alá esett. Normálisan számít, csak meg van jelölve. Ha az ár megmarad, a figyelmeztetés eltűnik.</li>
@@ -139,9 +147,9 @@
       </section>
 
       <section id="cil">
-        <h2>🎯 Célár</h2>
+        <h2><span data-icon="target"></span> Célár</h2>
         <ol>
-          <li>Nyissa meg a termék árelőzményeit (vagy a termékoldalon kattintson a „🎯 Célár beállítása“ gombra).</li>
+          <li>Nyissa meg a termék árelőzményeit (vagy a termékoldalon kattintson a „<span data-icon="target"></span> Célár beállítása“ gombra).</li>
           <li>Adja meg az árat, amelyen vásárolni szeretne, és kattintson a <strong>Figyelés</strong> gombra.</li>
         </ol>
         <p>
@@ -156,26 +164,29 @@
       </section>
 
       <section id="hlidani">
-        <h2>🔔 Háttérfigyelés és értesítések</h2>
+        <h2><span data-icon="bell"></span> Háttérfigyelés és értesítések</h2>
         <ul>
-          <li><strong>Figyelt lista:</strong> nyissa meg a listát, és a bővítmény felugró ablakában kattintson a <strong>🔔 Lista figyelése</strong> gombra, vagy kattintson a csengőre a lista fülén. Az egész lista figyelve van; az újonnan hozzáadott tételek a lista következő megnyitásakor kerülnek a figyelésbe.</li>
-          <li><strong>Figyelt termék:</strong> a termékoldalon a „🔔 Figyelés a háttérben“ gomb, vagy egy beállított célár.</li>
-          <li>Az ellenőrzés <strong>óránként</strong> fut, amíg a böngésző fut. A beállításokban 3, 6 vagy 12 óránkéntire, illetve <strong>naponta egyszer a megadott időpontban</strong> futóra módosíthatja – ha a böngésző akkor nincs megnyitva, néhány perccel az indítása után fut le. A következő időpontját a felugró ablak mutatja. Azonnal elindíthatja a felugró ablak ▶️ Ellenőrzés gombjával.</li>
+          <li><strong>Figyelt lista:</strong> nyissa meg a listát, és a bővítmény felugró ablakában kattintson a <strong><span data-icon="bell"></span> Lista figyelése</strong> gombra, vagy kattintson a csengőre a lista fülén. Az egész lista figyelve van; az újonnan hozzáadott tételek a lista következő megnyitásakor kerülnek a figyelésbe.</li>
+          <li><strong>Figyelt termék:</strong> a termékoldalon a „<span data-icon="bell"></span> Figyelés a háttérben“ gomb, vagy egy beállított célár.</li>
+          <li>Az ellenőrzés <strong>óránként</strong> fut, amíg a böngésző fut. A beállításokban 3, 6 vagy 12 óránkéntire, illetve <strong>naponta egyszer a megadott időpontban</strong> futóra módosíthatja – ha a böngésző akkor nincs megnyitva, néhány perccel az indítása után fut le. A következő időpontját a felugró ablak mutatja. Azonnal elindíthatja a felugró ablak <span data-icon="refresh"></span> Ellenőrzés gombjával.</li>
           <li><strong>A szám az ikonon</strong> = a felugró ablak legutóbbi megnyitása óta változott termékek száma, a változások a felugró ablakban láthatók. Színe: <strong>zöld</strong> = legalább egy termék olcsóbb lett, raktárra érkezett, új akciót kapott vagy elérte a célárat, <strong>piros</strong> = egy sem lett olcsóbb, de legalább egy drágult, <strong>szürke</strong> = csak az értékesítés vége vagy nem elérhető. <strong>A kék szám</strong> = törlésre javasolt régi termékek.</li>
-          <li><strong>Változások a felugró ablakban:</strong> az árcsökkenés, a raktárra érkezés, az új akció és az elért célár zölden, az áremelés pirosan (áremelésről nem jön értesítés), az értékesítés vége és a nem elérhetőség szürkén. Az új változások színes háttérrel, a már látottak csak színes szöveggel jelennek meg. A figyelt listáknál látja, hány termék lett az elmúlt 7 napban olcsóbb (▼) és drágább (▲). A lista figyelését a megnyitott listán a felugró ablak 🔕 Figyelés leállítása gombjával vagy a beállításokban (Figyelt listák fül) kapcsolja ki. Ha több Alzát figyel, a listák, a változások és a figyelt termékek <strong>CZ / SK / HU</strong> címkét kapnak (az egérmutatót fölé víve az Alza címe látszik). A súgó a beállításokban érhető el (❓ jobb felül).</li>
+          <li><strong>Változások a felugró ablakban:</strong> az árcsökkenés, a raktárra érkezés, az új akció és az elért célár zölden, az áremelés pirosan (áremelésről nem jön értesítés), az értékesítés vége és a nem elérhetőség szürkén. Az új változások színes háttérrel, a már látottak csak színes szöveggel jelennek meg. A figyelt listáknál látja, hány termék lett az elmúlt 7 napban olcsóbb (▼) és drágább (▲). A lista figyelését a megnyitott listán a felugró ablak <span data-icon="bell-off"></span> Figyelés leállítása gombjával vagy a beállításokban (Figyelt listák fül) kapcsolja ki. Ha több Alzát figyel, a listák, a változások és a figyelt termékek <strong>CZ / SK / HU</strong> címkét kapnak (az egérmutatót fölé víve az Alza címe látszik). A súgó a beállításokban érhető el (<span data-icon="help"></span> jobb felül).</li>
+          <li><strong>Kuponkódok a felugró ablakban:</strong> az elmúlt 30 napban látott termékek kódjai (termékoldal, lista, háttérellenőrzés) – egy sorba összecsukva, kattintásra kinyílik: termék, kód, kóddal érvényes ár és Másolás gomb. Ha egy figyelt terméknél új kód jelenik meg, az értesítésben a kód is ott van.</li>
+          <li><strong>Figyelés vásárlás után:</strong> a bővítmény a „Rendeléseim” oldalról átveszi az elmúlt 14 napban vásárolt termékeket, és figyeli az árukat. Ha olcsóbbak lesznek, értesítést kap: „X-ért vásárolta, most Y. D-ig visszaküldheti és újra megveheti.” Az interneten vásárolt termék 14 napon belül visszaküldhető. A beállításokban kapcsolható ki (Ár figyelése vásárlás után); a rendeléseket csak a böngészője olvassa.</li>
+          <li><strong>Cashback emlékeztető:</strong> ha olyan terméket vásárol, amelynél a termékoldalon „Cashback ár” szerepelt, a bővítmény az akció oldaláról kiolvassa a gyártói regisztráció határidejét. Értesíti, amikor a vásárlás regisztrálható (egyes akciók pl. 30 nap várakozást kérnek), és egy héttel a határidő előtt; kattintásra megnyílnak az akció feltételei. A „Regisztrálandó cashback” lista a bővítmény ablakában van – regisztráció után pipálja ki a Kész gombbal. A határidőt az akció szövegéből olvassuk; ha nem ismerjük fel, az értesítés a feltételekre irányítja. Az akció határidőit – meddig vásároljon és meddig regisztráljon – már vásárlás előtt látja: a listában a cashback ár tooltipjében (a feltételek linkjével) és a termékoldalon a cashback sor alatt. A beállításokban kapcsolható ki (Emlékeztető a cashback regisztrációjára).</li>
         </ul>
         <p>A beállításokban kiválaszthatja, miről szeretne tudni: árcsökkenés (akár hány százaléktól), új árak (akció, kód, cashback), elérhetőség és csendes órák.</p>
-        <p class="tip">Nem jönnek értesítések? A beállításokban kattintson a <strong>🔔 Értesítések kipróbálása</strong> gombra. Ha nem érkeznek meg, ellenőrizze a Windows „Ne zavarjanak“ / Fókuszsegéd beállítását és a böngésző (Chrome, Firefox) értesítési engedélyét.</p>
+        <p class="tip">Nem jönnek értesítések? A beállításokban kattintson a <strong><span data-icon="bell"></span> Értesítések kipróbálása</strong> gombra. Ha nem érkeznek meg, ellenőrizze a Windows „Ne zavarjanak“ / Fókuszsegéd beállítását és a böngésző (Chrome, Firefox) értesítési engedélyét.</p>
       </section>
 
       <section id="za-kus">
-        <h2>⚖️ Valós darabár</h2>
+        <h2><span data-icon="compare"></span> Valós darabár</h2>
         <p>
           Az Alza a darabárat csak a mindenki számára érvényes árból számolja – az AlzaPlus+ kedvezményt és a kuponkódot nem veszi figyelembe. Készletezéskor
           így nem derül ki, melyik kiszerelés a legelőnyösebb. A bővítmény kiszámolja:
         </p>
         <ul>
-          <li><strong>Kategóriák és keresés:</strong> az Alza egységára előtt narancssárga címke mutatja a valós árat, pl. <span class="unit">35 Ft/db</span>. A <strong>„Rendezés valós egységár szerint“</strong> gomb betölti az egész kategóriát és rendezi.</li>
+          <li><strong>Kategóriák és keresés:</strong> az Alza egységára előtt narancssárga címke mutatja a valós árat, pl. <span class="unit">35 Ft/db</span>. Az Alza rendezési fülei mellett a <strong>„Egységár”</strong> fül (a bővítmény ikonjával) betölti az egész kategóriát és rendezi (újabb kattintással a rendezés megszűnik).</li>
           <li><strong>Bevásárlólista:</strong> darabár minden árnál rámutatva, és „Legolcsóbb darabár“ rendezés.</li>
           <li><strong>Termékoldal:</strong> „Darabár“ csempe a darabárral minden ártípusnál. A kiszerelés kiválasztásakor minden méretnél jobb oldalt látszik a darabár (hosszúságnál a méterár) – a legelőnyösebb zölden, a legdrágább pirosan. A kiválasztott méret egységárát (a legelőnyösebb / legdrágább jelöléssel együtt) a bezárt választó is azonnal mutatja.</li>
         </ul>
@@ -183,22 +194,22 @@
       </section>
 
       <section id="nastaveni">
-        <h2>⚙️ Beállítások és adatok</h2>
-        <p>A beállításokat a bővítmény felugró ablakában a ⚙️ ikonnal nyithatja meg.</p>
+        <h2><span data-icon="settings"></span> Beállítások és adatok</h2>
+        <p>A beállításokat a bővítmény felugró ablakában a <span data-icon="settings"></span> ikonnal nyithatja meg.</p>
         <ul>
           <li><strong>Böngészés közbeni árak mentése</strong> (Árkövetés) – azoknak a termékeknek az árai, amelyeket a kategórialistákban, a keresésben, a termékoldalon, a körhintákban és a kezdőlapon lát, csendben az előzményekbe mentődnek akkor is, ha nem figyeli őket. Ha visszatér a termékhez, látni fogja, hogyan alakult az ára. Semmi nem jelenik meg, és nincs értesítés. Alapértelmezés szerint bekapcsolva.</li>
-          <li><strong>Mentett adatok</strong> – az összes előzménnyel rendelkező termék áttekintése, és hogy miért mentődnek (📋 lista, 🔔 termékoldal, 🎯 célár, 👀 böngészés). Keresés, szűrők, árelőzmények a 📈 gombbal és egy termék adatainak törlése.</li>
+          <li><strong>Mentett adatok</strong> – az összes előzménnyel rendelkező termék áttekintése, és hogy miért mentődnek (<span data-icon="list"></span> lista, <span data-icon="bell"></span> termékoldal, <span data-icon="target"></span> célár, <span data-icon="visibility"></span> böngészés). Keresés, szűrők, árelőzmények a <span data-icon="chart"></span> gombbal és egy termék adatainak törlése.</li>
           <li><strong>Mentés (JSON)</strong> – minden adat fájlba; a <strong>Visszaállítás mentésből</strong> visszatölti őket (semmit sem töröl, az előzmények összefésülődnek).</li>
           <li><strong>Előzmények (CSV)</strong> – minden ár Excelhez.</li>
           <li><strong>Régi adatok törlése</strong> – törli azokat a termékeket, amelyeket nem figyel, és több mint 3 hónapja nem nyitotta meg és nem voltak ellenőrizve (a böngészés közben mentetteket csak egy év után). A bővítmény maga is javasolja őket kék számmal az ikonon és értesítéssel a felugró ablakban.</li>
           <li><strong>Minden adat törlése</strong> – csak a TÖRLÉS szó beírása után; előtte automatikusan letöltődik egy biztonsági mentés.</li>
-          <li><strong>Diagnosztika</strong> – ha valami nem működik, kattintson a <strong>🐞 Hiba bejelentése</strong> gombra: megnyílik egy előre kitöltött bejelentés a GitHubon (verzió, böngésző, utolsó hibák). Vagy töltse le a diagnosztikát, és küldje el a szerzőnek (verzió, beállítások, ellenőrzési napló és hibák; jelszavak és cookie-k nélkül).</li>
+          <li><strong>Diagnosztika</strong> – ha valami nem működik, kattintson a <strong><span data-icon="bug"></span> Hiba bejelentése</strong> gombra: megnyílik egy előre kitöltött bejelentés a GitHubon (verzió, böngésző, utolsó hibák). Vagy töltse le a diagnosztikát, és küldje el a szerzőnek (verzió, beállítások, ellenőrzési napló és hibák; jelszavak és cookie-k nélkül).</li>
         </ul>
         <p class="tip">Minden adat csak az Ön böngészőjében marad. A bővítmény kizárólag az Alza weboldalaival kommunikál, máshová semmit sem küld.</p>
       </section>
 
       <section id="faq">
-        <h2>❓ Gyakori kérdések</h2>
+        <h2><span data-icon="help"></span> Gyakori kérdések</h2>
         <details>
           <summary>Az árak nem mentődnek / az ellenőrzés hibát jelez</summary>
           <p>
@@ -230,11 +241,13 @@
           <summary>Miért vannak a Mentett adatok között olyan termékek, amelyeket nem figyelek?</summary>
           <p>
             Ezek a megnyitott bevásárlólisták termékei, a „Böngészés közbeni árak mentése“ beállítással pedig azok a termékek is, amelyeket az Alza
-            böngészése közben látott (👀). Az előzményeik akkor jönnek jól, ha visszatér a termékhez. A böngészés közbeni mentést a beállításokban
+            böngészése közben látott (<span data-icon="visibility"></span>). Az előzményeik akkor jönnek jól, ha visszatér a termékhez. A böngészés közbeni mentést a beállításokban
             kapcsolhatja ki; a nem figyelt termékeket a bővítmény maga javasolja törlésre (a böngészés közben mentetteket csak egy év után).
           </p>
         </details>
       </section>
     </main>
+    <script src="../shared/icons.js"></script>
+    <script src="help.js"></script>
   </body>
 </html>

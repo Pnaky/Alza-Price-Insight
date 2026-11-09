@@ -21,7 +21,7 @@
         </div>
       </header>
 
-      <p class="machine">🤖 Toto je strojový preklad z češtiny. Ak niečo nesedí, platí <a href="help.html" lang="cs">česká verzia</a>.</p>
+      <p class="machine"><span data-icon="translate"></span> Toto je strojový preklad z češtiny. Ak niečo nesedí, platí <a href="help.html" lang="cs">česká verzia</a>.</p>
 
       <nav>
         <a href="#zaciname">Začíname</a>
@@ -37,8 +37,8 @@
       </nav>
 
       <section id="zaciname">
-        <h2>🚀 Začíname</h2>
-        <p class="tip">Po inštalácii sa otvorí <strong>🧭 Sprievodca nastavením</strong>: vyberiete hlavnú Alzu, jedným kliknutím overí prihlásenie a ceny s DPH (pri každej položke napíše, čo je hotové a čo urobiť) a prevedie vás sledovaním a notifikáciami. Znova ho spustíte v nastaveniach (🧭 Sprievodca vpravo hore), hlavnú Alzu zmeníte v nastaveniach pri jazyku.</p>
+        <h2><span data-icon="flag"></span> Začíname</h2>
+        <p class="tip">Po inštalácii sa otvorí <strong><span data-icon="explore"></span> Sprievodca nastavením</strong>: vyberiete hlavnú Alzu, jedným kliknutím overí prihlásenie a ceny s DPH (pri každej položke napíše, čo je hotové a čo urobiť) a prevedie vás sledovaním a notifikáciami. Znova ho spustíte v nastaveniach (<span data-icon="explore"></span> Sprievodca vpravo hore), hlavnú Alzu zmeníte v nastaveniach pri jazyku.</p>
         <ol>
           <li><strong>Prihláste sa na Alze.</strong> Ceny sa ukladajú len prihláseným – Alza ukazuje každému iné ceny (AlzaPlus+, benefity, B2B).</li>
           <li><strong>Majte zapnuté ceny s DPH.</strong> S voľbou „Zobrazovať ceny bez DPH“ sa ceny neukladajú, aby sa nepomiešali.</li>
@@ -54,14 +54,17 @@
       </section>
 
       <section id="seznam">
-        <h2>📋 Nákupný zoznam</h2>
+        <h2><span data-icon="list"></span> Nákupný zoznam</h2>
         <ul>
           <li><strong>Všetky ceny pri položke</strong> – okrem bežnej ceny aj akciová cena, cena so zľavovým kódom, s AlzaPlus+, cashback… zoradené od najnižšej.</li>
+          <li><strong>Po prejdení myšou na cenu</strong> sa ukáže karta: názov ceny (Benefit, Zľavový kód, Black Friday…), rozdiel oproti vyšším cenám, minimum a maximum a pri zľavovom kóde kód s tlačidlom Kopírovať.</li>
           <li><strong>Klik na cenu alebo dostupnosť</strong> otvorí históriu cien produktu.</li>
-          <li><strong>Šípky pri cene:</strong> <span class="badge good">▼</span> je teraz lacnejšie ako obvykle, <span class="badge high">▲</span> drahšie ako obvykle (podrobnosti po prejdení myšou). 🎯 = máte nastavenú cieľovú cenu, nazeleno = je dosiahnutá.</li>
+          <li><strong>Šípky pri cene:</strong> <span class="badge good">▼</span> je teraz lacnejšie ako obvykle, <span class="badge high">▲</span> drahšie ako obvykle (podrobnosti po prejdení myšou). <span data-icon="target"></span> = máte nastavenú cieľovú cenu, nazeleno = je dosiahnutá.</li>
           <li><strong>Zmeny od minula</strong> – pri položkách, ktoré od posledného načítania zlacneli alebo zdraželi, je pôvodná cena a rozdiel.</li>
-          <li><strong>Viac kusov</strong> – ceny zostávajú za kus a vľavo od nich je stĺpec „3 ks spolu“ so súčtom (aj s množstevnou zľavou). Riadok sa nijako neposunie.</li>
-          <li><strong>Podmienená cena a košík</strong> – keď najnižšia cena platí len so zľavovým kódom, s AlzaPlus+ alebo po cashbacku / výkupe, upozorní vás rozšírenie pred vložením do košíka zo zoznamu (pri zľavovom kóde treba vložiť tovar z detailu produktu). Môžete ho aj tak pridať.</li>
+          <li><strong>Viac kusov</strong> – ceny zostávajú za kus a vľavo od nich je stĺpec „3 ks spolu“ so súčtom (aj s množstevnou zľavou). Keď už platí stupeň množstevnej zľavy, je pred cenami zelene cena za kus pri tomto počte – po prejdení myšou tabuľka stupňov a koľko ušetríte. Riadok sa nijako neposunie.</li>
+          <li><strong>Podmienená cena a košík</strong> – keď najnižšia cena platí len so zľavovým kódom, s AlzaPlus+ alebo po cashbacku / výkupe, upozorní vás rozšírenie pred vložením do košíka zo zoznamu Môžete ho aj tak pridať. Pri zľavovom kóde je v upozornení kód s tlačidlom Kopírovať a tlačidlo <strong>Pridať s kódom</strong>, ktoré vloží tovar do košíka a kód rovno uplatní (ako „Kúpiť s kódom“ na detaile produktu).</li>
+          <li><strong>Kontrola kódov v košíku</strong> – keď je v košíku tovar, ku ktorému rozšírenie pozná z detailu produktu zľavový kód, a zľava v košíku chýba, upozorní vás po kliknutí na „Pokračovať“. Kód vložíte jedným klikom, alebo pokračujete bez neho.</li>
+          <li><strong>Hodnotenie v košíku</strong> – pod cenou každej položky košíka je to isté ako v zozname: ▼▲ voči obvyklej cene, oplatí sa počkať, podozrivá zľava, lacnejší rozbalený / zánovný kus. Pri množstevnej zľave je pod počtom kusov tlačidlo „+1 ks → nižšia cena za kus“, ktoré kus rovno pridá. Podrobnosti po prejdení myšou.</li>
         </ul>
         <h3>Lišta nad zoznamom</h3>
         <ul>
@@ -73,19 +76,22 @@
       </section>
 
       <section id="detail">
-        <h2>🔎 Detail produktu</h2>
-        <p>Na stránke produktu je v ľavom stĺpci (pod galériou) karta <strong>📈 História cien</strong>:</p>
+        <h2><span data-icon="search"></span> Detail produktu</h2>
+        <p>Na stránke produktu je v ľavom stĺpci (pod galériou) karta <strong><span data-icon="chart"></span> História cien</strong>:</p>
         <ul>
           <li><strong>Aktuálne</strong> – najnižšia cena, ktorú môžete zaplatiť, a pod ňou hodnotenie voči obvyklej cene.</li>
           <li><strong>Za kus</strong> – skutočná cena za kus pri balení (aj bez histórie).</li>
           <li><strong>Obvyklá cena, najnižšia za 30 dní, historické minimum</strong> a malý graf – klikom na graf sa otvorí celá história.</li>
-          <li><strong>🔔 Sledovať na pozadí</strong> – produkt sa bude pravidelne kontrolovať, aj keď nie je v žiadnom zozname.</li>
-          <li><strong>🎯 Nastaviť cieľovú cenu</strong> – pozri <a href="#cil">Cieľová cena</a>.</li>
+          <li><strong>Ikona porovnávača</strong> (Heureka) – vyhľadá produkt podľa názvu v novej karte. Ikona sa načítava priamo z webu porovnávača; keď sa nenačíta, je tam jeho názov.</li>
+          <li><strong>Kopírovať ponuku</strong> – do schránky skopíruje názov, cenu, cenu s kódom alebo AlzaPlus+, obvyklú cenu, najnižšiu cenu za 30 dní a odkaz. Hodí sa do chatu alebo na sociálne siete.</li>
+          <li><strong>Množstevná zľava</strong> – tabuľka stupňov „Kúp viac, zaplať menej“ (koľko stojí kus pri 1, 2, 3… kusoch) uvidíte hneď v bubline nad tlačidlom košíka – Alza ju ukáže až s tovarom v košíku. Keď sa ceny neukladajú (napr. bez prihlásenia), karta napíše prečo.</li>
+          <li><strong><span data-icon="bell"></span> Sledovať na pozadí</strong> – produkt sa bude pravidelne kontrolovať, aj keď nie je v žiadnom zozname.</li>
+          <li><strong><span data-icon="target"></span> Nastaviť cieľovú cenu</strong> – pozri <a href="#cil">Cieľová cena</a>.</li>
         </ul>
       </section>
 
       <section id="historie">
-        <h2>📈 História cien</h2>
+        <h2><span data-icon="chart"></span> História cien</h2>
         <p>Dialóg histórie otvoríte klikom na cenu v zozname alebo tlačidlom „Celá história a graf“ na detaile produktu.</p>
         <ul>
           <li><strong>Dlaždice hore:</strong> historické minimum, najvyššia predajná a cenníková cena, najnižšia cena za 30 dní, obvyklá cena, odkedy sa produkt sleduje a posledná kontrola.</li>
@@ -106,7 +112,7 @@
       </section>
 
       <section id="dobra-cena">
-        <h2>✅ Je cena naozaj dobrá?</h2>
+        <h2><span data-icon="check-circle"></span> Je cena naozaj dobrá?</h2>
         <h3>Obvyklá cena a hodnotenie</h3>
         <p>
           Obvyklá cena je cena, za ktorú sa produkt za posledných 180 dní predával najdlhšie – krátka akcia ju nestiahne. Aktuálna cena sa s ňou
@@ -119,17 +125,19 @@
         </ul>
         <p>Po prejdení myšou uvidíte aj to, koľkokrát bol produkt lacnejší ako obvykle a ako dlho to trvalo.</p>
         <h3>Rytmus akcií – oplatí sa počkať?</h3>
-        <p>Keď mal produkt za posledných 180 dní aspoň 3 akcie, rozšírenie spočíta, ako často, na ako dlho a ako hlboko býva v zľave (napr. „Akcia zhruba raz za 6 týždňov, obvykle −15 % na 7 dní“) a kedy sa dá čakať ďalšia. Keď ďalšia akcia príde do 3 týždňov, ukáže <strong>⏳ oplatí sa počkať</strong> – v zozname pri cene a vo filtri, na detaile modro v karte s históriou. Pri nepravidelných akciách sa ďalšia akcia nepredpovedá.</p>
+        <p>Keď mal produkt za posledných 180 dní aspoň 3 akcie, rozšírenie spočíta, ako často, na ako dlho a ako hlboko býva v zľave (napr. „Akcia zhruba raz za 6 týždňov, obvykle −15 % na 7 dní“) a kedy sa dá čakať ďalšia. Keď ďalšia akcia príde do 3 týždňov, ukáže <strong><span data-icon="hourglass"></span> oplatí sa počkať</strong> – v zozname pri cene a vo filtri, na detaile modro v karte s históriou. Pri nepravidelných akciách sa ďalšia akcia nepredpovedá.</p>
         <h3>Rovnaký produkt v inom stave</h3>
         <p>Alza predáva niektoré produkty aj rozbalené alebo zánovné (každý stav je samostatný produkt). Keď je iný stav lacnejší ako najnižšia cena, ktorú za tento kus zaplatíte (aj s AlzaPlus+ a benefitom), uvidíte to v karte na detaile a po prejdení myšou na cenu v zozname (napr. „Lacnejšie v inom stave: Zánovný 251,99 € (o 9,00 € lacnejšie)“); v zozname je aj filter <em>Iný stav lacnejšie</em>.</p>
+        <h3>Filter zliav v kategóriách</h3>
+        <p>V ľavom paneli filtrov (blok Price Insight hore) vyberte <strong>Zľava aspoň X %</strong> alebo zaškrtnite <strong>Len s kupónom</strong> (cena s AlzaPlus+ alebo so zľavovým kódom) či <strong>S množstevnou zľavou</strong> („Kúp viac, zaplať menej“). Rozšírenie načíta celý výpis a skryje produkty, ktoré nevyhovujú. Zľavu počíta z najnižšej ceny, ktorú zaplatíte – aj s AlzaPlus+ a zľavovým kódom. Pri produktoch s históriou ju porovná s obvyklou cenou, takže prečiarknutá cena, ktorá dlho neplatila, zľavu nenafúkne; pri ostatných s prečiarknutou cenou Alzy. Veľký výpis sa načíta po zhruba 500 produktoch, ďalšie tlačidlom „Načítať zvyšné“. Vypnúť sa dá v nastaveniach (Výpisy kategórií → Filter zliav).</p>
         <h3>Podozrivá zľava</h3>
         <ul>
           <li><strong>Za 30 dní lacnejšie:</strong> produkt je „v zľave“, ale v posledných 30 dňoch sa dal kúpiť lacnejšie, než stojí teraz.</li>
-          <li><strong>Vymyslená prečiarknutá cena:</strong> za prečiarknutú cenu sa produkt počas sledovania nikdy nepredával, alebo naposledy pred viac ako 90 dňami.</li>
+          <li><strong>Prečiarknutá cena dlho neplatila:</strong> za prečiarknutú cenu sa produkt počas sledovania nikdy nepredával, alebo naposledy pred viac ako 90 dňami.</li>
         </ul>
         <p>Podozrivé zľavy nájdete vo filtri „Podozrivá zľava“ v zozname, oranžovým pruhom v histórii a na karte detailu produktu.</p>
-        <h3>⚠️ Podozrivá cena</h3>
-        <p>Keď Alza zmení web, rozšírenie môže prečítať zlé číslo, napríklad mesačnú splátku namiesto ceny. Taká cena sa neschová, aby vám neušla skutočná zľava. Je ale označená ⚠️ a čiarkovaným rámčekom, po prejdení myšou je vidieť prečo:</p>
+        <h3><span data-icon="warning"></span> Podozrivá cena</h3>
+        <p>Keď Alza zmení web, rozšírenie môže prečítať zlé číslo, napríklad mesačnú splátku namiesto ceny. Taká cena sa neschová, aby vám neušla skutočná zľava. Je ale označená <span data-icon="warning"></span> a čiarkovaným rámčekom, po prejdení myšou je vidieť prečo:</p>
         <ul>
           <li><strong>Pod polovicou ďalšej ceny:</strong> cena je nižšia než polovica najbližšej vyššej ceny z tej istej kontroly. Nezapočíta sa do minima, šípky zmeny, hodnotenia ceny ani podozrivej zľavy.</li>
           <li><strong>Pod polovicou obvyklej ceny:</strong> najnižšia cena klesla pod polovicu obvyklej ceny za posledných 30 dní. Počíta sa normálne, len je označená. Keď cena vydrží, výstraha zmizne.</li>
@@ -139,9 +147,9 @@
       </section>
 
       <section id="cil">
-        <h2>🎯 Cieľová cena</h2>
+        <h2><span data-icon="target"></span> Cieľová cena</h2>
         <ol>
-          <li>Otvorte históriu cien produktu (alebo na detaile kliknite na „🎯 Nastaviť cieľovú cenu“).</li>
+          <li>Otvorte históriu cien produktu (alebo na detaile kliknite na „<span data-icon="target"></span> Nastaviť cieľovú cenu“).</li>
           <li>Zadajte cenu, za ktorú chcete nakúpiť, a kliknite na <strong>Sledovať</strong>.</li>
         </ol>
         <p>
@@ -156,26 +164,29 @@
       </section>
 
       <section id="hlidani">
-        <h2>🔔 Sledovanie na pozadí a notifikácie</h2>
+        <h2><span data-icon="bell"></span> Sledovanie na pozadí a notifikácie</h2>
         <ul>
-          <li><strong>Sledovaný zoznam:</strong> otvorte zoznam a v popupe rozšírenia kliknite na <strong>🔔 Sledovať zoznam</strong>, alebo kliknite na zvonček v záložke zoznamu. Sleduje sa celý zoznam; novo pridané položky sa do sledovania dostanú pri ďalšom otvorení zoznamu.</li>
-          <li><strong>Sledovaný produkt:</strong> tlačidlo „🔔 Sledovať na pozadí“ na detaile produktu, alebo nastavená cieľová cena.</li>
-          <li>Kontrola beží <strong>každú hodinu</strong>, kým je spustený prehliadač. V nastaveniach ju zmeníte na každé 3, 6 alebo 12 hodín alebo na <strong>raz denne vo zvolenom čase</strong> – keď je prehliadač v tom čase zatvorený, prebehne pár minút po jeho spustení. Kedy bude ďalšia, ukazuje popup. Hneď ju spustíte tlačidlom ▶️ Skontrolovať v popupe.</li>
+          <li><strong>Sledovaný zoznam:</strong> otvorte zoznam a v popupe rozšírenia kliknite na <strong><span data-icon="bell"></span> Sledovať zoznam</strong>, alebo kliknite na zvonček v záložke zoznamu. Sleduje sa celý zoznam; novo pridané položky sa do sledovania dostanú pri ďalšom otvorení zoznamu.</li>
+          <li><strong>Sledovaný produkt:</strong> tlačidlo „<span data-icon="bell"></span> Sledovať na pozadí“ na detaile produktu, alebo nastavená cieľová cena.</li>
+          <li>Kontrola beží <strong>každú hodinu</strong>, kým je spustený prehliadač. V nastaveniach ju zmeníte na každé 3, 6 alebo 12 hodín alebo na <strong>raz denne vo zvolenom čase</strong> – keď je prehliadač v tom čase zatvorený, prebehne pár minút po jeho spustení. Kedy bude ďalšia, ukazuje popup. Hneď ju spustíte tlačidlom <span data-icon="refresh"></span> Skontrolovať v popupe.</li>
           <li><strong>Číslo na ikone</strong> rozšírenia = počet produktov so zmenou od posledného otvorenia popupu, prehľad zmien je v popupe. Farba: <strong>zelená</strong> = aspoň jeden produkt zlacnel, naskladnil sa, má novú akciu alebo dosiahol cieľovú cenu, <strong>červená</strong> = žiadny nezlacnel, ale aspoň jeden zdražel, <strong>sivá</strong> = len koniec predaja alebo nedostupnosť. <strong>Modré číslo</strong> = staré produkty navrhnuté na zmazanie.</li>
-          <li><strong>Prehľad zmien v popupe:</strong> zlacnenie, naskladnenie, nová akcia a dosiahnutá cieľová cena zelene, zdraženie červeno (na zdraženie notifikácie nechodia), koniec predaja a nedostupnosť sivo. Podfarbené sú nové zmeny, už videné majú farebný len text. Pri sledovaných zoznamoch vidíte, koľko produktov za posledných 7 dní zlacnelo (▼) a zdraželo (▲). Sledovanie zoznamu vypnete tlačidlom 🔕 Nesledovať zoznam v popupe na otvorenom zozname alebo v nastaveniach (záložka Sledované zoznamy). Keď sledujete viac Alz, majú zoznamy, zmeny aj sledované produkty štítok <strong>CZ / SK / HU</strong> (po prejdení myšou adresa Alzy). Nápoveda je v nastaveniach (❓ vpravo hore).</li>
+          <li><strong>Prehľad zmien v popupe:</strong> zlacnenie, naskladnenie, nová akcia a dosiahnutá cieľová cena zelene, zdraženie červeno (na zdraženie notifikácie nechodia), koniec predaja a nedostupnosť sivo. Podfarbené sú nové zmeny, už videné majú farebný len text. Pri sledovaných zoznamoch vidíte, koľko produktov za posledných 7 dní zlacnelo (▼) a zdraželo (▲). Sledovanie zoznamu vypnete tlačidlom <span data-icon="bell-off"></span> Nesledovať zoznam v popupe na otvorenom zozname alebo v nastaveniach (záložka Sledované zoznamy). Keď sledujete viac Alz, majú zoznamy, zmeny aj sledované produkty štítok <strong>CZ / SK / HU</strong> (po prejdení myšou adresa Alzy). Nápoveda je v nastaveniach (<span data-icon="help"></span> vpravo hore).</li>
+          <li><strong>Zľavové kódy v popupe:</strong> kódy z produktov, ktoré ste videli za posledných 30 dní (detail, zoznam, kontrola na pozadí) – zbalené na jeden riadok, kliknutím rozbalíte produkt, kód, cenu s kódom a tlačidlo Kopírovať. Keď sa pri sledovanom produkte objaví nový kód, príde upozornenie aj s kódom.</li>
+          <li><strong>Sledovanie po nákupe:</strong> rozšírenie si z „Moje objednávky“ vezme tovar kúpený za posledných 14 dní a sleduje jeho cenu. Keď zlacnie, príde upozornenie „Kúpili ste za X, teraz stojí Y. Do D ho môžete vrátiť a kúpiť znova.“ Tovar kúpený na internete sa dá do 14 dní vrátiť. Vypnete v nastaveniach (Sledovať cenu po nákupe); objednávky sa čítajú len vo vašom prehliadači.</li>
+          <li><strong>Pripomienka cashbacku:</strong> keď kúpite tovar, pri ktorom bola na detaile „Cena s CashBack“, rozšírenie si zo stránky akcie prečíta lehotu registrácie u výrobcu. Upozorní vás, keď pôjde nákup zaregistrovať (niektoré akcie chcú počkať napr. 30 dní), a týždeň pred koncom lehoty; kliknutím otvoríte podmienky akcie. Zoznam „Cashback na registráciu“ je v okne rozšírenia – po registrácii ho odškrtnite tlačidlom Hotovo. Lehotu čítame z textu akcie; keď ju nepoznáme, upozornenie vás odkáže na podmienky. Termíny akcie – do kedy kúpiť a do kedy sa registrovať – vidíte už pred nákupom: v tooltipe ceny s cashbackom v zozname (s odkazom na podmienky) a pod riadkom „Cena s CashBack“ na detaile produktu. Vypnete v nastaveniach (Pripomínať registráciu cashbacku).</li>
         </ul>
         <p>V nastaveniach si vyberiete, o čom chcete vedieť: zlacnenie (aj od koľkých percent), nové ceny (akcia, kód, cashback), dostupnosť a tiché hodiny.</p>
-        <p class="tip">Nechodia notifikácie? V nastaveniach kliknite na <strong>🔔 Vyskúšať notifikácie</strong>. Keď neprídu, skontrolujte vo Windows „Nerušiť“ / Asistenta sústredenia a povolenie oznámení pre prehliadač (Chrome, Firefox).</p>
+        <p class="tip">Nechodia notifikácie? V nastaveniach kliknite na <strong><span data-icon="bell"></span> Vyskúšať notifikácie</strong>. Keď neprídu, skontrolujte vo Windows „Nerušiť“ / Asistenta sústredenia a povolenie oznámení pre prehliadač (Chrome, Firefox).</p>
       </section>
 
       <section id="za-kus">
-        <h2>⚖️ Skutočná cena za kus</h2>
+        <h2><span data-icon="compare"></span> Skutočná cena za kus</h2>
         <p>
           Alza počíta cenu za kus len z ceny pre všetkých – zľavu AlzaPlus+ ani zľavový kód do nej nezahrnie. Pri nákupe do zásoby tak nespoznáte, ktoré
           balenie je naozaj najvýhodnejšie. Rozšírenie to dopočíta:
         </p>
         <ul>
-          <li><strong>Kategórie a vyhľadávanie:</strong> pred cenou za jednotku od Alzy je oranžový štítok so skutočnou cenou, napr. <span class="unit">0,09 €/ks</span>. Tlačidlo <strong>„Zoradiť podľa skutočnej ceny za jednotku“</strong> načíta celú kategóriu a zoradí ju.</li>
+          <li><strong>Kategórie a vyhľadávanie:</strong> pred cenou za jednotku od Alzy je oranžový štítok so skutočnou cenou, napr. <span class="unit">0,09 €/ks</span>. Záložka <strong>„Za jednotku“</strong> s ikonou rozšírenia vedľa záložiek zoradenia Alzy načíta celú kategóriu a zoradí ju (ďalším kliknutím zoradenie zrušíte).</li>
           <li><strong>Nákupný zoznam:</strong> cena za kus pri každej cene po prejdení myšou a zoradenie „Najlacnejšie za kus“.</li>
           <li><strong>Detail produktu:</strong> dlaždica „Za kus“ s cenou za kus pri každom type ceny. Vo výbere veľkosti balenia je pri každej veľkosti cena za kus (pri dĺžkach za meter) v stĺpci vpravo – najvýhodnejšia nazeleno, najdrahšia načerveno. Cenu za jednotku zvolenej veľkosti (aj s označením najvýhodnejšie / najdrahšie) ukazuje hneď aj zatvorený výber.</li>
         </ul>
@@ -183,22 +194,22 @@
       </section>
 
       <section id="nastaveni">
-        <h2>⚙️ Nastavenia a dáta</h2>
-        <p>Nastavenia otvoríte ikonou ⚙️ v popupe rozšírenia.</p>
+        <h2><span data-icon="settings"></span> Nastavenia a dáta</h2>
+        <p>Nastavenia otvoríte ikonou <span data-icon="settings"></span> v popupe rozšírenia.</p>
         <ul>
           <li><strong>Ukladať ceny z prehliadania</strong> (Sledovanie cien) – ceny produktov, ktoré uvidíte vo výpisoch kategórií, vo vyhľadávaní, na detaile, v karuseloch a na úvodnej stránke, sa potichu ukladajú do histórie, aj keď ich nesledujete. Keď sa k produktu vrátite, uvidíte, ako sa jeho cena vyvíjala. Nič sa nezobrazuje ani neoznamuje. V predvolenom stave zapnuté.</li>
-          <li><strong>Uložené dáta</strong> – prehľad všetkých produktov s históriou a prečo sa ukladajú (📋 zoznam, 🔔 detail, 🎯 cieľová cena, 👀 prehliadanie). Hľadanie, filtre, história cien cez 📈 a zmazanie dát jedného produktu.</li>
+          <li><strong>Uložené dáta</strong> – prehľad všetkých produktov s históriou a prečo sa ukladajú (<span data-icon="list"></span> zoznam, <span data-icon="bell"></span> detail, <span data-icon="target"></span> cieľová cena, <span data-icon="visibility"></span> prehliadanie). Hľadanie, filtre, história cien cez <span data-icon="chart"></span> a zmazanie dát jedného produktu.</li>
           <li><strong>Záloha (JSON)</strong> – všetky dáta do súboru; <strong>Obnoviť zo zálohy</strong> ich zase doplní (nič nemaže, história sa zlúči).</li>
           <li><strong>História (CSV)</strong> – všetky ceny pre Excel.</li>
           <li><strong>Upratať staré dáta</strong> – zmaže produkty, ktoré nesledujete a viac ako 3 mesiace ste ich neotvorili ani sa nekontrolovali (uložené pri prehliadaní až po roku). Rozšírenie ich samo navrhne modrým číslom na ikone a upozornením v popupe.</li>
           <li><strong>Zmazať všetky dáta</strong> – len po napísaní slova ZMAZAŤ; predtým sa automaticky stiahne záloha.</li>
-          <li><strong>Diagnostika</strong> – keď niečo nefunguje, kliknite na <strong>🐞 Nahlásiť chybu</strong>: otvorí sa predvyplnené hlásenie na GitHube (verzia, prehliadač, posledné chyby). Alebo stiahnite diagnostiku a pošlite ju autorovi (obsahuje verziu, nastavenia, log kontrol a chyby; žiadne heslá ani cookies).</li>
+          <li><strong>Diagnostika</strong> – keď niečo nefunguje, kliknite na <strong><span data-icon="bug"></span> Nahlásiť chybu</strong>: otvorí sa predvyplnené hlásenie na GitHube (verzia, prehliadač, posledné chyby). Alebo stiahnite diagnostiku a pošlite ju autorovi (obsahuje verziu, nastavenia, log kontrol a chyby; žiadne heslá ani cookies).</li>
         </ul>
         <p class="tip">Všetky dáta zostávajú len vo vašom prehliadači. Rozšírenie komunikuje iba s webmi Alzy a nikam inam nič neodosiela.</p>
       </section>
 
       <section id="faq">
-        <h2>❓ Časté otázky</h2>
+        <h2><span data-icon="help"></span> Časté otázky</h2>
         <details>
           <summary>Ceny sa neukladajú / kontrola hlási chybu</summary>
           <p>
@@ -230,11 +241,13 @@
           <summary>Prečo mám v Uložených dátach produkty, ktoré nesledujem?</summary>
           <p>
             Sú to produkty z nákupných zoznamov, ktoré ste otvorili, a s voľbou „Ukladať ceny z prehliadania“ aj produkty, ktoré ste videli pri prehliadaní
-            Alzy (👀). Ich história sa hodí, keď sa k produktu vrátite. Ukladanie z prehliadania vypnete v nastaveniach; produkty, ktoré nesledujete, sa
+            Alzy (<span data-icon="visibility"></span>). Ich história sa hodí, keď sa k produktu vrátite. Ukladanie z prehliadania vypnete v nastaveniach; produkty, ktoré nesledujete, sa
             samy navrhnú na zmazanie (uložené pri prehliadaní až po roku).
           </p>
         </details>
       </section>
     </main>
+    <script src="../shared/icons.js"></script>
+    <script src="help.js"></script>
   </body>
 </html>

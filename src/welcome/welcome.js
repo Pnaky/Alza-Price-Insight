@@ -22,13 +22,34 @@ const pick = (dictionary, key) => dictionary[DICTIONARY_LANG[uiLanguage]]?.[key]
 const t = (key, ...params) => AlzaCore.fillTemplate(pick(WELCOME_TEXTS, key), params);
 const o = (key) => pick(OPTIONS_TEXTS, key);
 
+// Ikony před texty (src/shared/icons.js) – emoji v textech nejsou, ikonu přidá podle klíče textu (data-w i data-o)
+const WELCOME_ICONS = {
+  factHistoryTitle: "event",
+  factAccountTitle: "key",
+  factPrivacyTitle: "lock",
+  checkButton: "search",
+  checkAgain: "refresh",
+  watchHowList: "list",
+  watchHowProduct: "bag",
+  watchHowTarget: "target",
+  openHelp: "help",
+  openSettings: "settings",
+  testNotifications: "bell",
+};
+
+function setText(element, key, text) {
+  element.textContent = text;
+  if (WELCOME_ICONS[key]) AlzaIcons.prepend(element, WELCOME_ICONS[key]);
+}
+
 function applyTexts() {
   document.documentElement.lang = uiLanguage;
-  document.querySelectorAll("[data-w]").forEach((element) => (element.textContent = t(element.dataset.w)));
-  document.querySelectorAll("[data-o]").forEach((element) => (element.textContent = o(element.dataset.o)));
+  document.querySelectorAll("[data-w]").forEach((element) => setText(element, element.dataset.w, t(element.dataset.w)));
+  document.querySelectorAll("[data-o]").forEach((element) => setText(element, element.dataset.o, o(element.dataset.o)));
+  AlzaIcons.decorate(document.querySelector(".app-header"));
   document.querySelectorAll("[data-step-of]").forEach((element) => (element.textContent = t("stepOf", element.dataset.stepOf)));
   document.title = t("pageTitle");
-  // „Jazyk rozšíření“ jako v nastavení – bublina u 🌐 a název výběru pro čtečky
+  // „Jazyk rozšíření“ jako v nastavení – bublina u ikony glóbu a název výběru pro čtečky
   document.getElementById("languageLabel").title = o("uiLanguage");
   document.getElementById("language").setAttribute("aria-label", o("uiLanguage"));
   document.getElementById("openHelp").href = AlzaCore.getHelpUrl(uiLanguage);
@@ -147,7 +168,8 @@ async function runCheck() {
   } finally {
     checking = false;
     button.disabled = false;
-    button.textContent = t(lastCheck ? "checkAgain" : "checkButton");
+    const key = lastCheck ? "checkAgain" : "checkButton";
+    setText(button, key, t(key));
   }
   if (recheck || (lastCheck && lastCheck.domain.domainKey !== primaryDomain)) {
     recheck = false;

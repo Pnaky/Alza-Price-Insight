@@ -31,6 +31,12 @@
 - 📦 **Stejný produkt levněji:** upozornění na rozbalený nebo zánovní kus.
 - 🧾 **Lišta nákupního seznamu** se souhrnem, filtry a řazením.
 - 🧮 **Skutečná cena za kus** v kategoriích, v nákupním seznamu i na detailu produktu (i se slevou AlzaPlus+) a řazení celé kategorie podle ní.
+- 🏷️ **Filtr slev v kategoriích:** „Sleva aspoň X %“, „Jen s kupónem“ a „S množstevní slevou“ v levém panelu filtrů – i se slevovým kódem a AlzaPlus+, proti obvyklé ceně z historie. Řazení podle ceny za kus jako záložka „Za jednotku“.
+- 🎟️ **Trezor slevových kódů** v okně rozšíření: kódy z produktů, které jste viděli, s cenou po slevě a tlačítkem Kopírovat.
+- 🛒 **Košík:** hodnocení ceny u každé položky, tip „+1 ks → nižší cena za kus“ u množstevní slevy a upozornění, když chybí slevový kód. Ze seznamu jde zboží do košíku i s kódem.
+- ↩️ **Hlídání po nákupu:** když koupené zboží do 14 dní zlevní, dozvíte se, že ho můžete vrátit a koupit levněji.
+- 💸 **Připomínka cashbacku:** termíny akce už před nákupem a upozornění, až jde nákup zaregistrovat u výrobce.
+- 🔍 **Srovnávače cen** na detailu produktu: Heureka, Zboží.cz, Árukereső jedním klikem. **Kopírovat nabídku** pošle název, ceny i s kódem a odkaz do chatu.
 - 💾 **Záloha dat:** export do JSON, export historie do CSV, obnova ze zálohy a úklid starých dat.
 
 Rozhraní je v češtině, slovenštině, maďarštině a angličtině.
@@ -173,11 +179,11 @@ Ne. Chrome pro Android rozšíření nepodporuje a Firefox pro Android nemá not
 
 ## Soukromí
 
-Všechna data (ceny, historie, nastavení) se ukládají jen lokálně ve vašem prohlížeči. Rozšíření komunikuje výhradně s weby Alzy a nikam jinam nic neodesílá. Nemá žádnou analytiku ani sledování, což si můžete ověřit přímo ve zdrojovém kódu v tomto repozitáři.
+Všechna data (ceny, historie, nastavení) se ukládají jen lokálně ve vašem prohlížeči. Rozšíření komunikuje výhradně s weby Alzy a nikam jinam nic neodesílá. Jedinou výjimkou jsou ikony srovnávačů cen (Heureka, Zboží.cz, Árukereső) na detailu produktu: načítají se přímo z jejich webů, takže ty vidí vaši IP adresu – nic dalšího se jim neposílá, ani jaký produkt si prohlížíte. Nemá žádnou analytiku ani sledování, což si můžete ověřit přímo ve zdrojovém kódu v tomto repozitáři.
 
 ## English
 
-**Alza Price Insight** tells you whether a price on Alza (CZ, SK, HU) is really a deal: price history, fake-discount alerts, background watching of your wishlists with notifications, target prices and the real price per piece. Free, no ads, no tracking, all data stays in your browser. The extension speaks English too – switch the language in the setup guide or in the settings.
+**Alza Price Insight** tells you whether a price on Alza (CZ, SK, HU) is really a deal: price history, fake-discount alerts, background watching of your wishlists with notifications, target prices, the real price per piece, a discount filter in categories, a discount code vault, cart checks (price ratings, volume discounts, missing codes), price watching after purchase and cashback reminders. Free, no ads, no tracking, all data stays in your browser. The extension speaks English too – switch the language in the setup guide or in the settings.
 
 Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/alza-price-insight/ndaheikijjhppooeiioljekolkekfgie) or [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/alza-price-insight/). A setup guide opens right after installation. You need to be logged in to Alza and see prices including VAT for prices to be saved. Unofficial project, not affiliated with Alza.cz a.s.
 

@@ -4,7 +4,7 @@
   "description": "__MSG_description__",
   "default_locale": "en",
   "author": "Jan Pňakovič",
-  "version": "2026.11.7",
+  "version": "2026.11.9",
   "minimum_chrome_version": "121",
   "browser_specific_settings": {
     "gecko": {
@@ -28,11 +28,15 @@
       ],
       "js": [
         "src/shared/core.js",
+        "src/shared/icons.js",
         "src/shared/store.js",
         "src/content/texts.js",
         "src/content.js",
         "src/content/variants.js",
         "src/content/cart-warning.js",
+        "src/content/price-card.js",
+        "src/content/basket-codes.js",
+        "src/content/basket-insights.js",
         "src/content/history.js",
         "src/content/targets.js",
         "src/content/list-toolbar.js",
@@ -42,7 +46,8 @@
         "src/content/watch.js",
         "src/content/start.js",
         "src/category.js",
-        "src/browsing.js"
+        "src/browsing.js",
+        "src/purchases.js"
       ],
       "css": ["css/main.css"]
     }

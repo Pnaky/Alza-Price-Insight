@@ -50,13 +50,15 @@ Object.assign(AlzaPriceTracker, {
         this.formatDate(warning.at),
         this.formatPrice(current - warning.value)
       );
-      if (!warning.complete) text += ` · ${this.translate("discountPartial", this.formatDays(Math.max(1, warning.days)))}`;
+      // Věta končí tečkou – „údaj za X dní“ za ni bez tečky navíc: „… levněji) · údaj za 5 dní“
+      if (!warning.complete) text = `${text.replace(/\.$/, "")} · ${this.translate("discountPartial", this.formatDays(Math.max(1, warning.days)))}`;
       notices.push(this.createEl("div", "alza-price-tracker-history-warning", text));
     }
 
     const strikethrough = AlzaCore.getStrikethroughWarning(entries, priceMap);
     if (strikethrough) notices.push(this.createEl("div", "alza-price-tracker-history-warning", this.getStrikethroughText(strikethrough)));
 
+    notices.forEach((notice) => AlzaIcons.prepend(notice, "warning", { tone: true }));
     return notices;
   },
 
@@ -125,7 +127,7 @@ Object.assign(AlzaPriceTracker, {
 
     // Vyplatí se počkat: další akce se čeká brzy – značka i u obvyklé ceny
     if (data.saleCycle?.wait) {
-      const waitMarker = this.createEl("span", "alza-price-tracker-verdict-marker alza-price-tracker-verdict-marker--wait", "⏳");
+      const waitMarker = AlzaIcons.prepend(this.createEl("span", "alza-price-tracker-verdict-marker alza-price-tracker-verdict-marker--wait"), "hourglass", { tone: true });
       waitMarker.title = cycleLines.join("\n");
       this.getPriceIndicators(priceContainer).appendChild(waitMarker);
     }
@@ -168,7 +170,7 @@ Object.assign(AlzaPriceTracker, {
     return this.translate(key, this.translate(`type_${item.type}`), this.formatPrice(item.price), this.formatPrice(item.reference));
   },
 
-  // Ceny v řádku seznamu: ⚠ před cenou a vysvětlení v title (nad případnou cenou za kus)
+  // Ceny v řádku seznamu: výstraha před cenou a vysvětlení v title (nad případnou cenou za kus)
   markSuspiciousPrices(priceContainer, suspicious) {
     priceContainer.querySelectorAll(".alza-price-tracker-price").forEach((element) => {
       const item = suspicious.find(({ type }) => type === element.dataset.priceType);

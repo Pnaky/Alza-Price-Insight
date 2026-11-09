@@ -6,117 +6,169 @@ const POPUP_TEXTS = {
     title: "Alza Price Insight",
     showProducts: "Zobrazit produkty",
     noProducts: "Žádné produkty",
-    cleanupText: "🧹 {0} produktů už přes 3 měsíce nehlídáte ani neotevíráte – navrhujeme je smazat.",
+    cleanupText: "{0} produktů už přes 3 měsíce nehlídáte ani neotevíráte – navrhujeme je smazat.",
     cleanupHint: "Produkty, které nejsou v žádném hlídaném seznamu, nehlídáte z detailu, nemají cílovou cenu a přes 3 měsíce se nekontrolovaly ani neotevřely (uložené při procházení přes rok). Smaže se jejich historie cen a uložené ceny – v nastavení si je nejdřív prohlédnete a smazání potvrdíte.",
-    cleanupReview: "🧹 Prohlédnout a smazat",
+    cleanupReview: "Prohlédnout a smazat",
     cleanupSnooze: "Připomenout za měsíc",
     openOptionsTitle: "Nastavení, hlídané produkty, cílové ceny, záloha",
     changes: "Změny cen",
     changesNew: "Nové změny cen ({0})",
     changesRecent: "Poslední změny cen",
-    watchList: "🔔 Hlídat seznam",
-    unwatchList: "🔕 Nehlídat seznam ({0})",
+    codesTitle: "Slevové kódy ({0})",
+    codeWithPrice: "s kódem {0}",
+    codeCopy: "Kopírovat",
+    codeCopied: "Zkopírováno",
+    cashbackTitle: "Cashback k registraci ({0})",
+    cashbackRefund: "až {0} zpět",
+    cashbackUntil: "registrace do {0}",
+    cashbackFrom: "registrace od {0}",
+    cashbackRange: "registrace {0} – {1}",
+    cashbackNoDate: "lhůta v podmínkách akce",
+    cashbackTerms: "Podmínky akce",
+    cashbackDone: "Hotovo",
+    cashbackDoneTitle: "Nákup mám zaregistrovaný – už nepřipomínat",
+    watchList: "Hlídat seznam",
+    unwatchList: "Nehlídat seznam ({0})",
     openListHint: "Otevřete nákupní seznam na Alze",
-    runNow: "▶️ Zkontrolovat",
+    runNow: "Zkontrolovat",
     runNowTitle: "Zkontrolovat hlídané produkty teď",
     listSynced: "Synchronizováno {0}",
     openAlzaTitle: "Otevřít {0}",
     listSummary: "Za posledních 7 dní: zlevnilo {0}, zdražilo {1} (nejnižší cena)",
     listNoChanges: "beze změn",
-    actionFailed: "⚠️ Nepovedlo se: {0}",
+    actionFailed: "Nepovedlo se: {0}",
     watchedProducts: "Hlídané produkty ({0})",
-    running: "⏳ Probíhá kontrola (od {0})",
+    running: "Probíhá kontrola (od {0})",
     lastRun: "Kontrola {0} · {1} produktů · změn {2}",
     noRunYet: "Zatím neproběhla žádná kontrola",
-    nextRun: "⏰ Další kontrola {0}",
-    pending: "🌙 Odloženo do konce tichých hodin: {0}",
+    nextRun: "Další kontrola {0}",
+    pending: "Odloženo do konce tichých hodin: {0}",
   },
   sk: {
     title: "Alza Price Insight",
     showProducts: "Zobraziť produkty",
     noProducts: "Žiadne produkty",
-    cleanupText: "🧹 {0} produktov už viac ako 3 mesiace nesledujete ani neotvárate – navrhujeme ich zmazať.",
+    cleanupText: "{0} produktov už viac ako 3 mesiace nesledujete ani neotvárate – navrhujeme ich zmazať.",
     cleanupHint: "Produkty, ktoré nie sú v žiadnom sledovanom zozname, nesledujete z detailu, nemajú cieľovú cenu a viac ako 3 mesiace sa nekontrolovali ani neotvorili (uložené pri prehliadaní viac ako rok). Zmaže sa ich história cien a uložené ceny – v nastaveniach si ich najprv pozriete a zmazanie potvrdíte.",
-    cleanupReview: "🧹 Pozrieť a zmazať",
+    cleanupReview: "Pozrieť a zmazať",
     cleanupSnooze: "Pripomenúť o mesiac",
     openOptionsTitle: "Nastavenia, sledované produkty, cieľové ceny, záloha",
     changes: "Zmeny cien",
     changesNew: "Nové zmeny cien ({0})",
     changesRecent: "Posledné zmeny cien",
-    watchList: "🔔 Sledovať zoznam",
-    unwatchList: "🔕 Nesledovať zoznam ({0})",
+    codesTitle: "Zľavové kódy ({0})",
+    codeWithPrice: "s kódom {0}",
+    codeCopy: "Kopírovať",
+    codeCopied: "Skopírované",
+    cashbackTitle: "Cashback na registráciu ({0})",
+    cashbackRefund: "až {0} späť",
+    cashbackUntil: "registrácia do {0}",
+    cashbackFrom: "registrácia od {0}",
+    cashbackRange: "registrácia {0} – {1}",
+    cashbackNoDate: "lehota v podmienkach akcie",
+    cashbackTerms: "Podmienky akcie",
+    cashbackDone: "Hotovo",
+    cashbackDoneTitle: "Nákup mám zaregistrovaný – už nepripomínať",
+    watchList: "Sledovať zoznam",
+    unwatchList: "Nesledovať zoznam ({0})",
     openListHint: "Otvorte nákupný zoznam na Alze",
-    runNow: "▶️ Skontrolovať",
+    runNow: "Skontrolovať",
     runNowTitle: "Skontrolovať sledované produkty teraz",
     listSynced: "Synchronizované {0}",
     openAlzaTitle: "Otvoriť {0}",
     listSummary: "Za posledných 7 dní: zlacnelo {0}, zdraželo {1} (najnižšia cena)",
     listNoChanges: "bez zmien",
-    actionFailed: "⚠️ Nepodarilo sa: {0}",
+    actionFailed: "Nepodarilo sa: {0}",
     watchedProducts: "Sledované produkty ({0})",
-    running: "⏳ Prebieha kontrola (od {0})",
+    running: "Prebieha kontrola (od {0})",
     lastRun: "Kontrola {0} · {1} produktov · zmien {2}",
     noRunYet: "Zatiaľ neprebehla žiadna kontrola",
-    nextRun: "⏰ Ďalšia kontrola {0}",
-    pending: "🌙 Odložené do konca tichých hodín: {0}",
+    nextRun: "Ďalšia kontrola {0}",
+    pending: "Odložené do konca tichých hodín: {0}",
   },
   hu: {
     title: "Alza Price Insight",
     showProducts: "Termékek megjelenítése",
     noProducts: "Nincsenek termékek",
-    cleanupText: "🧹 {0} terméket több mint 3 hónapja nem figyel és nem nyitott meg – javasoljuk a törlésüket.",
+    cleanupText: "{0} terméket több mint 3 hónapja nem figyel és nem nyitott meg – javasoljuk a törlésüket.",
     cleanupHint: "Olyan termékek, amelyek nincsenek figyelt listán, nem figyeli őket a termékoldalról, nincs célár, és több mint 3 hónapja nem ellenőrizték vagy nyitották meg őket (a böngészés közben mentetteket több mint egy éve). Az árelőzményeik és mentett áraik törlődnek – a beállításokban előbb megtekinti, majd megerősíti a törlést.",
-    cleanupReview: "🧹 Megtekintés és törlés",
+    cleanupReview: "Megtekintés és törlés",
     cleanupSnooze: "Emlékeztessen egy hónap múlva",
     openOptionsTitle: "Beállítások, figyelt termékek, célárak, biztonsági mentés",
     changes: "Árváltozások",
     changesNew: "Új árváltozások ({0})",
     changesRecent: "Legutóbbi árváltozások",
-    watchList: "🔔 Lista figyelése",
-    unwatchList: "🔕 Figyelés leállítása ({0})",
+    codesTitle: "Kuponkódok ({0})",
+    codeWithPrice: "kóddal {0}",
+    codeCopy: "Másolás",
+    codeCopied: "Másolva",
+    cashbackTitle: "Regisztrálandó cashback ({0})",
+    cashbackRefund: "akár {0} vissza",
+    cashbackUntil: "regisztrációs határidő: {0}",
+    cashbackFrom: "regisztráció kezdete: {0}",
+    cashbackRange: "regisztráció: {0} – {1}",
+    cashbackNoDate: "határidő az akció feltételeiben",
+    cashbackTerms: "Akciós feltételek",
+    cashbackDone: "Kész",
+    cashbackDoneTitle: "A vásárlást regisztráltam – ne emlékeztessen",
+    watchList: "Lista figyelése",
+    unwatchList: "Figyelés leállítása ({0})",
     openListHint: "Nyisson meg egy bevásárlólistát az Alzán",
-    runNow: "▶️ Ellenőrzés",
+    runNow: "Ellenőrzés",
     runNowTitle: "Figyelt termékek ellenőrzése most",
     listSynced: "Szinkronizálva: {0}",
     openAlzaTitle: "{0} megnyitása",
     listSummary: "Az elmúlt 7 napban: {0} olcsóbb lett, {1} drágább (legalacsonyabb ár)",
     listNoChanges: "nincs változás",
-    actionFailed: "⚠️ Nem sikerült: {0}",
+    actionFailed: "Nem sikerült: {0}",
     watchedProducts: "Figyelt termékek ({0})",
-    running: "⏳ Ellenőrzés folyamatban ({0} óta)",
+    running: "Ellenőrzés folyamatban ({0} óta)",
     lastRun: "Ellenőrzés {0} · {1} termék · {2} változás",
     noRunYet: "Még nem volt ellenőrzés",
-    nextRun: "⏰ Következő ellenőrzés: {0}",
-    pending: "🌙 A csendes órák végéig elhalasztva: {0}",
+    nextRun: "Következő ellenőrzés: {0}",
+    pending: "A csendes órák végéig elhalasztva: {0}",
   },
   en: {
     title: "Alza Price Insight",
     showProducts: "Show products",
     noProducts: "No products",
-    cleanupText: "🧹 {0} products haven't been watched or opened for over 3 months – we suggest deleting them.",
+    cleanupText: "{0} products haven't been watched or opened for over 3 months – we suggest deleting them.",
     cleanupHint: "Products that aren't in any watched list, aren't watched from the product page, have no target price and haven't been checked or opened for over 3 months (products saved while browsing: over a year). Their price history and stored prices will be deleted – you review them in settings first and confirm the deletion.",
-    cleanupReview: "🧹 Review and delete",
+    cleanupReview: "Review and delete",
     cleanupSnooze: "Remind me in a month",
     openOptionsTitle: "Settings, watched products, target prices, backup",
     changes: "Price changes",
     changesNew: "New price changes ({0})",
     changesRecent: "Recent price changes",
-    watchList: "🔔 Watch list",
-    unwatchList: "🔕 Stop watching list ({0})",
+    codesTitle: "Discount codes ({0})",
+    codeWithPrice: "with code {0}",
+    codeCopy: "Copy",
+    codeCopied: "Copied",
+    cashbackTitle: "Cashback to register ({0})",
+    cashbackRefund: "up to {0} back",
+    cashbackUntil: "register by {0}",
+    cashbackFrom: "register from {0}",
+    cashbackRange: "register {0} – {1}",
+    cashbackNoDate: "deadline in the promotion terms",
+    cashbackTerms: "Promotion terms",
+    cashbackDone: "Done",
+    cashbackDoneTitle: "I've registered the purchase – stop reminding me",
+    watchList: "Watch list",
+    unwatchList: "Stop watching list ({0})",
     openListHint: "Open a shopping list on Alza",
-    runNow: "▶️ Check now",
+    runNow: "Check now",
     runNowTitle: "Check watched products now",
     listSynced: "Synced {0}",
     openAlzaTitle: "Open {0}",
     listSummary: "Last 7 days: {0} cheaper, {1} more expensive (lowest price)",
     listNoChanges: "no changes",
-    actionFailed: "⚠️ Failed: {0}",
+    actionFailed: "Failed: {0}",
     watchedProducts: "Watched products ({0})",
-    running: "⏳ Check in progress (since {0})",
+    running: "Check in progress (since {0})",
     lastRun: "Checked {0} · {1} products · {2} changes",
     noRunYet: "No check has run yet",
-    nextRun: "⏰ Next check {0}",
-    pending: "🌙 Postponed until quiet hours end: {0}",
+    nextRun: "Next check {0}",
+    pending: "Postponed until quiet hours end: {0}",
   },
 };
 
@@ -135,9 +187,29 @@ function t(key, ...params) {
   return AlzaCore.translateFrom(POPUP_TEXTS, ui.lang, key, params);
 }
 
+// Ikony před texty (src/shared/icons.js) – emoji v textech nejsou, ikonu přidá setText podle klíče textu
+const POPUP_ICONS = {
+  cleanupText: "cleaning",
+  cleanupReview: "cleaning",
+  watchList: "bell",
+  unwatchList: "bell-off",
+  runNow: "refresh",
+  actionFailed: "warning",
+  running: "hourglass",
+  nextRun: "schedule",
+  pending: "moon",
+};
+
+function setText(element, key, ...params) {
+  element.textContent = t(key, ...params);
+  if (POPUP_ICONS[key]) AlzaIcons.prepend(element, POPUP_ICONS[key], { tone: key === "actionFailed" });
+  return element;
+}
+
 function applyStaticTexts() {
   document.documentElement.lang = ui.locale.split("-")[0];
-  document.querySelectorAll("[data-i18n]").forEach((element) => (element.textContent = t(element.dataset.i18n)));
+  document.querySelectorAll("[data-i18n]").forEach((element) => setText(element, element.dataset.i18n));
+  AlzaIcons.decorate(document);
   document.querySelectorAll("[data-i18n-title]").forEach((element) => (element.title = t(element.dataset.i18nTitle)));
 }
 applyStaticTexts();
@@ -210,6 +282,9 @@ const TARGETS_KEY = AlzaCore.storageKeys.targets;
 const WATCH_PRODUCTS_KEY = AlzaCore.storageKeys.watchProducts;
 const CLEANUP_KEY = AlzaCore.storageKeys.cleanup;
 const WATCH_STATE_KEY = AlzaCore.storageKeys.watchState;
+const CODES_KEY = AlzaCore.storageKeys.codes;
+const CODES_MAX_AGE_MS = 30 * AlzaCore.dayMs; // Trezor ukazuje kódy viděné za posledních 30 dní
+const CASHBACK_REMINDERS_KEY = AlzaCore.storageKeys.cashbackReminders;
 
 const toggleWatchButton = document.getElementById("toggleWatch");
 const runWatchNowButton = document.getElementById("runWatchNow");
@@ -234,7 +309,7 @@ async function sendToActiveTab(message) {
 function showError(error) {
   console.error("Popup:", error);
   const status = document.getElementById("watchStatus");
-  status.textContent = t("actionFailed", error?.message || error);
+  setText(status, "actionFailed", error?.message || error);
   status.classList.add("error");
 }
 
@@ -242,12 +317,12 @@ function renderToggle() {
   toggleWatchButton.disabled = !watchState?.listId;
   toggleWatchButton.title = "";
   if (!watchState?.listId) {
-    toggleWatchButton.textContent = t("watchList");
+    setText(toggleWatchButton, "watchList");
     toggleWatchButton.title = t("openListHint");
   } else if (watchState.watched) {
-    toggleWatchButton.textContent = t("unwatchList", watchState.count);
+    setText(toggleWatchButton, "unwatchList", watchState.count);
   } else {
-    toggleWatchButton.textContent = t("watchList");
+    setText(toggleWatchButton, "watchList");
   }
 }
 
@@ -304,25 +379,42 @@ async function renderWatch() {
   const status = document.getElementById("watchStatus");
   status.replaceChildren();
   status.classList.remove("error");
-  const addLine = (text, className) => {
+  const addLine = (text, className, icon) => {
     const line = document.createElement("div");
     line.textContent = text;
     if (className) line.className = className;
+    if (icon) AlzaIcons.prepend(line, icon, { tone: icon === "warning" });
     status.appendChild(line);
+    return line;
   };
 
   if (state.running) {
-    addLine(t("running", formatTime(state.lastRunStart)));
+    addLine(t("running", formatTime(state.lastRunStart)), null, POPUP_ICONS.running);
   } else if (state.lastRunEnd) {
-    addLine(t("lastRun", formatTime(state.lastRunEnd), state.checked || 0, state.changes?.length || 0) + (targetCount ? ` · 🎯 ${targetCount}` : ""));
+    const line = addLine(t("lastRun", formatTime(state.lastRunEnd), state.checked || 0, state.changes?.length || 0));
+    // Počet cílových cen za ikonou terče
+    if (targetCount) line.append(" · ", AlzaIcons.create(document, "target"), String(targetCount));
   } else {
     addLine(t("noRunYet"));
   }
   // Kdy proběhne další kontrola na pozadí (frekvence podle nastavení) – jen když je co hlídat
   const watching = Object.keys(lists).length > 0 || targetCount > 0 || productCount > 0;
-  if (!state.running && watching && nextAlarm?.scheduledTime) addLine(t("nextRun", formatTime(nextAlarm.scheduledTime)));
-  if (state.pendingNotifications?.length) addLine(t("pending", state.pendingNotifications.length));
-  (state.problems || []).forEach((problem) => addLine(`⚠️ ${problem.name}: ${problem.message}`, "watch-problem"));
+  if (!state.running && watching && nextAlarm?.scheduledTime) addLine(t("nextRun", formatTime(nextAlarm.scheduledTime)), null, POPUP_ICONS.nextRun);
+  if (state.pendingNotifications?.length) addLine(t("pending", state.pendingNotifications.length), null, POPUP_ICONS.pending);
+  // Název produktu s problémem je odkaz – rychle se na produkt podívat
+  (state.problems || []).forEach((problem) => {
+    if (!problem.url || !AlzaCore.isAlzaUrl(problem.url)) {
+      addLine(`${problem.name}: ${problem.message}`, "watch-problem", "warning");
+      return;
+    }
+    const line = addLine("", "watch-problem", "warning");
+    const link = document.createElement("a");
+    link.href = problem.url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = problem.name;
+    line.append(link, `: ${problem.message}`);
+  });
   runWatchNowButton.disabled = Boolean(state.running) || (Object.keys(lists).length === 0 && targetCount === 0 && productCount === 0);
   renderChanges(state.recent || [], showDomains);
   renderCleanup(data[CLEANUP_KEY] || {});
@@ -335,7 +427,7 @@ function renderCleanup(cleanup) {
   const notice = document.getElementById("cleanupNotice");
   notice.hidden = !(cleanup.count > 0) || cleanup.snoozedUntil > Date.now();
   if (notice.hidden) return;
-  document.getElementById("cleanupText").textContent = t("cleanupText", cleanup.count);
+  setText(document.getElementById("cleanupText"), "cleanupText", cleanup.count);
   notice.title = t("cleanupHint");
 }
 
@@ -470,6 +562,140 @@ function createProductPanel(products, showDomains = false) {
 }
 
 // Přehled posledních změn – nové (číslo na ikoně při otevření popupu) zvýrazněné nahoře
+// Trezor slevových kódů (AlzaCore.storageKeys.codes): produkt, kód, cena s kódem a Kopírovat – nejnovější kódy nahoře
+async function renderCodes() {
+  const { [CODES_KEY]: registry = {}, [AlzaCore.storageKeys.browsed]: browsed = {}, [WATCH_PRODUCTS_KEY]: watched = {} } = await chrome.storage.local.get([
+    CODES_KEY,
+    AlzaCore.storageKeys.browsed,
+    WATCH_PRODUCTS_KEY,
+  ]);
+  const now = Date.now();
+  const codes = Object.entries(registry)
+    .filter(([, entry]) => entry?.code && AlzaCore.isAlzaUrl(entry.url) && now - (entry.seenAt || 0) < CODES_MAX_AGE_MS)
+    .sort(([, a], [, b]) => (b.since || 0) - (a.since || 0))
+    .slice(0, 30);
+  const section = document.getElementById("codes");
+  section.hidden = codes.length === 0;
+  if (codes.length === 0) return;
+  const toggle = document.getElementById("codesToggle");
+  toggle.textContent = t("codesTitle", codes.length);
+  if (!toggle.dataset.ready) {
+    toggle.dataset.ready = "1";
+    toggle.addEventListener("click", () => {
+      const open = toggle.getAttribute("aria-expanded") !== "true";
+      toggle.setAttribute("aria-expanded", String(open));
+      document.getElementById("codesList").hidden = !open;
+    });
+  }
+
+  document.getElementById("codesList").replaceChildren(
+    ...codes.map(([key, entry]) => {
+      const row = document.createElement("div");
+      row.className = "change";
+      const body = document.createElement("div");
+      body.className = "change-body";
+      const title = document.createElement("div");
+      title.className = "change-title";
+      const name = document.createElement("a");
+      name.textContent = browsed[key]?.name || watched[key]?.name || decodeURIComponent(new URL(entry.url).pathname.split("/").pop().replace(/-d\d+\.htm$/, "").replace(/-/g, " "));
+      name.title = name.textContent;
+      name.href = entry.url;
+      name.target = "_blank";
+      title.appendChild(name);
+      const line = document.createElement("div");
+      line.className = "code-line";
+      const pill = document.createElement("code");
+      pill.className = "code-pill";
+      pill.textContent = entry.code;
+      const price = document.createElement("span");
+      price.className = "code-price";
+      price.textContent = Number.isFinite(entry.price) ? t("codeWithPrice", AlzaCore.formatPrice(entry.price, entry.domain)) : "";
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "code-copy";
+      copy.textContent = t("codeCopy");
+      copy.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(entry.code).catch(() => {});
+        copy.textContent = t("codeCopied");
+        setTimeout(() => (copy.textContent = t("codeCopy")), 1500);
+      });
+      line.append(pill, price, copy);
+      body.append(title, line);
+      row.appendChild(body);
+      return row;
+    })
+  );
+}
+
+// Cashback k registraci (AlzaCore.storageKeys.cashbackReminders): koupené zboží s cashbackem, lhůta registrace,
+// odkaz na podmínky akce a Hotovo (už nepřipomínat) – nejbližší lhůta nahoře
+async function renderCashbacks() {
+  const { [CASHBACK_REMINDERS_KEY]: reminders = {} } = await chrome.storage.local.get(CASHBACK_REMINDERS_KEY);
+  const now = Date.now();
+  const items = Object.entries(reminders || {})
+    .filter(([, reminder]) => reminder && !reminder.done && AlzaCore.isAlzaUrl(reminder.url) && AlzaCore.getCashbackReminderStep(reminder, now) !== "expired")
+    .sort(([, a], [, b]) => (a.registerUntil || Infinity) - (b.registerUntil || Infinity));
+  const section = document.getElementById("cashbacks");
+  section.hidden = items.length === 0;
+  if (items.length === 0) return;
+  document.getElementById("cashbacksTitle").textContent = t("cashbackTitle", items.length);
+  const date = (time) => new Date(time).toLocaleDateString(ui.locale, { day: "numeric", month: "numeric", year: "numeric" });
+
+  document.getElementById("cashbacksList").replaceChildren(
+    ...items.map(([key, reminder]) => {
+      const row = document.createElement("div");
+      row.className = "change";
+      const body = document.createElement("div");
+      body.className = "change-body";
+      const title = document.createElement("div");
+      title.className = "change-title";
+      const name = document.createElement("a");
+      name.textContent = reminder.name || reminder.title || reminder.url;
+      name.title = name.textContent;
+      name.href = reminder.url;
+      name.target = "_blank";
+      title.appendChild(name);
+
+      const line = document.createElement("div");
+      line.className = "code-line";
+      const info = document.createElement("span");
+      info.className = "code-price";
+      const opensLater = reminder.registerFrom > now;
+      const when =
+        opensLater && reminder.registerUntil
+          ? t("cashbackRange", date(reminder.registerFrom), date(reminder.registerUntil))
+          : opensLater
+            ? t("cashbackFrom", date(reminder.registerFrom))
+            : reminder.registerUntil
+              ? t("cashbackUntil", date(reminder.registerUntil))
+              : t("cashbackNoDate");
+      info.textContent = [reminder.refund > 0 ? t("cashbackRefund", AlzaCore.formatPrice(reminder.refund, reminder.domain)) : null, when].filter(Boolean).join(" · ");
+      line.appendChild(info);
+      if (AlzaCore.isAlzaUrl(reminder.terms)) {
+        const terms = document.createElement("a");
+        terms.className = "cashback-terms";
+        terms.textContent = t("cashbackTerms");
+        terms.href = reminder.terms;
+        terms.target = "_blank";
+        line.appendChild(terms);
+      }
+      const done = document.createElement("button");
+      done.type = "button";
+      done.className = "code-copy";
+      done.textContent = t("cashbackDone");
+      done.title = t("cashbackDoneTitle");
+      done.addEventListener("click", () => {
+        done.disabled = true;
+        AlzaStore.run({ type: "patchMap", key: CASHBACK_REMINDERS_KEY, merge: { [key]: { done: true } } }).catch(showError);
+      });
+      line.appendChild(done);
+      body.append(title, line);
+      row.appendChild(body);
+      return row;
+    })
+  );
+}
+
 function renderChanges(recent, showDomains = false) {
   const section = document.getElementById("changes");
   section.hidden = recent.length === 0;
@@ -525,7 +751,10 @@ function renderChanges(recent, showDomains = false) {
       lines.forEach((text, index) => {
         const line = document.createElement("div");
         line.className = tones[index] ? `change-line change-line--${tones[index]}` : "change-line";
-        line.textContent = text;
+        // Výstraha / cílová cena s ikonou (starší uložené řádky mají místo ní emoji na začátku textu)
+        line.textContent = AlzaCore.stripChangeEmoji(text);
+        const icon = AlzaCore.getChangeIcon(text);
+        if (icon) AlzaIcons.prepend(line, icon, { tone: true });
         body.appendChild(line);
       });
 
@@ -558,6 +787,8 @@ runWatchNowButton.addEventListener("click", () => {
 });
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area === "local" && changes[CODES_KEY]) renderCodes().catch(showError);
+  if (area === "local" && changes[CASHBACK_REMINDERS_KEY]) renderCashbacks().catch(showError);
   if (area !== "local" || ![WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY].some((key) => changes[key])) return;
   // Změny z kontroly doběhlé při otevřeném popupu (např. tlačítko Zkontrolovat) – zvýraznit a hned označit viděné
   const unseen = changes[WATCH_STATE_KEY]?.newValue?.unseen || [];
@@ -589,4 +820,6 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   watchState = await sendToActiveTab({ action: "getWatchState" });
   renderToggle();
   await renderWatch();
+  await renderCodes();
+  await renderCashbacks();
 })().catch(showError);

@@ -21,6 +21,11 @@ const ProductPages = {
     return chrome.runtime.sendMessage({ target: "offscreen", action: "checkProduct", url });
   },
 
+  // Stránka akce s cashbackem jako text (fetchTermsPage)
+  terms(url) {
+    return chrome.runtime.sendMessage({ target: "offscreen", action: "termsPage", url });
+  },
+
   async close() {
     try {
       await chrome.offscreen.closeDocument();
