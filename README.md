@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--3.0-blue" alt="Licence GPL-3.0"></a>
 </p>
 
-**Alza Price Insight** je rozšíření pro Chrome a Firefox, které vám na Alze řekne, jestli je cena opravdu výhodná. Ukazuje historii cen, hlídá vaše nákupní seznamy na pozadí, upozorní na podezřelé slevy a spočítá skutečnou cenu za kus. Funguje na alza.cz, alza.sk a alza.hu.
+**Alza Price Insight** je rozšíření pro Chrome a Firefox (experimentálně i Safari na Macu), které vám na Alze řekne, jestli je cena opravdu výhodná. Ukazuje historii cen, hlídá vaše nákupní seznamy na pozadí, upozorní na podezřelé slevy a spočítá skutečnou cenu za kus. Funguje na alza.cz, alza.sk a alza.hu.
 
 > **Neoficiální projekt.** Rozšíření nemá žádnou vazbu na Alza.cz a.s. Název „Alza“ je ochranná známka svého vlastníka a je zde použit jen k označení webu, se kterým rozšíření pracuje.
 
@@ -24,18 +24,21 @@
 ## Co umí
 
 - 📈 **Historie cen** v nákupních seznamech a na detailu produktu, včetně grafu s typy cen, dostupností a minimem/maximem.
-- 🔔 **Hlídání seznamů na pozadí** s notifikacemi při změně ceny. Počet změn se zobrazuje na ikoně rozšíření.
+- 🔔 **Hlídání seznamů na pozadí** s notifikacemi při změně ceny. Počet změn se zobrazuje na ikoně rozšíření. Obsah hlídaného seznamu se před každou kontrolou načte z Alzy, takže se hlídají i položky přidané třeba v mobilní aplikaci a odebrané se přestanou kontrolovat.
 - 🎯 **Cílová cena** u hlídaných produktů, a to i cílová cena za kus.
 - ⚠️ **Podezřelé slevy:** porovnání přeškrtnuté ceny s obvyklou cenou a hodnocení, jestli je aktuální cena opravdu výhodná.
 - ⏳ **Vyplatí se počkat?** Rytmus akcí: jak často a o kolik produkt obvykle zlevňuje.
 - 📦 **Stejný produkt levněji:** upozornění na rozbalený nebo zánovní kus.
 - 🧾 **Lišta nákupního seznamu** se souhrnem, filtry a řazením.
 - 🧮 **Skutečná cena za kus** v kategoriích, v nákupním seznamu i na detailu produktu (i se slevou AlzaPlus+) a řazení celé kategorie podle ní.
-- 🏷️ **Filtr slev v kategoriích:** „Sleva aspoň X %“, „Jen s kupónem“ a „S množstevní slevou“ v levém panelu filtrů – i se slevovým kódem a AlzaPlus+, proti obvyklé ceně z historie. Řazení podle ceny za kus jako záložka „Za jednotku“.
+- 📏 **Cena za parametr** ve výpisech kategorií, kde Alza cenu za jednotku neuvádí: Kč/TB u disků, Kč/GB u pamětí, flash disků a paměťových karet, Kč/1000 mAh u powerbank a Kč/Wh u nabíjecích stanic. Řadí podle ní záložka „Za jednotku“.
+- ⚡ **Cena provozu spotřebičů:** odhad ceny elektřiny u lednic, mrazáků, praček a sušiček ve výpisech kategorií, na detailu produktu i u televizí, monitorů a myček. Počítá ze spotřeby a z ceny elektřiny, kterou zadáte v nastavení; záložka „S provozem“ seřadí výpis podle pořizovací ceny a provozu dohromady.
+- 🏷️ **Filtr slev v kategoriích:** „Sleva aspoň X %“, „Jen s kupónem“ a „S množstevní slevou“ v levém panelu filtrů – i se slevovým kódem a AlzaPlus+, proti obvyklé ceně z historie. Velký výpis se sám nenačítá celý: filtr projde načtené produkty a další přidá tlačítko „Načíst dalších 480“.
 - 🎟️ **Trezor slevových kódů** v okně rozšíření: kódy z produktů, které jste viděli, s cenou po slevě a tlačítkem Kopírovat.
 - 🛒 **Košík:** hodnocení ceny u každé položky, tip „+1 ks → nižší cena za kus“ u množstevní slevy a upozornění, když chybí slevový kód. Ze seznamu jde zboží do košíku i s kódem.
-- ↩️ **Hlídání po nákupu:** když koupené zboží do 14 dní zlevní, dozvíte se, že ho můžete vrátit a koupit levněji.
+- ↩️ **Hlídání po nákupu:** když koupené zboží do 14 dní zlevní, dozvíte se, že ho můžete vrátit a koupit levněji. Nové objednávky se načtou při návštěvě Alzy i při kontrole na pozadí; v přehledu změn je u koupeného zboží odkaz „Objednávky“.
 - 💸 **Připomínka cashbacku:** termíny akce už před nákupem a upozornění, až jde nákup zaregistrovat u výrobce.
+- 🛍️ **Moje nákupy** (volitelné, zapnete v nastavení): přehled všeho, co jste na Alze koupili – datum, cena, stav záruky, vrácené a reklamované zboží, odkaz na objednávku a graf výdajů po letech a měsících. Připomínka měsíc před koncem záruky u dražšího zboží a „Koupili jste…“ na detailu produktu, který už máte.
 - 🔍 **Srovnávače cen** na detailu produktu: Heureka, Zboží.cz, Árukereső jedním klikem. **Kopírovat nabídku** pošle název, ceny i s kódem a odkaz do chatu.
 - 💾 **Záloha dat:** export do JSON, export historie do CSV, obnova ze zálohy a úklid starých dat.
 
@@ -45,7 +48,7 @@ Rozhraní je v češtině, slovenštině, maďarštině a angličtině.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/1-historie.png" alt="Historie cen"><br><sub><b>Historie cen</b> a odhalení slev, které jsou jen na oko</sub></td>
+    <td width="50%"><img src="docs/images/1-historie.png" alt="Historie cen"><br><sub><b>Historie cen</b> a upozornění na podezřelé slevy</sub></td>
     <td width="50%"><img src="docs/images/2-seznam.png" alt="Nákupní seznam se změnami cen"><br><sub><b>Nákupní seznam</b> na jeden pohled: souhrn, filtry a řazení</sub></td>
   </tr>
   <tr>
@@ -54,6 +57,18 @@ Rozhraní je v češtině, slovenštině, maďarštině a angličtině.
   </tr>
   <tr>
     <td><img src="docs/images/5-hlidani.png" alt="Hlídání cen na pozadí"><br><sub><b>Hlídání na pozadí</b> s notifikacemi a přehledem změn</sub></td>
+    <td><img src="docs/images/6-kody-cashback.png" alt="Trezor slevových kódů a připomínka cashbacku"><br><sub><b>Slevové kódy a cashback</b> v okně rozšíření, upozornění na zlevnění po nákupu</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/7-kosik.png" alt="Košík s hodnocením cen"><br><sub><b>Košík</b> s hodnocením cen, množstevní slevou a kontrolou kódu</sub></td>
+    <td><img src="docs/images/8-filtr-slev.png" alt="Filtr slev v kategorii"><br><sub><b>Filtr slev</b> v panelu filtrů a řazení „Za jednotku“</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/9-moje-nakupy.png" alt="Moje nákupy"><br><sub><b>Moje nákupy</b> se stavem záruky a grafem výdajů</sub></td>
+    <td><img src="docs/images/10-cena-provozu.png" alt="Cena provozu lednic v kategorii"><br><sub><b>Cena provozu</b> spotřebičů a řazení „S provozem“</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/11-cena-za-tb.png" alt="Cena za TB u SSD disků"><br><sub><b>Cena za TB</b> u disků, za GB, 1000 mAh a Wh</sub></td>
     <td valign="middle" align="center">
       <b>Zdarma a bez reklam.</b><br><br>
       <a href="https://chromewebstore.google.com/detail/alza-price-insight/ndaheikijjhppooeiioljekolkekfgie">Chrome Web Store</a> ·
@@ -70,6 +85,9 @@ Rozhraní je v češtině, slovenštině, maďarštině a angličtině.
 |---|---|---|
 | **Chrome** | [Chrome Web Store](https://chromewebstore.google.com/detail/alza-price-insight/ndaheikijjhppooeiioljekolkekfgie) | Chrome 121 nebo novější |
 | **Firefox** pro počítač | [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/alza-price-insight/) | Firefox 140 nebo novější (ne Android) |
+| **Safari** na Macu (experimentálně) | [sestavení na vlastním Macu](safari/README.md) | macOS 13 a Safari 18 nebo novější, Command Line Tools |
+
+Verze pro Safari v App Storu není – sestavíte si ji sami jedním příkazem v Terminálu podle [návodu](safari/README.md). Hodí se pro ty, kdo se Terminálu nebojí.
 
 Potřebujete jen účet na Alze. Registrace je zdarma a rozšíření s ním pracuje stejně jako vy v prohlížeči.
 
@@ -79,7 +97,7 @@ Po instalaci se sám otevře průvodce. Zabere asi minutu a později ho kdykoli 
 
 <p align="center"><img src="docs/images/welcome-1-uvod.png" alt="Úvod průvodce nastavením" width="80%"></p>
 
-Úvod shrnuje, co je dobré vědět předem: historie začíná instalací, ceny se ukládají jen přihlášenému s cenami s DPH a všechna data zůstávají ve vašem prohlížeči. Pak následují tři kroky:
+Úvod shrnuje, co je dobré vědět předem: historie začíná instalací, ceny se ukládají jen přihlášenému s cenami s DPH a všechna data zůstávají ve vašem prohlížeči. Pak následují čtyři kroky:
 
 <table>
   <tr>
@@ -89,17 +107,26 @@ Po instalaci se sám otevře průvodce. Zabere asi minutu a později ho kdykoli 
     </td>
     <td width="50%" valign="top">
       <img src="docs/images/welcome-3-hlidani.png" alt="Krok 2: co a jak často hlídat">
-      <p><b>Krok 2 – Hlídání.</b> Jak často kontrolovat hlídané produkty (každou hodinu až jednou denně ve zvolený čas), jestli ukládat ceny i z procházení Alzy a jestli ve výpisech kategorií ukazovat skutečnou cenu za kus. Každá změna se hned uloží.</p>
+      <p><b>Krok 2 – Hlídání.</b> Jak často kontrolovat hlídané produkty (každou hodinu až jednou denně ve zvolený čas), jestli ukládat ceny i z procházení Alzy, hlídat cenu po nákupu, připomínat registraci cashbacku a jestli zapnout Moje nákupy s připomínkou konce záruky. Každá změna se hned uloží.</p>
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <img src="docs/images/welcome-4-notifikace.png" alt="Krok 3: notifikace">
-      <p><b>Krok 3 – Notifikace.</b> Kdy se ozvat: zlevnění (třeba až od 5 %), nová cena (akce, slevový kód, cashback), změna dostupnosti a tiché hodiny. Tlačítkem <b>🔔 Vyzkoušet notifikace</b> ověříte, že je Windows nebo prohlížeč nezahazuje.</p>
+      <img src="docs/images/welcome-4-kategorie.png" alt="Krok 3: výpisy kategorií">
+      <p><b>Krok 3 – Kategorie.</b> Co ukázat ve výpisech kategorií a ve vyhledávání: skutečnou cenu za jednotku, filtr slev a cenu provozu spotřebičů s vaší cenou elektřiny.</p>
     </td>
     <td valign="top">
-      <img src="docs/images/welcome-5-hotovo.png" alt="Hotovo">
+      <img src="docs/images/welcome-5-notifikace.png" alt="Krok 4: notifikace">
+      <p><b>Krok 4 – Notifikace.</b> Kdy se ozvat: zlevnění (třeba až od 5 %), nová cena (akce, slevový kód, cashback), změna dostupnosti a tiché hodiny. Tlačítkem <b>🔔 Vyzkoušet notifikace</b> ověříte, že je Windows nebo prohlížeč nezahazuje.</p>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <img src="docs/images/welcome-6-hotovo.png" alt="Hotovo">
       <p><b>Hotovo.</b> Otevřete svůj nákupní seznam na Alze. Rozšíření u položek načte všechny ceny a začne si vést historii. Průvodce ukáže, kolik seznamů a produktů už hlídáte.</p>
+    </td>
+    <td valign="top">
+      <p><b>Po aktualizaci</b> s novou volbou se sama otevře stránka <b>Co je nového</b>, kde nové volby hned zapnete nebo vypnete. U ostatních aktualizací svítí v popupu zelená značka <b>Novinky</b>.</p>
     </td>
   </tr>
 </table>
@@ -118,26 +145,32 @@ Změny cen přijdou jako notifikace a jejich počet svítí na ikoně rozšíře
 
 ## Nastavení
 
-Nastavení otevřete z popupu (ozubené kolečko ⚙️) nebo pravým tlačítkem na ikonu rozšíření → *Možnosti*. Volby jsou stejné jako v průvodci, navíc tu je jazyk, záloha dat a diagnostika.
+Nastavení otevřete z popupu (ozubené kolečko ⚙️) nebo pravým tlačítkem na ikonu rozšíření → *Možnosti*. Najdete tu volby z průvodce a další, které v průvodci nejsou. Volby jsou rozdělené do čtyř záložek; každá změna se hned uloží.
 
-<p align="center"><img src="docs/images/nastaveni-1-volby.png" alt="Nastavení: sledování cen, notifikace, jazyk, záloha dat" width="90%"></p>
+<p align="center"><img src="docs/images/nastaveni-1-sledovani.png" alt="Nastavení: záložka Sledování cen" width="90%"></p>
 
-- **Sledování cen:** jak často kontrolovat hlídané produkty a jestli ukládat ceny z procházení.
-- **Notifikace:** zlevnění od zvoleného procenta, nové ceny, dostupnost, tiché hodiny a zkušební notifikace.
-- **Výpisy kategorií:** skutečná cena za jednotku na oranžovém štítku.
-- **Jazyk:** jazyk rozšíření a hlavní Alza (cz, sk, hu).
-- **Záloha dat:** **Záloha (JSON)** stáhne všechna data včetně historie cen, **Obnovit ze zálohy…** je vrátí. **Historie (CSV)** se otevře v Excelu, **Uklidit stará data…** smaže to, co už nepotřebujete.
-- **Diagnostika:** **🐞 Nahlásit chybu** otevře na GitHubu nové hlášení s předvyplněnou verzí, prohlížečem a posledními chybami (odešle se, až ho sami potvrdíte). **Stáhnout diagnostiku** uloží log chyb do souboru.
+- **Sledování cen:** jak často kontrolovat hlídané produkty, **Ukládat ceny z procházení**, **Hlídat cenu po nákupu**, **Připomínat registraci cashbacku**, **Moje nákupy – koupené zboží a záruky** (ve výchozím stavu vypnuté) a **Připomínat konec záruky**.
+- **Notifikace:** zlevnění od zvoleného procenta, nové ceny, dostupnost, tiché hodiny a **Vyzkoušet notifikace**.
+- **Výpisy kategorií:** **Skutečná cena za jednotku** na oranžovém štítku, **Filtr slev** v levém panelu filtrů a **Cena provozu spotřebičů** – cena elektřiny, počet let, praní týdně a kolik hodin denně běží televize a monitor.
+- **Obecné:**
+  - **Jazyk:** jazyk rozšíření a hlavní Alza (cz, sk, hu).
+  - **Záloha dat:** **Záloha (JSON)** stáhne historii cen, hlídané seznamy a produkty, cílové ceny, připomínky cashbacku a nastavení (nákupy a slevové kódy ne – znovu se načtou z Alzy), **Obnovit ze zálohy…** je vrátí. **Historie (CSV)** se otevře v Excelu, **Uklidit stará data…** smaže to, co už nepotřebujete.
+  - **Diagnostika:** **🐞 Nahlásit chybu** otevře na GitHubu nové hlášení s předvyplněnou verzí, prohlížečem a posledními chybami (odešle se, až ho sami potvrdíte). **Stáhnout diagnostiku** uloží soubor pro autora. Názvy koupeného zboží ani čísla objednávek v hlášení ani v souboru nejsou.
+  - **Smazat všechna data…** smaže vše kromě nastavení a logu chyb; předtím se stáhne záloha.
+
+Na záložku nastavení jde odkázat přímo – adresa stránky nastavení končí `#s-tracking`, `#s-notifications`, `#s-categories` nebo `#s-general`.
 
 Pod volbami jsou záložky s tím, co rozšíření hlídá a ukládá:
 
 <p align="center"><img src="docs/images/nastaveni-2-seznamy.png" alt="Nastavení: hlídané nákupní seznamy" width="90%"></p>
 <p align="center"><img src="docs/images/nastaveni-3-produkty.png" alt="Nastavení: hlídané produkty a cílové ceny" width="90%"></p>
+<p align="center"><img src="docs/images/nastaveni-4-moje-nakupy.png" alt="Nastavení: Moje nákupy s grafem výdajů" width="90%"></p>
 
 - **Hlídané seznamy:** kolik mají produktů, od kdy se hlídají. Kliknutím na řádek uvidíte produkty seznamu.
 - **Hlídané produkty:** jednotlivé produkty a cílové ceny, včetně aktuální ceny.
+- **Moje nákupy:** koupené zboží s datem, cenou, stavem záruky a odkazem na objednávku, hledání, filtry podle záruky, roku a měsíce a graf výdajů. Se zapnutou volbou tu je tlačítko **Načíst nové nákupy**, s vypnutou **Smazat načtené nákupy**.
 - **Uložená data:** všechny produkty s historií cen.
-- **Logy běhů:** kdy a s jakým výsledkem proběhla kontrola na pozadí.
+- **Logy běhů:** kdy a s jakým výsledkem proběhla kontrola na pozadí, včetně nových a odebraných položek seznamů a nových nákupů.
 
 ## Časté otázky
 
@@ -168,7 +201,7 @@ Nemusí. Hlídané seznamy a produkty se kontrolují na pozadí, stačí mít sp
 <details>
 <summary><b>Jak přenesu data na jiný počítač nebo do jiného prohlížeče?</b></summary>
 
-V nastavení klikněte na **Záloha (JSON)** a soubor si uložte. V novém prohlížeči nainstalujte rozšíření a v nastavení použijte **Obnovit ze zálohy…**. Záloha obsahuje historii cen, hlídané seznamy a produkty, cílové ceny i nastavení. Při odinstalaci rozšíření prohlížeč jeho data smaže, proto si zálohu udělejte vždy předem.
+V nastavení klikněte na **Záloha (JSON)** a soubor si uložte. V novém prohlížeči nainstalujte rozšíření a v nastavení použijte **Obnovit ze zálohy…**. Záloha obsahuje historii cen, hlídané seznamy a produkty, cílové ceny, připomínky cashbacku i nastavení; nákupy a slevové kódy se znovu načtou z Alzy. Při odinstalaci rozšíření prohlížeč jeho data smaže, proto si zálohu udělejte vždy předem.
 </details>
 
 <details>
@@ -179,19 +212,27 @@ Ne. Chrome pro Android rozšíření nepodporuje a Firefox pro Android nemá not
 
 ## Soukromí
 
-Všechna data (ceny, historie, nastavení) se ukládají jen lokálně ve vašem prohlížeči. Rozšíření komunikuje výhradně s weby Alzy a nikam jinam nic neodesílá. Jedinou výjimkou jsou ikony srovnávačů cen (Heureka, Zboží.cz, Árukereső) na detailu produktu: načítají se přímo z jejich webů, takže ty vidí vaši IP adresu – nic dalšího se jim neposílá, ani jaký produkt si prohlížíte. Nemá žádnou analytiku ani sledování, což si můžete ověřit přímo ve zdrojovém kódu v tomto repozitáři.
+Všechna data (ceny, historie, nákupy, nastavení) se ukládají jen lokálně ve vašem prohlížeči. Rozšíření komunikuje výhradně s weby Alzy a nikam jinam nic neodesílá. Jedinou výjimkou jsou ikony srovnávačů cen (Heureka, Zboží.cz, Árukereső) na detailu produktu: načítají se přímo z jejich webů, takže ty vidí vaši IP adresu – nic dalšího se jim neposílá, ani jaký produkt si prohlížíte. Nemá žádnou analytiku ani sledování, což si můžete ověřit přímo ve zdrojovém kódu v tomto repozitáři.
+
+Z vašeho účtu na Alze rozšíření čte (s vaším přihlášením, stejně jako stránky Alzy, které si otevřete sami):
+
+- **Obsah hlídaných nákupních seznamů** – před každou kontrolou na pozadí.
+- **Objednávky za posledních 14 dní** pro hlídání ceny po nákupu – na stránkách Alzy i při kontrole na pozadí. Ukládá se koupené zboží (adresa, název, obrázek, cena, počet kusů, datum, konec lhůty pro vrácení), čas načtení a otisk seznamu rozpracovaných objednávek, podle kterého se pozná změna. Vypnete volbou **Hlídat cenu po nákupu**.
+- **Celý archiv objednávek** – jen když zapnete volbu **Moje nákupy – koupené zboží a záruky** (ve výchozím stavu je vypnutá). Ukládá se zboží (adresa, název, obrázek, značka, kategorie), u každého nákupu datum, počet kusů, cena, číslo objednávky (kvůli odkazu na ni), délka záruky a příznaky (jde reklamovat, vráceno, reklamováno, firemní nákup), a přehled objednávek (číslo, datum, částka).
+
+Číslo vašeho účtu na Alze, jméno, adresa, platební údaje ani IČO se neukládají. Nákupy nejsou v záloze a názvy koupeného zboží ani čísla objednávek se nedostanou do hlášení chyby ani do souboru diagnostiky. Vypnutím volby Moje nákupy se načítání zastaví, data zůstanou – smažete je tlačítkem **Smazat načtené nákupy** v záložce Moje nákupy, nebo se vším ostatním přes **Smazat všechna data…**.
 
 ## English
 
-**Alza Price Insight** tells you whether a price on Alza (CZ, SK, HU) is really a deal: price history, fake-discount alerts, background watching of your wishlists with notifications, target prices, the real price per piece, a discount filter in categories, a discount code vault, cart checks (price ratings, volume discounts, missing codes), price watching after purchase and cashback reminders. Free, no ads, no tracking, all data stays in your browser. The extension speaks English too – switch the language in the setup guide or in the settings.
+**Alza Price Insight** tells you whether a price on Alza (CZ, SK, HU) is really a deal: price history, suspicious-discount alerts, background watching of your wishlists with notifications, target prices, the real price per piece, price per parameter (e.g. per TB) and appliance running costs in category listings, a discount filter in categories, a discount code vault, cart checks (price ratings, volume discounts, missing codes), price watching after purchase, cashback reminders and an optional overview of your purchases with warranty reminders. Free, no ads, no tracking, all data stays in your browser – including the orders it reads from your Alza account (the last 14 days for price watching after purchase; the whole order archive only if you turn on My purchases). The extension speaks English too – switch the language in the setup guide or in the settings.
 
-Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/alza-price-insight/ndaheikijjhppooeiioljekolkekfgie) or [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/alza-price-insight/). A setup guide opens right after installation. You need to be logged in to Alza and see prices including VAT for prices to be saved. Unofficial project, not affiliated with Alza.cz a.s.
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/alza-price-insight/ndaheikijjhppooeiioljekolkekfgie) or [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/alza-price-insight/). Safari on macOS is experimental: you build it yourself on your Mac with one Terminal command, see [safari/README.md](safari/README.md) (in Czech). A setup guide opens right after installation. You need to be logged in to Alza and see prices including VAT for prices to be saved. Unofficial project, not affiliated with Alza.cz a.s.
 
 ## Chyby a návrhy
 
-Chyby a nápady hlaste přes [Issues](https://github.com/Pnaky/Alza-Price-Insight/issues). Nejrychleji to jde z rozšíření: **Nastavení → Diagnostika → 🐞 Nahlásit chybu** předvyplní verzi, prohlížeč i poslední chyby. Když Alza změní vzhled webu a něco přestane fungovat, pomůže odkaz na stránku a snímek obrazovky. Projekt vzniká ve volném čase, pull requesty přijímám podle uvážení.
+Chyby a nápady hlaste přes [Issues](https://github.com/Pnaky/Alza-Price-Insight/issues). Nejrychleji to jde z rozšíření: **Nastavení → Obecné → Diagnostika → 🐞 Nahlásit chybu** předvyplní verzi, prohlížeč i poslední chyby. Když Alza změní vzhled webu a něco přestane fungovat, pomůže odkaz na stránku a snímek obrazovky. Projekt vzniká ve volném čase, pull requesty přijímám podle uvážení, viz [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Bezpečnostní chyby prosím hlaste neveřejně přes **Security → Report a vulnerability**.
+Bezpečnostní chyby prosím hlaste neveřejně přes **Security → Report a vulnerability**, viz [SECURITY.md](SECURITY.md).
 
 ## Pro vývojáře
 
@@ -219,6 +260,7 @@ Rozbalená vývojová verze má v Chrome jiné ID než verze z obchodu, takže m
 | `src/` | skript na stránkách Alzy (`content.js` a moduly v `content/`), výpisy kategorií (`category.js`), služba na pozadí (`background.js`), popup, nastavení, průvodce (`welcome/`), nápověda (`help/`) |
 | `src/shared/` | jádro sdílené všemi částmi (`core.js`) a jediný zapisovatel do úložiště (`store.js`) |
 | `src/chrome/`, `src/firefox/` | kód jen pro jeden prohlížeč |
+| `safari/` | experimentální verze pro Safari: sestavení macOS aplikace s rozšířením ze stejných souborů, notifikace přes aplikaci (návod v [safari/README.md](safari/README.md)); do balíčků pro Chrome a Firefox nejde |
 | `_locales/` | název a popis rozšíření v obchodech |
 | `tests/` | testy jádra, úložiště, překladů, nápovědy a průvodce |
 

@@ -59,12 +59,20 @@
         background: var(--head-btn-hover-bg);
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-        gap: 16px;
+      /* Nastavení: záložky + panel (styl záložek níž u .tabs), řádky ve dvou sloupcích vedle sebe */
+      #settings {
         margin-bottom: 26px;
+      }
+
+      .settings-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 44px;
         align-items: start;
+      }
+
+      .settings-panel > .buttons {
+        margin: 10px 0 0;
       }
 
       section {
@@ -83,8 +91,8 @@
       }
 
       /* Další nadpis v kartě – oddělený jako nová skupina */
-      section h2[style] {
-        margin-top: 18px !important;
+      section h2.group {
+        margin-top: 18px;
         padding-top: 16px;
         border-top: 1px solid var(--line);
       }
@@ -254,11 +262,10 @@
         min-height: 0;
       }
 
-      /* „✓ Uloženo“ v pravém horním rohu karty – nezabírá místo a nic neposouvá */
+      /* „✓ Uloženo“ vpravo v řadě záložek nastavení – nezabírá místo a nic neposouvá */
       [data-saved] {
-        position: absolute;
-        top: 24px;
-        right: 26px;
+        align-self: center;
+        margin-left: auto;
         padding: 2px 10px;
         border-radius: 999px;
         background: #edf7ee;
@@ -335,6 +342,246 @@
       .reached {
         font-weight: 600;
         color: #2e7d32;
+      }
+
+      /* Moje nákupy: záruka brzy končí / už skončila, výdaje po letech */
+      .owned-ending {
+        font-weight: 600;
+        color: #c62828;
+      }
+
+      /* Odkud je konec záruky: délka podle Alzy („36 měs.“) / odhad */
+      .owned-warranty-source {
+        font-weight: 400;
+        opacity: 0.65;
+        white-space: nowrap;
+      }
+
+      .owned-past {
+        opacity: 0.6;
+      }
+
+      #ownedTable {
+        overflow-x: auto; /* úzké okno: tabulka se posune, nepřeteče z karty */
+      }
+
+      #ownedTable td:first-child {
+        min-width: 200px; /* název produktu se nesmí smrsknout na pár písmen */
+      }
+
+      .owned-spending {
+        margin: 6px 0 14px;
+      }
+
+      .owned-spending summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .owned-spending table {
+        width: auto;
+        margin-top: 6px;
+      }
+
+      .owned-spending-table summary {
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+
+      /* Graf výdajů po letech: sloupec = rok, Alzy na sobě (barva patří Alze, ne pořadí) */
+      .owned-seg--cz {
+        background: #2a78d6;
+      }
+
+      .owned-seg--sk {
+        background: #eb6834;
+      }
+
+      .owned-seg--hu {
+        background: #1baf7a;
+      }
+
+      .owned-chart {
+        margin: 10px 0 4px;
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .owned-chart-legend {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 6px;
+        color: var(--muted);
+      }
+
+      .owned-chart-swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+        border-radius: 2px;
+      }
+
+      /* Vlevo místo na popisky linek, sloupce dělí zbytek šířky */
+      .owned-chart-plot,
+      .owned-chart-years {
+        display: flex;
+        padding-left: 76px;
+      }
+
+      .owned-chart-plot {
+        position: relative;
+        height: 180px;
+        margin-top: 22px; /* horní linka má popisek nad sebou */
+        border-bottom: 1px solid var(--field);
+      }
+
+      .owned-chart-grid {
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-bottom: -1px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .owned-chart-col {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        outline: none;
+      }
+
+      .owned-chart-col:hover,
+      .owned-chart-col:focus-visible {
+        background: rgba(38, 63, 106, 0.07);
+      }
+
+      /* Sloupec s daty jde vybrat – filtruje tabulku na svůj rok */
+      .owned-chart-col[data-year] {
+        cursor: pointer;
+      }
+
+      .owned-chart-col--selected,
+      .owned-chart-col--selected:hover {
+        background: rgba(38, 63, 106, 0.14);
+      }
+
+      /* Odkaz na objednávku – jen ikona, s plochou pro pohodlné kliknutí */
+      .owned-order {
+        display: inline-flex;
+        padding: 3px;
+        border-radius: 6px;
+      }
+
+      .owned-order:hover {
+        background: rgba(38, 63, 106, 0.1);
+      }
+
+      /* Součet vybraných nákupů nad tabulkou */
+      .owned-selection {
+        margin: 10px 0 2px;
+        padding: 8px 12px;
+        border-radius: 9px;
+        background: #f3f6fa;
+        font-weight: 600;
+      }
+
+      /* Sloupce stojí na ose vedle sebe: šedý sloupec srovnání (graf měsíců) a sloupec období */
+      .owned-chart-bars {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 3px;
+        height: 100%;
+      }
+
+      .owned-chart-stack {
+        display: flex;
+        flex: 0 1 24px;
+        flex-direction: column-reverse;
+        gap: 2px; /* mezera v barvě podkladu odděluje Alzy ve sloupci */
+        min-width: 0;
+        height: 100%;
+      }
+
+      .owned-chart-seg {
+        min-height: 2px; /* i malá útrata je vidět */
+      }
+
+      /* Stejný měsíc o rok dřív – užší a šedý, ať nepřebije vybraný rok */
+      .owned-chart-ghost {
+        flex: 0 1 10px;
+        min-width: 0;
+        min-height: 2px;
+        border-radius: 3px 3px 0 0;
+      }
+
+      .owned-chart-ghost,
+      .owned-chart-swatch--ghost {
+        background: #a3abb8;
+      }
+
+      .owned-chart--months {
+        margin-top: 16px;
+      }
+
+      .owned-chart--months .owned-chart-plot {
+        height: 130px;
+      }
+
+      .owned-chart-title {
+        color: var(--text);
+        font-size: 13px;
+      }
+
+      .owned-chart-seg--top {
+        border-radius: 4px 4px 0 0;
+      }
+
+      .owned-chart-tip {
+        display: none;
+        position: absolute;
+        z-index: 5;
+        top: 6px;
+        left: calc(50% + 20px);
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        color: var(--text);
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+      /* Pravá polovina grafu: bublina vlevo od sloupce, aby nevyjela z karty */
+      .owned-chart-tip--left {
+        left: auto;
+        right: calc(50% + 20px);
+      }
+
+      .owned-chart-col:hover .owned-chart-tip,
+      .owned-chart-col:focus-visible .owned-chart-tip {
+        display: block;
+      }
+
+      .owned-chart-tip-row {
+        margin-top: 3px;
+      }
+
+      .owned-chart-years {
+        margin-top: 4px;
+        color: var(--muted);
+      }
+
+      .owned-chart-years span {
+        flex: 1;
+        min-width: 0;
+        text-align: center;
       }
 
       .empty {
@@ -419,13 +666,21 @@
         color: var(--muted);
       }
 
-      /* Záložky pod nastavením – na pozadí stránky (světlé / tmavé podle systému), vybraná splyne s bílým panelem pod ní:
+      /* Záložky nastavení a záložky dat pod ním – na pozadí stránky (světlé / tmavé podle systému), vybraná splyne s bílým panelem pod ní:
          má stejný rámeček jako karta a o 1 px přesahuje dolů přes horní hranu panelu */
       .tabs {
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
         padding: 0 10px;
+      }
+
+      /* Nastavení: řada záložek (role tablist) uvnitř .tabs, vedle ní „✓ Uloženo“ */
+      .tab-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        min-width: 0;
       }
 
       .tab {
@@ -462,6 +717,10 @@
       .tab-panel.stored {
         margin-top: 0;
         min-height: 160px;
+      }
+
+      .tab-panel.settings-panel {
+        min-height: 0;
       }
 
       /* Rozbalovací řádek (seznamy, log běhů) – klik rozbalí pod ním detail */
@@ -576,6 +835,23 @@
         background: none;
       }
 
+      /* Užší okno: sloupce nastavení pod sebou, čára i mezi posledním řádkem prvního a prvním řádkem druhého */
+      @media (max-width: 800px) {
+        .settings-columns {
+          grid-template-columns: 1fr;
+        }
+
+        .settings-col + .settings-col > .row:first-child {
+          border-top: 1px solid var(--line);
+        }
+
+        .settings-col + .settings-col > h2:first-child {
+          margin-top: 18px;
+          padding-top: 16px;
+          border-top: 1px solid var(--line);
+        }
+      }
+
       @media (max-width: 640px) {
         section {
           padding: 18px 16px;
@@ -597,204 +873,303 @@
         <h1 class="app-title">Alza Price Insight</h1>
         <span class="app-sub version" id="version"></span>
       </div>
+      <a class="help-link" href="../welcome/welcome.html#news" target="_blank" data-i18n="newsLink" data-i18n-title="newsLinkTitle">Co je nového</a>
       <a class="help-link" href="../welcome/welcome.html#check" target="_blank" data-i18n="welcomeLink" data-i18n-title="welcomeLinkTitle">Průvodce</a>
       <a class="help-link" id="helpLink" href="../help/help.html" target="_blank" data-i18n="helpLink" data-i18n-title="helpLinkTitle">Nápověda</a>
     </header>
 
     <!-- Texty: data-i18n (text), data-i18n-title, data-i18n-tip (bublina „?“ + aria-label), data-i18n-placeholder –
          slovník v options-texts.js; čeština tady jen do spuštění skriptu (shodu s cz hlídá tests/options-i18n.test.js) -->
-    <form id="settings" class="grid">
-      <section>
-        <h2 data-i18n="tracking">Sledování cen</h2>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="checkSchedule">Kontrola hlídaných produktů</span> <span class="info" tabindex="0" role="note" data-i18n-tip="checkScheduleTip">?</span></span
+    <!-- Nastavení po záložkách (vybraná se pamatuje v prohlížeči); řádky každé záložky ve dvou sloupcích -->
+    <form id="settings">
+      <!-- Záložky: tlačítko <panel>-button ↔ panel (aria-controls / aria-labelledby; párování hlídá
+           tests/audit-2026-11-12-options.test.js). „✓ Uloženo“ je vedle řady záložek, ne v ní (tablist smí mít jen záložky) -->
+      <div class="tabs">
+        <div class="tab-list" role="tablist" aria-label="Nastavení" data-i18n-label="settingsTabsLabel">
+          <button type="button" class="tab" role="tab" id="settings-tracking-button" aria-controls="settings-tracking" data-settings-tab="tracking">
+            <span data-i18n="tracking">Sledování cen</span>
+          </button>
+          <button
+            type="button"
+            class="tab"
+            role="tab"
+            id="settings-notifications-button"
+            aria-controls="settings-notifications"
+            data-settings-tab="notifications"
           >
-          <span class="controls"
-            ><select name="checkSchedule">
-              <option value="1h" data-i18n="schedule1h">každou hodinu</option>
-              <option value="3h" data-i18n="schedule3h">každé 3 hodiny</option>
-              <option value="6h" data-i18n="schedule6h">každých 6 hodin</option>
-              <option value="12h" data-i18n="schedule12h">každých 12 hodin</option>
-              <option value="daily" data-i18n="scheduleDaily">jednou denně v</option>
-            </select>
-            <input type="time" name="checkTime" hidden
-          /></span>
+            <span data-i18n="notifications">Notifikace</span>
+          </button>
+          <button type="button" class="tab" role="tab" id="settings-categories-button" aria-controls="settings-categories" data-settings-tab="categories">
+            <span data-i18n="categories">Výpisy kategorií</span>
+          </button>
+          <button type="button" class="tab" role="tab" id="settings-general-button" aria-controls="settings-general" data-settings-tab="general">
+            <span data-i18n="general">Obecné</span>
+          </button>
         </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="saveBrowsing">Ukládat ceny z procházení</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="saveBrowsingTip">?</span></span
-          >
-          <span class="controls"><input type="checkbox" class="switch" name="saveBrowsing" /></span>
+        <span class="saved" data-saved role="status"></span>
+      </div>
+      <section class="tab-panel settings-panel" id="settings-tracking" role="tabpanel" aria-labelledby="settings-tracking-button">
+        <div class="settings-columns">
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="checkSchedule">Kontrola hlídaných produktů</span> <span class="info" tabindex="0" role="note" data-i18n-tip="checkScheduleTip">?</span></span
+              >
+              <span class="controls"
+                ><select name="checkSchedule">
+                  <option value="1h" data-i18n="schedule1h">každou hodinu</option>
+                  <option value="3h" data-i18n="schedule3h">každé 3 hodiny</option>
+                  <option value="6h" data-i18n="schedule6h">každých 6 hodin</option>
+                  <option value="12h" data-i18n="schedule12h">každých 12 hodin</option>
+                  <option value="daily" data-i18n="scheduleDaily">jednou denně v</option>
+                </select>
+                <input type="time" name="checkTime" hidden
+              /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="saveBrowsing">Ukládat ceny z procházení</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="saveBrowsingTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="saveBrowsing" /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="watchPurchases">Hlídat cenu po nákupu</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="watchPurchasesTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="watchPurchases" /></span>
+            </div>
+          </div>
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="remindCashback">Připomínat registraci cashbacku</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="remindCashbackTip">?</span></span
+              >
+              <span class="controls" id="cashbackRow"><input type="checkbox" class="switch" name="remindCashback" /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="ownedItems">Moje nákupy – koupené zboží a záruky</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="ownedItemsTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="ownedItems" /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="remindWarranty">Připomínat konec záruky</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="remindWarrantyTip">?</span></span
+              >
+              <span class="controls" id="warrantyRow"><input type="checkbox" class="switch" name="remindWarranty" /></span>
+            </div>
+          </div>
         </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="watchPurchases">Hlídat cenu po nákupu</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="watchPurchasesTip">?</span></span
-          >
-          <span class="controls"><input type="checkbox" class="switch" name="watchPurchases" /></span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="remindCashback">Připomínat registraci cashbacku</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="remindCashbackTip">?</span></span
-          >
-          <span class="controls" id="cashbackRow"><input type="checkbox" class="switch" name="remindCashback" /></span>
-        </div>
-
-        <h2 style="margin-top: 8px" data-i18n="notifications">Notifikace</h2>
-        <div class="row">
-          <span class="label"><span data-i18n="drops">Zlevnění</span> <span class="info" tabindex="0" role="note" data-i18n-tip="dropsTip">?</span></span>
-          <span class="controls"
-            ><span class="controls" id="dropRow"
-              ><span data-i18n="dropFrom">od</span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span
-            >
-            <input type="checkbox" class="switch" name="notifyDrops"
-          /></span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="newPrices">Nová cena (akce, kód, cashback)</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="newPricesTip">?</span></span
-          >
-          <span class="controls"><input type="checkbox" class="switch" name="notifyNewPrices" /></span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="availability">Dostupnost</span> <span class="info" tabindex="0" role="note" data-i18n-tip="availabilityTip">?</span></span
-          >
-          <span class="controls">
-            <select name="notifyAvailability">
-              <option value="all" data-i18n="availabilityAll">každá změna</option>
-              <option value="inStock" data-i18n="availabilityInStock">jen naskladnění</option>
-              <option value="off" data-i18n="availabilityOff">neoznamovat</option>
-            </select>
-          </span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="quietHours">Tiché hodiny</span> <span class="info" tabindex="0" role="note" data-i18n-tip="quietHoursTip">?</span></span
-          >
-          <span class="controls"
-            ><span class="controls" id="quietRow"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
-            <input type="checkbox" class="switch" name="quietHours"
-          /></span>
+      </section>
+      <section class="tab-panel settings-panel" id="settings-notifications" role="tabpanel" aria-labelledby="settings-notifications-button" hidden>
+        <div class="settings-columns">
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"><span data-i18n="drops">Zlevnění</span> <span class="info" tabindex="0" role="note" data-i18n-tip="dropsTip">?</span></span>
+              <span class="controls"
+                ><span class="controls" id="dropRow"
+                  ><span data-i18n="dropFrom">od</span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span
+                >
+                <input type="checkbox" class="switch" name="notifyDrops"
+              /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="newPrices">Nová cena (akce, kód, cashback)</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="newPricesTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="notifyNewPrices" /></span>
+            </div>
+          </div>
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="availability">Dostupnost</span> <span class="info" tabindex="0" role="note" data-i18n-tip="availabilityTip">?</span></span
+              >
+              <span class="controls">
+                <select name="notifyAvailability">
+                  <option value="all" data-i18n="availabilityAll">každá změna</option>
+                  <option value="inStock" data-i18n="availabilityInStock">jen naskladnění</option>
+                  <option value="off" data-i18n="availabilityOff">neoznamovat</option>
+                </select>
+              </span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="quietHours">Tiché hodiny</span> <span class="info" tabindex="0" role="note" data-i18n-tip="quietHoursTip">?</span></span
+              >
+              <span class="controls"
+                ><span class="controls" id="quietRow"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
+                <input type="checkbox" class="switch" name="quietHours"
+              /></span>
+            </div>
+          </div>
         </div>
         <div class="buttons">
           <button type="button" id="testNotifications" data-i18n="testNotifications" data-i18n-title="testNotificationsTitle">Vyzkoušet notifikace</button>
         </div>
-
-        <h2 style="margin-top: 8px" data-i18n="categories">Výpisy kategorií</h2>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="unitPrice">Skutečná cena za jednotku</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="unitPriceTip">?</span></span
-          >
-          <span class="controls"><input type="checkbox" class="switch" name="categoryUnitPrice" /></span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="discountFilter">Filtr slev</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="discountFilterTip">?</span></span
-          >
-          <span class="controls"><input type="checkbox" class="switch" name="categoryDiscountFilter" /></span>
-        </div>
-
-        <div class="saved" data-saved></div>
       </section>
-
-      <section>
-        <h2 data-i18n="language">Jazyk</h2>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="uiLanguage">Jazyk rozšíření</span> <span class="info" tabindex="0" role="note" data-i18n-tip="uiLanguageTip">?</span></span
-          >
-          <span class="controls">
-            <select name="uiLanguage">
-              <option value="auto" data-i18n="languageAuto">automaticky</option>
-              <option value="cs" lang="cs">Čeština</option>
-              <option value="sk" lang="sk">Slovenčina</option>
-              <option value="hu" lang="hu">Magyar</option>
-              <option value="en" lang="en">English</option>
-            </select>
-          </span>
-        </div>
-        <div class="row">
-          <span class="label"
-            ><span data-i18n="primaryDomain">Hlavní Alza</span> <span class="info" tabindex="0" role="note" data-i18n-tip="primaryDomainTip">?</span></span
-          >
-          <span class="controls">
-            <select name="primaryDomain">
-              <option value="auto" data-i18n="languageAuto">automaticky</option>
-              <option value="alza_cz">alza.cz</option>
-              <option value="alza_sk">alza.sk</option>
-              <option value="alza_hu">alza.hu</option>
-            </select>
-          </span>
-        </div>
-        <div class="saved" data-saved></div>
-
-        <h2 style="margin-top: 8px">
-          <span class="label"
-            ><span data-i18n="backup">Záloha dat</span> <span class="info" tabindex="0" role="note" data-i18n-tip="backupNote">?</span></span
-          >
-        </h2>
-        <div class="buttons">
-          <button type="button" id="exportJson" data-i18n="exportJson">Záloha (JSON)</button>
-          <button type="button" id="exportCsv" data-i18n="exportCsv">Historie (CSV)</button>
-          <button type="button" id="importJson" data-i18n="importJson">Obnovit ze zálohy…</button>
-          <button type="button" id="pruneData" data-i18n="pruneData">Uklidit stará data…</button>
-        </div>
-        <div class="saved" id="backupInfo"></div>
-
-        <h2 style="margin-top: 8px">
-          <span class="label"
-            ><span data-i18n="diagnostics">Diagnostika</span>
-            <span class="info" tabindex="0" role="note" data-i18n-tip="diagnosticsNote">?</span></span
-          >
-        </h2>
-        <p class="note" id="errorSummary"></p>
-        <div class="buttons">
-          <button type="button" id="reportBug" data-i18n="reportBug" data-i18n-title="reportBugTitle">Nahlásit chybu</button>
-          <button type="button" id="exportDiagnostics" data-i18n="exportDiagnostics">Stáhnout diagnostiku</button>
-          <button type="button" id="clearErrorLog" data-i18n="clearErrorLog">Vymazat log chyb</button>
-        </div>
-
-        <details class="danger">
-          <summary data-i18n="wipeSummary">Smazat všechna data…</summary>
-          <p class="note">
-            <span data-i18n="wipeNote"
-              >Smaže historii cen, uložené ceny, hlídané seznamy a produkty i cílové ceny (nastavení zůstane). Nejdřív se stáhne záloha, ze
-              které jde vše obnovit – smažete až druhým klepnutím, když je uložená. Pro potvrzení napište</span
-            >
-            <strong data-i18n="wipeWord">SMAZAT</strong><span data-i18n="wipeNoteEnd">:</span>
-          </p>
-          <div class="buttons">
-            <input type="text" id="wipeConfirm" autocomplete="off" spellcheck="false" placeholder="SMAZAT" data-i18n-placeholder="wipeWord" />
-            <button type="button" id="wipeData" class="danger-button" disabled>Smazat</button>
+      <section class="tab-panel settings-panel" id="settings-categories" role="tabpanel" aria-labelledby="settings-categories-button" hidden>
+        <div class="settings-columns">
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="unitPrice">Skutečná cena za jednotku</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="unitPriceTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="categoryUnitPrice" /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="discountFilter">Filtr slev</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="discountFilterTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="categoryDiscountFilter" /></span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="energyCost">Cena provozu spotřebičů</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="energyCostTip">?</span></span
+              >
+              <span class="controls"><input type="checkbox" class="switch" name="energyCost" /></span>
+            </div>
           </div>
-        </details>
+          <div class="settings-col">
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="energyPrice">Cena elektřiny</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="energyPriceTip">?</span></span
+              >
+              <!-- name = nastavení pro měnu hlavní Alzy (energyPriceCZK / EUR / HUF) – doplní updateEnergyField -->
+              <span class="controls" id="energyRow"
+                ><input type="number" id="energyPrice" min="0.01" max="99999" step="0.01" /> <span id="energyPriceUnit">Kč/kWh</span></span
+              >
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="energyUsage">Počítat provoz na</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="energyUsageTip">?</span></span
+              >
+              <span class="controls" id="energyUsageRow"
+                ><input type="number" name="energyYears" min="1" max="30" step="1" /> <span data-i18n="energyYearsUnit">let,</span>
+                <input type="number" name="energyCyclesPerWeek" min="1" max="21" step="1" /> <span data-i18n="energyCyclesUnit">praní týdně</span></span
+              >
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="energyHours">Televize a monitor zapnuté</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="energyHoursTip">?</span></span
+              >
+              <span class="controls" id="energyHoursRow"
+                ><input type="number" name="energyHoursPerDay" min="0.5" max="24" step="0.5" /> <span data-i18n="energyHoursUnit">hodin denně</span></span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="tab-panel settings-panel" id="settings-general" role="tabpanel" aria-labelledby="settings-general-button" hidden>
+        <div class="settings-columns">
+          <div class="settings-col">
+            <h2 data-i18n="language">Jazyk</h2>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="uiLanguage">Jazyk rozšíření</span> <span class="info" tabindex="0" role="note" data-i18n-tip="uiLanguageTip">?</span></span
+              >
+              <span class="controls">
+                <select name="uiLanguage">
+                  <option value="auto" data-i18n="languageAuto">automaticky</option>
+                  <option value="cs" lang="cs">Čeština</option>
+                  <option value="sk" lang="sk">Slovenčina</option>
+                  <option value="hu" lang="hu">Magyar</option>
+                  <option value="en" lang="en">English</option>
+                </select>
+              </span>
+            </div>
+            <div class="row">
+              <span class="label"
+                ><span data-i18n="primaryDomain">Hlavní Alza</span> <span class="info" tabindex="0" role="note" data-i18n-tip="primaryDomainTip">?</span></span
+              >
+              <span class="controls">
+                <select name="primaryDomain">
+                  <option value="auto" data-i18n="languageAuto">automaticky</option>
+                  <option value="alza_cz">alza.cz</option>
+                  <option value="alza_sk">alza.sk</option>
+                  <option value="alza_hu">alza.hu</option>
+                </select>
+              </span>
+            </div>
+            <h2 class="group">
+              <span class="label"
+                ><span data-i18n="backup">Záloha dat</span> <span class="info" tabindex="0" role="note" data-i18n-tip="backupNote">?</span></span
+              >
+            </h2>
+            <div class="buttons">
+              <button type="button" id="exportJson" data-i18n="exportJson">Záloha (JSON)</button>
+              <button type="button" id="exportCsv" data-i18n="exportCsv">Historie (CSV)</button>
+              <button type="button" id="importJson" data-i18n="importJson">Obnovit ze zálohy…</button>
+              <button type="button" id="pruneData" data-i18n="pruneData">Uklidit stará data…</button>
+            </div>
+            <div class="saved" id="backupInfo"></div>
+          </div>
+          <div class="settings-col">
+            <h2>
+              <span class="label"
+                ><span data-i18n="diagnostics">Diagnostika</span>
+                <span class="info" tabindex="0" role="note" data-i18n-tip="diagnosticsNote">?</span></span
+              >
+            </h2>
+            <p class="note" id="errorSummary"></p>
+            <div class="buttons">
+              <button type="button" id="reportBug" data-i18n="reportBug" data-i18n-title="reportBugTitle">Nahlásit chybu</button>
+              <button type="button" id="exportDiagnostics" data-i18n="exportDiagnostics">Stáhnout diagnostiku</button>
+              <button type="button" id="clearErrorLog" data-i18n="clearErrorLog">Vymazat log chyb</button>
+            </div>
+
+            <details class="danger">
+              <summary data-i18n="wipeSummary">Smazat všechna data…</summary>
+              <p class="note">
+                <span data-i18n="wipeNote"
+                  >Smaže historii cen, uložené ceny, hlídané seznamy a produkty, cílové ceny, nákupy, slevové kódy a připomínky cashbacku
+                  (nastavení zůstane). Nejdřív se stáhne záloha – smažete až druhým klepnutím, když je uložená. Nákupy a kódy v záloze nejsou;
+                  s hlídáním ceny po nákupu nebo se zapnutými Mými nákupy se nákupy znovu načtou z Alzy. Pro potvrzení napište</span
+                >
+                <strong data-i18n="wipeWord">SMAZAT</strong><span data-i18n="wipeNoteEnd">:</span>
+              </p>
+              <div class="buttons">
+                <input type="text" id="wipeConfirm" autocomplete="off" spellcheck="false" placeholder="SMAZAT" data-i18n-placeholder="wipeWord" />
+                <button type="button" id="wipeData" class="danger-button" disabled>Smazat</button>
+              </div>
+            </details>
+          </div>
+        </div>
       </section>
     </form>
     <input type="file" id="importFile" accept=".json,application/json" hidden />
 
-    <nav class="tabs" role="tablist">
-      <button type="button" class="tab" role="tab" data-tab="lists">
+    <div class="tabs" role="tablist" aria-label="Hlídání a uložená data" data-i18n-label="dataTabsLabel">
+      <button type="button" class="tab" role="tab" id="tab-lists-button" aria-controls="tab-lists" data-tab="lists">
         <span data-i18n="tabLists">Hlídané seznamy</span> <span class="tab-count" id="countLists"></span>
       </button>
-      <button type="button" class="tab" role="tab" data-tab="products">
+      <button type="button" class="tab" role="tab" id="tab-products-button" aria-controls="tab-products" data-tab="products">
         <span data-i18n="tabProducts">Hlídané produkty</span> <span class="tab-count" id="countProducts"></span>
       </button>
-      <button type="button" class="tab" role="tab" data-tab="data">
+      <button type="button" class="tab" role="tab" id="tab-owned-button" aria-controls="tab-owned" data-tab="owned">
+        <span data-i18n="tabOwned">Moje nákupy</span> <span class="tab-count" id="countOwned"></span>
+      </button>
+      <button type="button" class="tab" role="tab" id="tab-data-button" aria-controls="tab-data" data-tab="data">
         <span data-i18n="tabData">Uložená data</span> <span class="tab-count" id="countData"></span>
       </button>
-      <button type="button" class="tab" role="tab" data-tab="log">
+      <button type="button" class="tab" role="tab" id="tab-log-button" aria-controls="tab-log" data-tab="log">
         <span data-i18n="tabLog">Logy běhů</span> <span class="tab-count" id="countLog"></span>
       </button>
-    </nav>
+    </div>
 
-    <section class="tab-panel" id="tab-lists" role="tabpanel">
+    <section class="tab-panel" id="tab-lists" role="tabpanel" aria-labelledby="tab-lists-button">
       <p class="note" style="margin: 0 0 6px" data-i18n="listsNote">
         Nákupní seznamy, které se kontrolují na pozadí. Hlídání se zapíná v popupu na otevřeném seznamu. Kliknutím na řádek seznamu
         uvidíte jeho produkty.
@@ -803,7 +1178,7 @@
       <div id="listsTable"></div>
     </section>
 
-    <section class="tab-panel" id="tab-products" role="tabpanel" hidden>
+    <section class="tab-panel" id="tab-products" role="tabpanel" aria-labelledby="tab-products-button" hidden>
       <p class="note" style="margin: 0 0 6px" data-i18n="productsNote">
         Jednotlivé produkty hlídané i bez nákupního seznamu: na detailu produktu na Alze klikněte na „Hlídat na pozadí“ v kartě
         rozšíření pod fotkami. Patří sem i produkty s cílovou cenou (nastavuje se v dialogu historie). Produkty z hlídaných seznamů
@@ -812,7 +1187,58 @@
       <div id="productsTable"></div>
     </section>
 
-    <section class="tab-panel stored" id="tab-data" role="tabpanel" hidden>
+    <section class="tab-panel stored" id="tab-owned" role="tabpanel" aria-labelledby="tab-owned-button" hidden>
+      <p class="note" style="margin: 0 0 6px" data-i18n="ownedNote">
+        Všechno, co jste na Alze koupili – z archivu „Moje objednávky“. U každého nákupu vidíte, kdy a za kolik jste ho koupili a dokdy
+        ho jde reklamovat. Konec záruky se počítá z délky záruky, kterou u produktu uvádí Alza (pro váš účet – firemnímu pro firemní nákupy); kde se ji nepodaří zjistit, je to odhad (nákup + 24 měsíců). Jestli zboží jde ještě reklamovat, říká přímo Alza. Data
+        zůstávají jen ve vašem prohlížeči.
+      </p>
+      <div class="cleanup-banner" id="ownedOff" hidden>
+        <span data-i18n="ownedOffText"
+          >Moje nákupy jsou vypnuté. Po zapnutí si rozšíření z Alzy načte vaše objednávky – jen do tohoto prohlížeče, nikam se
+          neposílají.</span
+        >
+        <div class="buttons">
+          <button type="button" id="ownedEnable" data-i18n="ownedEnable">Načíst moje nákupy z Alzy</button>
+          <button type="button" id="ownedDelete" class="danger-button" data-i18n="ownedDelete" hidden>Smazat načtené nákupy</button>
+        </div>
+      </div>
+      <div class="buttons" id="ownedControls">
+        <input type="search" id="ownedSearch" placeholder="Hledat název, značku nebo kategorii…" data-i18n-placeholder="ownedSearch" />
+        <select id="ownedFilter">
+          <option value="all" data-i18n="ownedFilterAll">všechno</option>
+          <option value="warranty" data-i18n="ownedFilterWarranty">v záruce</option>
+          <option value="ending" data-i18n="ownedFilterEnding">záruka končí do 90 dní</option>
+          <option value="expired" data-i18n="ownedFilterExpired">po záruce</option>
+          <option value="returned" data-i18n="ownedFilterReturned">vrácené a reklamované</option>
+        </select>
+        <!-- Roky a měsíce doplní options-owned.js (jen roky s nákupem, měsíce v jazyce stránky) -->
+        <select id="ownedYear">
+          <option value="" data-i18n="ownedYearAll">všechny roky</option>
+        </select>
+        <select id="ownedMonth" disabled>
+          <option value="" data-i18n="ownedMonthAll">celý rok</option>
+        </select>
+        <button type="button" id="ownedSync" data-i18n="ownedSync">Načíst nové nákupy</button>
+        <span class="saved" id="ownedInfo"></span>
+      </div>
+      <div class="note" id="ownedSummary"></div>
+      <details class="owned-spending" id="ownedSpending" open hidden>
+        <summary data-i18n="ownedSpending">Přehled výdajů v grafu</summary>
+        <div id="ownedSpendingChart"></div>
+        <div id="ownedMonthsChart"></div>
+        <p class="note" id="ownedSpendingNote" style="margin: 6px 0"></p>
+        <details class="owned-spending-table">
+          <summary data-i18n="ownedSpendingAsTable">Zobrazit jako tabulku</summary>
+          <div id="ownedSpendingTable"></div>
+        </details>
+      </details>
+      <div class="owned-selection" id="ownedSelection" role="status" hidden></div>
+      <div id="ownedTable"></div>
+      <div class="pager" id="ownedPager"></div>
+    </section>
+
+    <section class="tab-panel stored" id="tab-data" role="tabpanel" aria-labelledby="tab-data-button" hidden>
       <p class="note" style="margin: 0 0 6px" data-i18n="dataNote">
         Všechny produkty, o kterých rozšíření něco ví – historie cen a ceny z nákupních seznamů – a proč se ukládají. Nehlídaný produkt se
         uloží při otevření nákupního seznamu a se zapnutým „Ukládat ceny z procházení“ i při procházení Alzy (výpisy kategorií,
@@ -847,7 +1273,7 @@
       <div class="pager" id="dataPager"></div>
     </section>
 
-    <section class="tab-panel" id="tab-log" role="tabpanel" hidden>
+    <section class="tab-panel" id="tab-log" role="tabpanel" aria-labelledby="tab-log-button" hidden>
       <p class="note" style="margin: 0 0 6px" data-i18n="logNote">
         Posledních 50 kontrol na pozadí i ručních. Kliknutím na řádek běhu uvidíte, co se u kterého produktu změnilo nebo co se
         nepovedlo.
@@ -876,6 +1302,8 @@
     <script src="../content/watch.js"></script>
     <script src="../content/start.js"></script>
     <script src="options-texts.js"></script>
+    <script src="options-backup.js"></script>
     <script src="options.js"></script>
+    <script src="options-owned.js"></script>
   </body>
 </html>

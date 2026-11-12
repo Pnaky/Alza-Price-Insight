@@ -4,7 +4,7 @@
   "description": "__MSG_description__",
   "default_locale": "en",
   "author": "Jan Pňakovič",
-  "version": "2026.11.9",
+  "version": "2026.11.12",
   "minimum_chrome_version": "121",
   "browser_specific_settings": {
     "gecko": {
@@ -17,7 +17,7 @@
   "host_permissions": ["https://www.alza.cz/*", "https://www.alza.sk/*", "https://www.alza.hu/*", "https://image.alza.cz/*", "https://image.alza.sk/*", "https://image.alza.hu/*"],
   "background": {
     "service_worker": "src/chrome/service-worker.js",
-    "scripts": ["src/shared/core.js", "src/shared/store.js", "src/shared/product-page.js", "src/firefox/product-pages.js", "src/background.js"]
+    "scripts": ["src/shared/core.js", "src/shared/store.js", "src/shared/orders.js", "src/shared/product-page.js", "src/firefox/product-pages.js", "src/background.js"]
   },
   "content_scripts": [
     {
@@ -47,6 +47,7 @@
         "src/content/start.js",
         "src/category.js",
         "src/browsing.js",
+        "src/shared/orders.js",
         "src/purchases.js"
       ],
       "css": ["css/main.css"]

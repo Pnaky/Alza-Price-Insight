@@ -35,13 +35,15 @@
         <a href="#cil">Target price</a>
         <a href="#hlidani">Watching &amp; notifications</a>
         <a href="#za-kus">Unit price</a>
+        <a href="#moje-nakupy">My purchases</a>
         <a href="#nastaveni">Settings &amp; data</a>
         <a href="#faq">FAQ</a>
       </nav>
 
       <section id="zaciname">
         <h2><span data-icon="flag"></span> Getting started</h2>
-        <p class="tip">After installation, the <strong><span data-icon="explore"></span> Setup guide</strong> opens: you pick your main Alza, it checks your sign-in and prices incl. VAT in one click (each item says what's done and what to do) and walks you through watching and notifications. Run it again from the settings (<span data-icon="explore"></span> Setup guide, top right); change the main Alza in the settings next to the language.</p>
+        <p class="tip">After installation, the <strong><span data-icon="explore"></span> Setup guide</strong> opens: you pick your main Alza, it checks your sign-in and prices incl. VAT in one click (each item says what's done and what to do) and walks you through watching (including My purchases), category listings and notifications. Run it again from the settings (<span data-icon="explore"></span> Setup guide, top right); change the main Alza in the settings on the General tab.</p>
+        <p class="tip">After an update with a new option, the <strong><span data-icon="news"></span> What's new</strong> page opens by itself: a short list of what's new and the new options in green with a New label – you can switch them on or off right there. After other updates, a green What's new badge shows in the extension window. Open the news any time with the <span data-icon="news"></span> icon in the extension window or the What's new link in the settings.</p>
         <ol>
           <li><strong>Log in to Alza.</strong> Prices are saved only when you are logged in – Alza shows different prices to different accounts (AlzaPlus+, benefits, B2B).</li>
           <li><strong>Show prices including VAT.</strong> With "show prices without VAT" turned on, prices are not saved so they don't get mixed up.</li>
@@ -87,6 +89,8 @@
           <li><strong>Price comparison icons</strong> (Heureka, Zboží.cz on alza.cz; Heureka.sk; Árukereső) – search for the product by name in a new tab. The icons are loaded directly from the comparison site; if they fail to load, the site's name is shown instead.</li>
           <li><strong>Copy offer</strong> – copies the name, price, price with a code or AlzaPlus+, usual price, lowest price in 30 days and the link to the clipboard. Handy for a chat or social media.</li>
           <li><strong>Volume discount</strong> – the table of “buy more, pay less” tiers (price per piece at 1, 2, 3… pieces) is shown right away in a bubble above the cart button; Alza shows it only once the product is in the cart. When prices aren't being saved (e.g. not signed in), the card says why.</li>
+          <li><strong>Running cost</strong> – for fridges, freezers, washing machines, dryers, dishwashers, TVs and monitors, the estimated electricity cost, e.g. “Running cost, 10 years: 6 570 Kč · with the purchase price 26 560 Kč” (see Real price per piece).</li>
+          <li><strong>You bought it on…</strong> – for goods you already own, the purchase date and price, the warranty end and a link to the order (with My purchases on).</li>
           <li><strong><span data-icon="bell"></span> Watch in background</strong> – the product is checked regularly even if it is not in any list.</li>
           <li><strong><span data-icon="target"></span> Set target price</strong> – see <a href="#cil">Target price</a>.</li>
         </ul>
@@ -103,7 +107,7 @@
         <h3>Price types</h3>
         <table>
           <tr><th>Type</th><th>Meaning</th></tr>
-          <tr><td>Original price</td><td>regular price, struck through during a sale</td></tr>
+          <tr><td>Original price</td><td>regular price; struck through when you can pay less (sale, code, AlzaPlus+, benefit) – with only a cashback or trade-in it still applies</td></tr>
           <tr><td>Sale price / Black Friday</td><td>sale price for everyone</td></tr>
           <tr><td>AlzaPlus+</td><td>price for AlzaPlus+ members</td></tr>
           <tr><td>Discount code</td><td>price after entering the code shown with the product</td></tr>
@@ -131,7 +135,7 @@
         <h3>The same product in another condition</h3>
         <p>Alza sells some products unpacked or like new too (each condition is a separate product). When another condition is cheaper than the lowest price you pay for this item (including AlzaPlus+ and benefit), you see it in the card on the product page and when hovering the price in a list (e.g. “Cheaper in another condition: Like new 6 459 Kč (231 Kč less)”); lists also have a <em>Cheaper in another condition</em> filter.</p>
         <h3>Discount filter in categories</h3>
-        <p>In the left filter panel (the Price Insight block at the top), choose <strong>Discount at least X %</strong> or tick <strong>Coupon only</strong> (a price with AlzaPlus+ or a discount code) or <strong>Volume discount</strong> (“buy more, pay less”). The extension loads the whole listing and hides products that don't match. The discount is calculated from the lowest price you pay – including AlzaPlus+ and discount codes. Products with history are compared with the usual price, so a crossed-out price that hasn't been charged for a long time can't inflate the discount; others with Alza's crossed-out price. A large listing loads about 500 products at a time, the rest with “Load the rest”. You can turn it off in the settings (Category listings → Discount filter).</p>
+        <p>In the left filter panel (the Price Insight block at the top), choose <strong>Discount at least X %</strong> or tick <strong>Coupon only</strong> (a price with AlzaPlus+ or a discount code) or <strong>Volume discount</strong> (“buy more, pay less”). The extension loads the whole listing (up to 500 products) and hides products that don't match. The discount is calculated from the lowest price you pay – including AlzaPlus+ and discount codes. Products with history are compared with the usual price, so a crossed-out price that hasn't been charged for a long time can't inflate the discount; others with Alza's crossed-out price. A larger listing (categories can have tens of thousands of products) isn't loaded automatically – the filter checks the loaded products and “Load 480 more” adds more. To pick from all of them, narrow the listing with Alza's filters (subcategory, price, brand) – once it has up to 500 products, it loads whole. For the “at least X %” filter in a large listing, use Alza's discount sort tab (“Podle slevy” on Alza.cz): the most discounted products come first, so the first loaded batches already contain those with the highest discount (Alza calculates it from the crossed-out price, so the order may not exactly match the extension's discount). You can turn it off in the settings (Category listings → Discount filter).</p>
         <h3>Suspicious discount</h3>
         <ul>
           <li><strong>Cheaper within 30 days:</strong> the product is "on sale", but in the last 30 days it could be bought for less than now.</li>
@@ -168,16 +172,16 @@
       <section id="hlidani">
         <h2><span data-icon="bell"></span> Background watching and notifications</h2>
         <ul>
-          <li><strong>Watched list:</strong> open the list and click <strong><span data-icon="bell"></span> Watch list</strong> in the extension popup, or click the bell on the list's tab. The whole list is watched; newly added items are included the next time you open the list.</li>
+          <li><strong>Watched list:</strong> open the list and click <strong><span data-icon="bell"></span> Watch list</strong> in the extension popup, or click the bell on the list's tab. The whole list is watched; the list contents are refreshed before every background check, so items added elsewhere (for example in the Alza mobile app) are watched too and removed items are no longer checked. If the contents can't be loaded, the saved items are checked and the list updates the next time you open it.</li>
           <li><strong>Watched product:</strong> the "<span data-icon="bell"></span> watch in background" button on a product page, or a target price.</li>
           <li>The check runs <strong>every hour</strong> while the browser is running. In the settings you can change it to every 3, 6 or 12 hours or to <strong>once a day at a chosen time</strong> – if the browser is closed then, it runs a few minutes after it starts. The popup shows when the next one is due. Run it right away with <span data-icon="refresh"></span> Check now in the popup.</li>
           <li><strong>The number on the icon</strong> = products with a change since you last opened the popup, which lists the changes. Its colour: <strong>green</strong> = at least one product got cheaper, came back in stock, has a new sale or reached its target price, <strong>red</strong> = none got cheaper but at least one got more expensive, <strong>grey</strong> = only sales ended or unavailability. <strong>A blue number</strong> = old products suggested for deletion.</li>
           <li><strong>Changes in the popup:</strong> price drops, back in stock, a new sale and a reached target price in green, price increases in red (no notification for increases), end of sale and unavailability in grey. New changes have a coloured background, ones you've seen only coloured text. Watched lists show how many products got cheaper (▼) and more expensive (▲) over the last 7 days. Stop watching a list with <span data-icon="bell-off"></span> Stop watching list in the popup on the open list, or in the settings (Watched lists tab). If you watch more than one Alza, lists, changes and watched products get a <strong>CZ / SK / HU</strong> label (hover it to see the Alza address). Help is in the settings (<span data-icon="help"></span> top right).</li>
           <li><strong>Discount codes in the popup:</strong> codes from products you have seen in the last 30 days (product page, list, background check) – collapsed to one line; click to expand the product, code, price with the code and a Copy button. When a watched product gets a new code, the notification includes the code.</li>
-          <li><strong>Watch after purchase:</strong> the extension takes items bought in the last 14 days from “My orders” and watches their price. If it drops, you get “You bought it for X, now it costs Y. You can return it and buy it again until D.” Items bought online can be returned within 14 days. Turn it off in the settings (Watch price after purchase); orders are read only in your browser.</li>
+          <li><strong>Watch after purchase:</strong> the extension takes items bought in the last 14 days from “My orders” and watches their price. If it drops, you get “You bought it for X, now it costs Y. You can return it and buy it again until D.” Items bought online can be returned within 14 days. New orders are loaded when you visit Alza and during the background check; returned items are no longer watched. For a bought item you don't watch otherwise, you are only notified when it drops below the price you paid. In the popup's list of changes, a bought item you don't watch otherwise has an <strong>Orders</strong> link – it leads to My orders on Alza. Turn it off in the settings (Watch price after purchase); orders are read only in your browser.</li>
           <li><strong>Cashback reminder:</strong> when you buy an item that showed a cashback price on its product page, the extension reads the manufacturer’s registration deadline from the promotion page. It notifies you when the purchase can be registered (some promotions ask you to wait e.g. 30 days) and a week before the deadline; clicking opens the promotion terms. The “Cashback to register” list is in the extension window – tick it off with Done after registering. We read the deadline from the promotion text; if we can’t recognise it, the notification points you to the terms. You see the promotion dates – buy by and register by – before buying, too: in the tooltip of the cashback price in the list (with a link to the terms) and under the cashback row on the product page. Turn it off in the settings (Remind me to register cashback).</li>
         </ul>
-        <p>In the settings you choose what you want to hear about: price drops (optionally from a given percentage), new prices (sale, code, cashback), availability and quiet hours.</p>
+        <p>In the settings (Notifications tab) you choose what you want to hear about: price drops (optionally from a given percentage), new prices (sale, code, cashback), availability and quiet hours.</p>
         <p class="tip">No notifications? In the settings click <strong><span data-icon="bell"></span> Test notifications</strong>. If nothing arrives, check Windows "Do not disturb" / Focus assist and notification permission for your browser (Chrome, Firefox).</p>
       </section>
 
@@ -188,26 +192,46 @@
           tell which pack is really the best deal. The extension works it out:
         </p>
         <ul>
-          <li><strong>Categories and search:</strong> an orange label with the real price, e.g. <span class="unit">2,50 Kč/ks</span>, sits before Alza's unit price. The <strong>“Unit price”</strong> tab with the extension icon next to Alza’s sort tabs loads the whole category and sorts it (click again to cancel).</li>
+          <li><strong>Categories and search:</strong> an orange label with the real price, e.g. <span class="unit">2,50 Kč/ks</span>, sits before Alza's unit price. The <strong>“Unit price”</strong> tab with the extension icon next to Alza’s sort tabs loads the whole category and sorts it (click again to cancel). For drives, memory, USB flash drives and memory cards (per TB / GB), power banks (per 1000 mAh) and power stations (per Wh), where Alza shows no unit price, the extension calculates it itself – a grey label under the price, e.g. <strong>1 995 Kč/TB</strong> – and sorts by it. For fridges, freezers, washing machines and dryers it shows the estimated electricity cost, e.g. <strong>running cost, 10 years: 8 400 Kč</strong>, and the <strong>“With running cost”</strong> tab sorts the listing by purchase price plus running cost; set the electricity price, the number of years and washes per week in the settings (Category listings → Running cost of appliances; the default 6 Kč, 0.20 € or 70 Ft per kWh is only a rough guide). On the product page the running cost is in the extension card – there for TVs, monitors and dishwashers too, which have no consumption data in listings. For TVs and monitors it counts with the number of hours a day they are on – set it in the same place (TV and monitor switched on … hours a day).</li>
           <li><strong>Shopping list:</strong> price per piece for every price on hover, and "cheapest per piece" sorting.</li>
           <li><strong>Product page:</strong> a "per piece" tile with the price per piece for each price type. The pack size selector shows the price per piece (per metre for lengths) for every size in a column on the right – the best value in green, the most expensive in red. The closed selector shows the unit price of the chosen size right away too, including the best value / most expensive label.</li>
         </ul>
         <p>The labels in categories can be turned off in the settings (Category listings → Real unit price).</p>
       </section>
 
+      <section id="moje-nakupy">
+        <h2><span data-icon="bag"></span> My purchases and warranties</h2>
+        <p>
+          The extension can load everything you bought on Alza from the “My orders” archive. Turn it on in the settings with
+          <strong>My purchases – purchased goods and warranties</strong> or with the button in the <strong>My purchases</strong> tab. Orders are read
+          only in your browser and are not sent anywhere.
+        </p>
+        <ul>
+          <li><strong>The My purchases tab</strong> in the settings: every purchase with its date, price per piece and in total, warranty status and a link to the order. Search by name, brand or category, a “warranty ends within 90 days” filter, a year and month selection with the sum of the selected purchases (clicking a chart column selects its year too; the months of that year then appear below it, with the same month a year earlier and the month-over-month and year-over-year change), and a chart of spending by year above the table (if you shop on several Alza sites, they are stacked within each year).</li>
+          <li><strong>Warranty:</strong> the extension loads the warranty length from Alza together with your purchases (the value given for the product and valid for your account – with a business account the warranty for business purchases) and shows it in the table next to the end date (“36 mo.”). Where it cannot be determined, the end date is an estimate (purchase + 24 months) and the table says so. Whether a claim is still possible comes directly from Alza – with a longer warranty you will see “longer warranty – a claim is still possible”, returned and claimed goods are marked; returned goods do not count towards spending. Goods returned or claimed after they were loaded are recognised later: the extension reads the order again about a month after the purchase, while a claim is open and before a warranty reminder.</li>
+          <li><strong>Remind me when a warranty ends:</strong> a month before the end you get a notification to check the item while you can still make a claim (during quiet hours it is postponed to their end). Only for goods from 1,000 Kč (40 €, 15,000 Ft) per piece.</li>
+          <li><strong>Product detail:</strong> for goods you already own, the extension card shows “You bought it on…” with the date, the price and a link to the order.</li>
+        </ul>
+        <p>
+          The first load goes through your whole order history; prices and claim info are added gradually for purchases from the last two
+          years. Turning the option off stops the loading and keeps the loaded purchases – delete them in the My purchases tab after turning the option off (Delete loaded purchases).
+          “Delete all data” deletes them too; with the option on, however, the archive is loaded again at the next background check.
+        </p>
+      </section>
+
       <section id="nastaveni">
         <h2><span data-icon="settings"></span> Settings and data</h2>
-        <p>Open the settings with the <span data-icon="settings"></span> icon in the extension popup.</p>
+        <p>Open the settings with the <span data-icon="settings"></span> icon in the extension popup. The options are on the Price tracking, Notifications, Category listings and General tabs (language, main Alza, backup, diagnostics). Below them are the Watched lists, Watched products, My purchases, Stored data and Check log tables.</p>
         <ul>
           <li><strong>Save prices while browsing</strong> (Price tracking) – prices of products you see in category listings, search results, product pages, carousels and on the home page are quietly saved to the history even if you don't watch them. When you come back to a product, you'll see how its price developed. Nothing is shown or notified. On by default.</li>
           <li><strong>Stored data</strong> – an overview of all products with a history and why they are stored (<span data-icon="list"></span> list, <span data-icon="bell"></span> product page, <span data-icon="target"></span> target price, <span data-icon="visibility"></span> browsing). Search, filters, price history via <span data-icon="chart"></span> and deleting the data of a single product.</li>
-          <li><strong>Backup (JSON)</strong> – all data to a file; <strong>Restore from backup</strong> adds it back (deletes nothing, history is merged).</li>
+          <li><strong>Backup (JSON)</strong> – saves the price history and stored prices, watched lists and products, target prices, cashback reminders and settings to a file. Purchases and discount codes are not in the backup – they are loaded from Alza again. <strong>Restore from backup</strong> adds the data back (deletes nothing, history is merged).</li>
           <li><strong>History (CSV)</strong> – all prices for Excel.</li>
           <li><strong>Clean up old data</strong> – deletes products you don't watch that haven't been opened or checked for over 3 months (those saved while browsing only after a year). The extension suggests them itself with a blue number on the icon and a notice in the popup.</li>
-          <li><strong>Delete all data</strong> – only after typing the word DELETE; a backup is downloaded automatically first.</li>
-          <li><strong>Diagnostics</strong> – if something doesn't work, click <strong><span data-icon="bug"></span> Report a bug</strong>: a pre-filled report opens on GitHub (version, browser, recent errors). Or download the diagnostics and send them to the author (version, settings, check log and errors; no passwords or cookies).</li>
+          <li><strong>Delete all data</strong> – also deletes purchases, discount codes and cashback reminders (settings and the error log stay); only after typing the word DELETE, a backup is downloaded automatically first. With price watching after purchase on, purchases are loaded again on your next visit to Alza; with My purchases on, the order archive is loaded again at the next background check.</li>
+          <li><strong>Diagnostics</strong> – if something doesn't work, click <strong><span data-icon="bug"></span> Report a bug</strong>: a pre-filled report opens on GitHub (version, browser, recent errors – without product addresses, discount codes and names of purchased goods); you write the title yourself. The report is public, so check it before sending. Or download the diagnostics and send them to the author (version, settings, counts of stored data, the check log and errors – names of items you bought and order numbers are hidden; no passwords or cookies).</li>
         </ul>
-        <p class="tip">All data stays in your browser only. The extension talks only to Alza websites and sends nothing anywhere else.</p>
+        <p class="tip">All data stays in your browser only. The extension talks only to Alza websites and sends nothing anywhere else. The only exception are the price comparison icons on the product page – they load directly from those websites, nothing else is sent to them.</p>
       </section>
 
       <section id="faq">

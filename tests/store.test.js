@@ -188,3 +188,104 @@ test("runCleanups: jednou odstraní z historie ceny „od …“ produktů s mno
   assert.equal(await AlzaStore.runCleanups(), 0);
   assert.equal(data.alzaHistory_alza_cz_101.length, 2);
 });
+
+// === Moje nákupy ===
+
+// Zapsané klíče úložiště od posledního dotazu
+function setupWrites(storage = {}) {
+  const { AlzaCore, chrome, context } = loadCore({ storage, files: ["src/shared/store.js"] });
+  context.AlzaStore.isWriter = true;
+  const written = [];
+  chrome.storage.onChanged.addListener((changes) => written.push(...Object.keys(changes)));
+  return { AlzaCore, AlzaStore: context.AlzaStore, data: chrome.storage.local.data, writes: () => written.splice(0).sort() };
+}
+
+const ownedOrder = (id, t, extra = {}) => ({
+  id: String(id),
+  t,
+  total: 500,
+  cancelled: false,
+  items: [{ key: `alza_cz_${id}`, url: `https://www.alza.cz/zbozi-d${id}.htm`, name: `Zboží ${id}`, image: null, brand: "Značka", cat: ["Audio"], n: 1 }],
+  ...extra,
+});
+
+test("mergeOwned: přehled zboží a objednávek zapisuje jen při skutečné změně, stav načítání vždy", async () => {
+  const { AlzaStore, data, writes } = setupWrites({ alzaOwnedSync: { alza_cz: { fails: { 9: 2 } }, alza_sk: { done: true } } });
+  const run = (orders, sync = { offset: 0, done: true, total: 2, at: 1 }) => AlzaStore.run({ type: "mergeOwned", domain: "alza_cz", orders, sync });
+  const orders = [ownedOrder(2, 2000), ownedOrder(1, 1000)];
+  assert.equal(await run(orders), 2);
+  assert.deepEqual(writes(), ["alzaOwned", "alzaOwnedOrders", "alzaOwnedSync"]);
+  // Stejná stránka archivu znovu: jen stav načítání (ostatní pole stavu a jiné domény zůstávají)
+  assert.equal(await run(orders, { offset: 0, done: true, total: 2, at: 5 }), 0);
+  assert.deepEqual(writes(), ["alzaOwnedSync"]);
+  assert.deepEqual(plain(data.alzaOwnedSync), { alza_cz: { fails: { 9: 2 }, offset: 0, done: true, total: 2, at: 5 }, alza_sk: { done: true } });
+  // Bez stavu a beze změny se nezapíše nic; prázdná stránka také ne
+  assert.equal(await run(orders, null), 0);
+  assert.equal(await run([], null), 0);
+  assert.deepEqual(writes(), []);
+  // Přejmenované zboží mění jen přehled zboží, jiná částka jen přehled objednávek
+  await run([{ ...orders[0], items: [{ ...orders[0].items[0], name: "Nový název" }] }], null);
+  assert.deepEqual(writes(), ["alzaOwned"]);
+  assert.equal(data.alzaOwned.alza_cz_2.name, "Nový název");
+  await run([{ ...orders[1], total: 450 }], null);
+  assert.deepEqual(writes(), ["alzaOwnedOrders"]);
+  assert.deepEqual(plain(data.alzaOwnedOrders.alza_cz[1]), [1000, 450]);
+  // Zrušená objednávka odebere nákup i objednávku; zrušená neznámá nic nemění
+  await run([ownedOrder(1, 1000, { cancelled: true })], null);
+  assert.deepEqual(writes(), ["alzaOwned", "alzaOwnedOrders"]);
+  assert.deepEqual([Object.keys(data.alzaOwned), Object.keys(data.alzaOwnedOrders.alza_cz)], [["alza_cz_2"], ["2"]]);
+  await run([ownedOrder(7, 700, { cancelled: true })], null);
+  assert.deepEqual(writes(), []);
+});
+
+test("applyOwnedDetails + markOwnedNotified: údaje z detailu k nákupu, připomínka jednou", async () => {
+  const { AlzaStore, data, writes } = setupWrites({
+    alzaOwned: { alza_cz_1: { url: "https://www.alza.cz/zbozi-d1.htm", domain: "alza_cz", buys: [{ t: 1000, n: 1, o: "1" }, { t: 2000, n: 1, o: "2" }] } },
+  });
+  await AlzaStore.run({ type: "applyOwnedDetails", domain: "alza_cz", results: [] });
+  assert.deepEqual(writes(), []);
+  await AlzaStore.run({ type: "applyOwnedDetails", domain: "alza_cz", results: [{ order: 2, details: { alza_cz_1: { p: 990, claim: true, ret: false, rma: false, n: 1 } } }], now: 5000 });
+  assert.deepEqual(writes(), ["alzaOwned"]);
+  const [first, second] = data.alzaOwned.alza_cz_1.buys;
+  assert.equal(first.at, undefined);
+  assert.deepEqual([second.p, second.claim, second.ret, second.at], [990, true, false, 5000]);
+  await AlzaStore.run({ type: "markOwnedNotified", items: [{ key: "alza_cz_1", order: "2" }, { key: "alza_cz_9", order: "2" }, { key: "__proto__", order: "2" }] });
+  assert.deepEqual(writes(), ["alzaOwned"]);
+  assert.equal(data.alzaOwned.alza_cz_1.buys[1].notified, true);
+  assert.equal(data.alzaOwned.alza_cz_1.buys[0].notified, undefined);
+  await AlzaStore.run({ type: "markOwnedNotified", items: [{ key: "alza_cz_1", order: "2" }] });
+  assert.deepEqual(writes(), []);
+});
+
+test("countOwnedDetailFails: počítadlo nenačtených detailů – po úspěchu pryč, jen čekající objednávky, strop", async () => {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  const buysOf = (ids) => Object.fromEntries(ids.map((id, index) => [`alza_cz_${id}`, { url: `https://www.alza.cz/zbozi-d${id}.htm`, domain: "alza_cz", buys: [{ t: now - (index + 1) * day, n: 1, o: String(id) }] }]));
+  const { AlzaStore, data, writes } = setupWrites({ alzaOwned: buysOf([1, 2, 3]), alzaOwnedSync: { alza_cz: { done: true, at: 7, fails: { 1: 2, 555: 4 } }, alza_sk: { done: true, fails: { 1: 9 } } } });
+  const run = (op) => AlzaStore.run({ type: "countOwnedDetailFails", domain: "alza_cz", ...op });
+  // +1 nenačteným; záznam objednávky, která na detail už nečeká (555), zmizí; špatné číslo se nezapíše
+  await run({ failed: ["1", 2, "__proto__", "x"] });
+  assert.deepEqual(writes(), ["alzaOwnedSync"]);
+  assert.deepEqual(plain(data.alzaOwnedSync), { alza_cz: { done: true, at: 7, fails: { 1: 3, 2: 1 } }, alza_sk: { done: true, fails: { 1: 9 } } });
+  // Beze změny se nezapisuje
+  await run({ loaded: ["3"] });
+  assert.deepEqual(writes(), []);
+  // Po úspěchu záznam pryč; poslední záznam odstraní i pole fails
+  await run({ loaded: ["1"], failed: ["2"] });
+  assert.deepEqual(plain(data.alzaOwnedSync.alza_cz), { done: true, at: 7, fails: { 2: 2 } });
+  await run({ loaded: [2] });
+  assert.deepEqual(plain(data.alzaOwnedSync.alza_cz), { done: true, at: 7 });
+  assert.deepEqual(writes(), ["alzaOwnedSync", "alzaOwnedSync"]);
+  // Strop počtu záznamů: zůstanou ty s nejvíc selháními
+  const many = Array.from({ length: 205 }, (_, index) => 1000 + index);
+  const big = setupWrites({ alzaOwned: buysOf(many), alzaOwnedSync: { alza_cz: { done: true, fails: { 1204: 5 } } } });
+  await big.AlzaStore.run({ type: "countOwnedDetailFails", domain: "alza_cz", failed: many });
+  const fails = big.data.alzaOwnedSync.alza_cz.fails;
+  assert.equal(Object.keys(fails).length, 200);
+  assert.equal(fails[1204], 6);
+  // Smazané nákupy: stav načítání nevznikne znovu
+  const empty = setupWrites();
+  await empty.AlzaStore.run({ type: "countOwnedDetailFails", domain: "alza_cz", failed: ["1"] });
+  assert.deepEqual(empty.writes(), []);
+  assert.equal(empty.data.alzaOwnedSync, undefined);
+});

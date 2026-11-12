@@ -196,8 +196,10 @@ const AlzaStore = {
     // Úprava objektu { klíč: položka } (cílové ceny, hlídané produkty a seznamy, procházené produkty):
     //   set = nahradit (keep = pole, která zůstanou z dosavadní položky, např. since)
     //   update = nahradit jen existující položku, merge = doplnit pole do položky, remove = smazat
+    //   existingOnly = merge jen do existující položky (stav nákupu, „Hotovo“ u připomínky – smazaná položka
+    //   nesmí vzniknout znovu jako útržek bez adresy a domény)
     // Vrací výsledný objekt
-    async patchMap({ key, set = {}, update = {}, merge = {}, remove = [], keep = [] }) {
+    async patchMap({ key, set = {}, update = {}, merge = {}, remove = [], keep = [], existingOnly = false }) {
       // Klíč "__proto__" by místo položky změnil prototyp – položka by se tiše ztratila
       [set, update, merge].forEach((entries) => delete entries.__proto__);
       const { [key]: stored } = await chrome.storage.local.get(key);
@@ -207,7 +209,9 @@ const AlzaStore = {
       Object.entries(update).forEach(([entry, value]) => {
         if (map[entry]) map[entry] = { ...value, ...kept(map[entry]) };
       });
-      Object.entries(merge).forEach(([entry, value]) => (map[entry] = { ...map[entry], ...value }));
+      Object.entries(merge).forEach(([entry, value]) => {
+        if (!existingOnly || (map[entry] && typeof map[entry] === "object")) map[entry] = { ...map[entry], ...value };
+      });
       remove.forEach((entry) => delete map[entry]);
       await chrome.storage.local.set({ [key]: map });
       return map;
@@ -234,21 +238,146 @@ const AlzaStore = {
       await chrome.storage.local.set({ [key]: [...(Array.isArray(log) ? log : []), ...entries].slice(-AlzaCore.errorLogMaxEntries) });
     },
 
-    // Data produktů (historie, záznam ceny, přehled procházených) – nastavení: úklid a smazání dat produktu.
-    // Hlídání a cílové ceny zůstávají. productKeys = ["alza_cz_123", …]
+    // Data produktů (historie, záznam ceny, přehled procházených, kód v trezoru, viděný cashback, připomínka
+    // cashbacku, hlídání po nákupu) – nastavení: úklid a smazání dat produktu. Hlídání a cílové ceny zůstávají.
+    // productKeys = ["alza_cz_123", …]
     async removeProducts({ productKeys }) {
       const { history, price } = AlzaCore.storagePrefixes;
-      const browsedKey = AlzaCore.storageKeys.browsed;
+      const { browsed, codes, cashbacks, cashbackReminders, purchases } = AlzaCore.storageKeys;
+      const mapKeys = [browsed, codes, cashbacks, cashbackReminders, purchases];
       await chrome.storage.local.remove(productKeys.flatMap((key) => [history + key, price + key]));
-      const { [browsedKey]: browsed } = await chrome.storage.local.get(browsedKey);
-      if (browsed && productKeys.some((key) => Object.hasOwn(browsed, key))) {
-        productKeys.forEach((key) => delete browsed[key]);
-        await chrome.storage.local.set({ [browsedKey]: browsed });
-      }
+      const stored = await chrome.storage.local.get(mapKeys);
+      const updates = {};
+      mapKeys.forEach((mapKey) => {
+        const map = stored[mapKey];
+        if (!map || typeof map !== "object" || !productKeys.some((key) => Object.hasOwn(map, key))) return;
+        productKeys.forEach((key) => delete map[key]);
+        updates[mapKey] = map;
+      });
+      if (Object.keys(updates).length > 0) await chrome.storage.local.set(updates);
     },
 
     async remove({ keys }) {
       await chrome.storage.local.remove(keys);
+    },
+
+    // === Moje nákupy (AlzaOwned v shared/orders.js, služba na pozadí) ===
+
+    // Objednávky z archivu (AlzaCore.parseArchivePage) do přehledu koupeného zboží a objednávek; sync = stav načítání
+    // domény (doplní se do storageKeys.ownedSync). Vrací počet nových nákupů. Přehled zboží a objednávek se zapisuje
+    // jen při skutečné změně (nový nákup, přejmenované zboží, zrušená objednávka, jiná částka) – stránka archivu se
+    // samými známými objednávkami by jinak pokaždé přepsala celý přehled; stav načítání se zapisuje vždy
+    async mergeOwned({ domain, orders = [], sync = null }) {
+      const { owned: ownedKey, ownedOrders: ordersKey, ownedSync: syncKey } = AlzaCore.storageKeys;
+      const stored = await chrome.storage.local.get([ownedKey, ordersKey, syncKey]);
+      const isObject = (value) => value && typeof value === "object" && !Array.isArray(value);
+      const owned = isObject(stored[ownedKey]) ? stored[ownedKey] : {};
+      const allOrders = isObject(stored[ordersKey]) ? stored[ordersKey] : {};
+      const domainOrders = isObject(allOrders[domain]) ? allOrders[domain] : {};
+      // mergeOwnedOrders mění oba objekty na místě – změnu pozná srovnání podoby před a po
+      const snapshot = () => [JSON.stringify(owned), JSON.stringify(domainOrders)];
+      const before = orders.length > 0 ? snapshot() : null;
+      const added = AlzaCore.mergeOwnedOrders(owned, domainOrders, orders, domain);
+      const updates = {};
+      if (before) {
+        const after = snapshot();
+        if (after[0] !== before[0]) updates[ownedKey] = owned;
+        if (after[1] !== before[1]) updates[ordersKey] = { ...allOrders, [domain]: domainOrders };
+      }
+      if (sync) {
+        const allSync = isObject(stored[syncKey]) ? stored[syncKey] : {};
+        updates[syncKey] = { ...allSync, [domain]: { ...allSync[domain], ...sync } };
+      }
+      if (Object.keys(updates).length > 0) await chrome.storage.local.set(updates);
+      return added;
+    },
+
+    // Údaje z detailů objednávek (cena kusu, reklamace, vrácení) k nákupům: results = [{ order, details }]
+    async applyOwnedDetails({ domain, results = [], now = Date.now() }) {
+      const key = AlzaCore.storageKeys.owned;
+      const { [key]: owned } = await chrome.storage.local.get(key);
+      if (!owned || typeof owned !== "object" || results.length === 0) return;
+      // Záruka z detailu produktu (setWarranty ji ukládá k záznamu ceny) – nákup si ji vezme s prvním detailem objednávky
+      const productKeys = [...new Set(results.flatMap(({ details }) => Object.keys(details || {})))];
+      const priceKeys = productKeys.map((productKey) => `${AlzaCore.storagePrefixes.price}${productKey}`);
+      const records = priceKeys.length > 0 ? await chrome.storage.local.get(priceKeys) : {};
+      const warranties = Object.fromEntries(productKeys.map((productKey, index) => [productKey, records[priceKeys[index]]?.warranty]).filter(([, warranty]) => warranty));
+      results.forEach(({ order, details }) => AlzaCore.applyOwnedDetails(owned, String(order), details || {}, domain, now, warranties));
+      await chrome.storage.local.set({ [key]: owned });
+    },
+
+    // Délka záruky zjištěná z API produktu při načítání Mých nákupů (AlzaOwned.sync): results = [{ key, months | null }]
+    // – i nezjištěná se zapíše jako „ptali jsme se“ (wa), ať se dotaz neopakuje při každém běhu
+    async applyOwnedWarranties({ domain, results = [], now = Date.now() }) {
+      const key = AlzaCore.storageKeys.owned;
+      const { [key]: owned } = await chrome.storage.local.get(key);
+      if (!owned || typeof owned !== "object" || results.length === 0) return;
+      let changed = false;
+      results.forEach(({ key: productKey, months }) => {
+        if (owned[productKey]?.domain !== domain) return;
+        changed = AlzaCore.applyOwnedWarrantyResult(owned, productKey, Number(months) || 0, now) || changed;
+      });
+      if (changed) await chrome.storage.local.set({ [key]: owned });
+    },
+
+    // Záruka z detailu produktu ({ m: měsíce, b: platí „pro firemní nákupy“ } – AlzaCore.getDocumentWarranty):
+    // k záznamu ceny (budoucí nákup si ji vezme při načtení detailu objednávky) a ke koupeným kusům v Mých nákupech,
+    // které ji ještě nemají. Zapisuje jen při změně; záznam ceny nevytváří (produkt, jehož ceny se neukládají)
+    async setWarranty({ domain, url, warranty }) {
+      const months = Number(warranty?.m);
+      if (!AlzaCore.isKnownDomain(domain) || !Number.isInteger(months) || months <= 0 || months > 240) return;
+      const value = { m: months, b: Boolean(warranty.b) };
+      const priceKey = AlzaCore.getPriceKey(domain, url);
+      const ownedKey = AlzaCore.storageKeys.owned;
+      const stored = await chrome.storage.local.get([priceKey, ownedKey]);
+      const changes = {};
+      const record = stored[priceKey];
+      if (record && typeof record === "object" && (record.warranty?.m !== value.m || Boolean(record.warranty?.b) !== value.b)) changes[priceKey] = { ...record, warranty: value };
+      const owned = stored[ownedKey];
+      const product = owned && typeof owned === "object" ? owned[AlzaCore.getProductKey(domain, url)] : null;
+      if (product && AlzaCore.applyOwnedWarranty(product, value)) changes[ownedKey] = owned;
+      if (Object.keys(changes).length > 0) await chrome.storage.local.set(changes);
+    },
+
+    // Počítadlo nenačtených detailů objednávek ve stavu načítání domény (storageKeys.ownedSync → { "<doména>":
+    // { …, fails: { "<číslo objednávky>": počet } } }) – AlzaOwned.sortQueue podle něj řadí opakovaně selhávající
+    // detaily na konec fronty. failed = čísla objednávek, jejichž detail se teď nenačetl (+1), loaded = načtené
+    // (záznam se smaže). Volat až po applyOwnedDetails: zůstávají jen objednávky, které na detail ještě čekají,
+    // a nejvýš maxFails záznamů (ty s nejvíc selháními). Zapisuje jen při změně
+    async countOwnedDetailFails({ domain, failed = [], loaded = [], now = Date.now() }) {
+      const maxFails = 200;
+      const { owned: ownedKey, ownedSync: syncKey } = AlzaCore.storageKeys;
+      const stored = await chrome.storage.local.get([ownedKey, syncKey]);
+      const isObject = (value) => value && typeof value === "object" && !Array.isArray(value);
+      // Smazané nákupy (nastavení) – stav načítání nesmí vzniknout znovu jako útržek
+      if (!isObject(stored[ownedKey])) return;
+      const allSync = isObject(stored[syncKey]) ? stored[syncKey] : {};
+      const state = isObject(allSync[domain]) ? allSync[domain] : {};
+      const previous = isObject(state.fails) ? state.fails : {};
+      const waiting = new Set(AlzaCore.getOwnedDetailQueue(stored[ownedKey], domain, now).map(String));
+      loaded.forEach((order) => waiting.delete(String(order)));
+      const counts = new Map(Object.entries(previous).filter(([order, count]) => waiting.has(order) && count > 0));
+      failed.map(String).filter((order) => /^\d{1,20}$/.test(order)).forEach((order) => counts.set(order, (Number(counts.get(order)) || 0) + 1));
+      const fails = Object.fromEntries([...counts].sort((a, b) => b[1] - a[1]).slice(0, maxFails));
+      const same = Object.keys(fails).length === Object.keys(previous).length && Object.entries(fails).every(([order, count]) => previous[order] === count);
+      if (same) return;
+      const { fails: dropped, ...rest } = state;
+      await chrome.storage.local.set({ [syncKey]: { ...allSync, [domain]: Object.keys(fails).length > 0 ? { ...rest, fails } : rest } });
+    },
+
+    // Připomínka konce záruky odeslána: items = [{ key (produkt), order }]
+    async markOwnedNotified({ items = [] }) {
+      const key = AlzaCore.storageKeys.owned;
+      const { [key]: owned } = await chrome.storage.local.get(key);
+      if (!owned || typeof owned !== "object") return;
+      let changed = false;
+      items.forEach(({ key: productKey, order }) => {
+        const buy = Object.hasOwn(owned, productKey) ? owned[productKey]?.buys?.find((candidate) => candidate.o === order) : null;
+        if (!buy || buy.notified) return;
+        buy.notified = true;
+        changed = true;
+      });
+      if (changed) await chrome.storage.local.set({ [key]: owned });
     },
 
     // Import ověřené zálohy (nastavení): historie se sloučí podle času, objekty po položkách, záznamy cen ze

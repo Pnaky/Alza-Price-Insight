@@ -23,6 +23,13 @@ Object.assign(AlzaPriceTracker, {
     continueButton: ".js-button-order-continue, #btnFastCheckout",
   },
 
+  basketCodeMaxAgeDays: 3, // Kód z detailu produktu se bere jen ze záznamu ceny mladšího než tolik dní
+
+  // První částka z textu buňky („33 990 Kč 31 490 Kč“ → „33 990“) – celý text by slepil obě čísla do jednoho
+  getFirstPriceText(text) {
+    return String(text).match(/\d+(?:\s\d{3})*(?:,\d{1,2})?/)?.[0] || "";
+  },
+
   isBasketPage() {
     return Boolean(document.querySelector(this.basketSelectors.codeInput) && document.querySelector(this.basketSelectors.continueButton));
   },
@@ -33,12 +40,11 @@ Object.assign(AlzaPriceTracker, {
     this.state.basketMissing = null;
     const refresh = () => this.updateBasketCodes().catch((error) => console.error("Alza Price Tracker – kódy v košíku:", error));
     refresh();
-    // Počet kusů, poukazy a položky Alza překresluje bez načtení stránky
     let timer = null;
-    AlzaCore.createObserver(() => {
+    this.observeBasket(() => {
       clearTimeout(timer);
       timer = setTimeout(refresh, 300);
-    }, { ignoreOwn: true }).observe(document.body, { childList: true, subtree: true });
+    });
 
     // Zachytávací fáze – dřív než Alzin posluchač; rozhoduje se z předem spočítaného stavu (čtení storage by
     // bylo pozdě, výchozí akci jde zrušit jen synchronně)
@@ -56,6 +62,27 @@ Object.assign(AlzaPriceTracker, {
     );
   },
 
+  // Jeden observer košíku pro kódy i hodnocení (basket-insights.js): počet kusů, poukazy a položky Alza
+  // překresluje bez načtení stránky. Na celé stránce – řádky i blok poukazů jsou v různých částech a Alza je
+  // při přepočtu může vyměnit (observer na odpojeném kontejneru by oněměl)
+  observeBasket(listener) {
+    if (!this.state.basketListeners) {
+      this.state.basketListeners = [];
+      AlzaCore.createObserver(
+        () =>
+          this.state.basketListeners.forEach((callback) => {
+            try {
+              callback();
+            } catch (error) {
+              console.error("Alza Price Tracker – změna košíku:", error);
+            }
+          }),
+        { ignoreOwn: true }
+      ).observe(document.body, { childList: true, subtree: true });
+    }
+    this.state.basketListeners.push(listener);
+  },
+
   // Položky košíku s cenou se slevovým kódem a kolik slevy chybí; null = vše v pořádku
   async updateBasketCodes() {
     const s = this.basketSelectors;
@@ -71,7 +98,7 @@ Object.assign(AlzaPriceTracker, {
         // „31 490 Kč“. Z boxu jen hlavní cena – celý text by slepil obě čísla do jednoho
         const cell = row.querySelector(s.price);
         const box = cell?.querySelector(s.priceBox);
-        const value = AlzaCore.parsePositivePrice((cell?.querySelector(s.priceValue) || cell)?.textContent || "");
+        const value = AlzaCore.parsePositivePrice(this.getFirstPriceText((cell?.querySelector(s.priceValue) || cell)?.textContent || ""));
         return { url: new URL(link.getAttribute("href"), window.location.origin).href, name: link.textContent.replace(/\s+/g, " ").trim(), count, value, discounted: Boolean(box?.matches(s.discountBox)) };
       })
       .filter((item) => item && item.value);
@@ -81,9 +108,13 @@ Object.assign(AlzaPriceTracker, {
     }
 
     const records = await this.getPriceRecords(items.map(({ url }) => url));
+    const fresh = Date.now() - this.basketCodeMaxAgeDays * AlzaCore.dayMs;
     const coded = items
       .map((item) => {
-        const entry = records[item.url] && AlzaCore.getPriceEntries(records[item.url]).find(({ type, code }) => type === "discount" && code);
+        // Kód ze starého záznamu už nemusí platit – vypršelý kód by zbytečně brzdil „Pokračovat“
+        const record = records[item.url];
+        if (!record || !(Number(record.lastUpdated) >= fresh)) return null;
+        const entry = AlzaCore.getPriceEntries(record).find(({ type, code }) => type === "discount" && code);
         if (!entry) return null;
         // Kód v řádku už platí: cena (za kus, nebo za všechny kusy) je na úrovni ceny s kódem
         if (item.discounted && (item.value <= entry.price + 1 || item.value <= entry.price * item.count + 1)) return null;

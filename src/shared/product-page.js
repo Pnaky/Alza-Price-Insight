@@ -40,7 +40,7 @@ async function fetchProductPage(url) {
   }
 }
 
-// Stránka akce s cashbackem (článek Alzy) jako prostý text – lhůty registrace čte AlzaCore.parseCashbackTerms.
+// Stránka akce s cashbackem (článek Alzy) jako prostý text – termíny akce čte AlzaCore.readCashbackTerms.
 // Text po textových uzlech s mezerou, ať se sousední prvky neslepí („31. 01. 2027Canon“). Nikdy nevyhodí chybu
 async function fetchTermsPage(url) {
   const controller = new AbortController();

@@ -14,14 +14,26 @@ Object.assign(AlzaPriceTracker, {
     this.state.basketChips = new Map(); // Adresa produktu → poslední spočítané chipy (vrácení bez čekání)
     const refresh = () => this.updateBasketInsights().catch((error) => console.error("Alza Price Tracker – hodnocení v košíku:", error));
     refresh();
-    // Počet kusů a položky Alza překresluje bez načtení stránky a vložený řádek zmizí. Vrátit ho hned z paměti
-    // (observer běží před vykreslením – neproblikne), přepočítat až po chvíli
+    // Počet kusů a položky Alza překresluje bez načtení stránky a vložený řádek zmizí. Vrátit ho z paměti
+    // v příštím snímku (requestAnimationFrame běží před vykreslením – neproblikne, dávky změn se sloučí),
+    // přepočítat až po chvíli
     let timer = null;
-    AlzaCore.createObserver(() => {
-      this.paintBasketInsights(this.getBasketRows());
+    let frame = 0;
+    this.observeBasket(() => {
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          this.paintBasketInsights(this.getBasketRows());
+        });
+      }
       clearTimeout(timer);
       timer = setTimeout(refresh, 400);
-    }, { ignoreOwn: true }).observe(document.body, { childList: true, subtree: true });
+    });
+  },
+
+  // Řádek položky košíku podle adresy produktu – Alza řádek při přepočtu vykreslí znovu (starý je odpojený)
+  findBasketRow(url) {
+    return this.getBasketRows().find((item) => item.url === url)?.row || null;
   },
 
   getBasketRows() {
@@ -52,6 +64,12 @@ Object.assign(AlzaPriceTracker, {
   basketCells: { count: ".c2", price: ".c5" },
 
   paintBasketInsights(rows) {
+    // Pruh patří řádku před sebou (data-url) – po překreslení košíku (odebraná položka, jiné pořadí) by jinak
+    // zůstal pod jinou položkou
+    const urls = new Map(rows.map(({ row, url }) => [row, url]));
+    document.querySelectorAll(`.${this.basketInsightClass}`).forEach((strip) => {
+      if (urls.get(strip.previousElementSibling) !== strip.dataset.url) strip.remove();
+    });
     rows.forEach(({ row, url }) => {
       const chips = this.state.basketChips?.get(url) || [];
       const signature = JSON.stringify(chips);
@@ -62,9 +80,10 @@ Object.assign(AlzaPriceTracker, {
         if (chips.length === 0) return;
         strip = this.createEl("div", this.basketInsightClass);
         strip.dataset.signature = signature;
+        strip.dataset.url = url;
         const countSlot = this.createEl("div", `${this.basketInsightClass}-count`);
         const priceSlot = this.createEl("div", `${this.basketInsightClass}-price`);
-        chips.forEach((chip) => (chip.slot === "count" ? countSlot : priceSlot).appendChild(this.createBasketChip(row, chip)));
+        chips.forEach((chip) => (chip.slot === "count" ? countSlot : priceSlot).appendChild(this.createBasketChip(url, chip)));
         strip.append(countSlot, priceSlot);
         row.after(strip);
       }
@@ -72,7 +91,7 @@ Object.assign(AlzaPriceTracker, {
     });
   },
 
-  createBasketChip(row, { tone, icon, text, hint, add, tiers, count, saving }) {
+  createBasketChip(url, { tone, icon, text, hint, add, tiers, count, saving }) {
     const className = `alza-price-tracker-basket-chip alza-price-tracker-basket-chip--${tone}`;
     const chip = this.createEl(add ? "button" : "span", className, text);
     if (icon) AlzaIcons.prepend(chip, icon, { tone: true });
@@ -85,7 +104,8 @@ Object.assign(AlzaPriceTracker, {
       chip.addEventListener("click", async () => {
         chip.disabled = true;
         for (let i = 0; i < add; i++) {
-          const plus = row.isConnected ? row.querySelector(this.basketQuantityPlus) : null;
+          // Po každém kliknutí Alza řádek překreslí – tlačítko + hledat v aktuálním řádku produktu
+          const plus = this.findBasketRow(url)?.querySelector(this.basketQuantityPlus);
           if (!plus) break;
           plus.click();
           if (i < add - 1) await new Promise((resolve) => setTimeout(resolve, 600));

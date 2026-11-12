@@ -364,7 +364,7 @@ test("parseOrderPurchases: koupené zboží z detailu objednávky, zrušené ne"
 
 test("getPurchaseDrop: zlevnění pod nákupní cenu ve lhůtě, každé nové minimum jen jednou", () => {
   const purchase = { price: 31490, returnUntil: NOW + DAY };
-  assert.deepEqual(plain(AlzaCore.getPurchaseDrop(purchase, { b2b: 29990, original: 31990 }, NOW)), { lowest: 29990, saving: 1500 });
+  assert.deepEqual(plain(AlzaCore.getPurchaseDrop(purchase, { b2b: 29990, original: 31990 }, NOW)), { lowest: 29990, saving: 1500, reference: 31490 });
   assert.equal(AlzaCore.getPurchaseDrop(purchase, { b2b: 31480 }, NOW), null); // pod hranicí 0,5 %
   assert.equal(AlzaCore.getPurchaseDrop({ ...purchase, notifiedPrice: 29990 }, { b2b: 29990 }, NOW), null);
   assert.equal(AlzaCore.getPurchaseDrop({ ...purchase, notifiedPrice: 29990 }, { b2b: 28990 }, NOW).lowest, 28990);
@@ -623,4 +623,385 @@ test("formatTextDate: datum podle jazyka textu, ne podle domény", () => {
   assert.equal(AlzaCore.formatTextDate(time, "en"), "18/11");
   assert.equal(AlzaCore.formatTextDate(time, "cz").replace(/\s/g, " "), "18. 11.");
   assert.equal(AlzaCore.formatTextDate(time, "en", true), "18/11/2026");
+});
+
+test("parseCommodityList: obsah seznamu z API – nové a odebrané položky, uložená adresa zůstane", () => {
+  const item = (id, name) => ({ id, name, navigationUrl: `https://www.alza.cz/produkt-d${id}.htm`, img: `https://image.alza.cz/${id}.jpg` });
+  const json = (items, extra = {}) => ({ err: 0, data: [{ id: 35851306, name: " Elektro ", itemCount: items.length, items, ...extra }] });
+  const list = {
+    domain: "alza_cz",
+    listId: "35851306",
+    products: {
+      "https://www.alza.cz/stary-nazev-d1.htm?o=2": { name: "Jedna", image: null },
+      "https://www.alza.cz/pryc-d3.htm": { name: "Tři", image: null },
+    },
+  };
+  const result = plain(AlzaCore.parseCommodityList(json([item(1, "Jedna nová"), item(2, "Dvě")]), list));
+  assert.equal(result.name, "Elektro");
+  assert.deepEqual(Object.keys(result.products), ["https://www.alza.cz/stary-nazev-d1.htm?o=2", "https://www.alza.cz/produkt-d2.htm"]);
+  assert.deepEqual(result.products["https://www.alza.cz/produkt-d2.htm"], { name: "Dvě", image: "https://image.alza.cz/2.jpg" });
+  assert.deepEqual(result.added, ["Dvě"]);
+  assert.deepEqual(result.removed, ["Tři"]);
+  // Prázdný seznam s itemCount 0 = opravdu prázdný
+  assert.deepEqual(plain(AlzaCore.parseCommodityList(json([]), list)).removed, ["Jedna", "Tři"]);
+});
+
+test("parseCommodityList: neúplná nebo cizí odpověď → null (zůstane uložený obsah)", () => {
+  const list = { domain: "alza_cz", listId: "5", products: {} };
+  const items = [{ id: 1, name: "A", navigationUrl: "https://www.alza.cz/a-d1.htm" }];
+  assert.equal(AlzaCore.parseCommodityList({ err: 1, data: [] }, list), null);
+  assert.equal(AlzaCore.parseCommodityList({ err: 0, data: [{ id: 6, itemCount: 1, items }] }, list), null);
+  assert.equal(AlzaCore.parseCommodityList({ err: 0, data: [{ id: 5, itemCount: 2, items }] }, list), null);
+  assert.equal(AlzaCore.parseCommodityList({ err: 0, data: [{ id: 5, itemCount: 1, items: null }] }, list), null);
+  assert.equal(AlzaCore.parseCommodityList("<html>", list), null);
+  assert.equal(AlzaCore.parseCommodityList({ err: 0, data: [{ id: 5, itemCount: 1, items }] }, { ...list, domain: "neznama" }), null);
+  // Položka mimo doménu seznamu se přeskočí, nic se nepřidá
+  const foreign = [{ id: 1, name: "A", navigationUrl: "https://www.alza.sk/a-d1.htm" }];
+  assert.deepEqual(plain(AlzaCore.parseCommodityList({ err: 0, data: [{ id: 5, itemCount: 1, items: foreign }] }, list)).products, {});
+});
+
+test("isOriginalSuperseded: běžná cena platí dál, když je levněji jen s cashbackem nebo výkupem", () => {
+  assert.equal(AlzaCore.isOriginalSuperseded({ scrappage: 28990, original: 31490 }), false);
+  assert.equal(AlzaCore.isOriginalSuperseded({ cashback: 900, scrappage: 800, original: 1000 }), false);
+  assert.equal(AlzaCore.isOriginalSuperseded({ cashback: 900, aplus: 950, original: 1000 }), true);
+  assert.equal(AlzaCore.isOriginalSuperseded({ discount: 26490, aplus: 31490, original: 31990 }), true);
+  assert.equal(AlzaCore.isOriginalSuperseded({ original: 1000 }), false);
+  assert.equal(AlzaCore.isOriginalSuperseded({ benefit: 900 }), false);
+});
+
+test("getListingParameter: kapacita z popisku dlaždice – úložiště, RAM, powerbanky, nabíjecí stanice", () => {
+  const parameter = (name, description) => plain(AlzaCore.getListingParameter(name, description));
+  // Disky v TB, i slovensky (dlouhá pomlčka) a maďarsky ("GB-os tárolókapacitás")
+  assert.deepEqual(parameter("Samsung 990 PRO 4TB", "SSD disk 4000 GB - M.2 (PCIe 4.0 4x NVMe), TLC"), { quantity: 4, unit: "TB", amount: 4000, amountUnit: "GB" });
+  assert.deepEqual(parameter("WD Elements", "Externý disk 500 GB – HDD úložisko, formát 2.5\""), { quantity: 0.5, unit: "TB", amount: 500, amountUnit: "GB" });
+  assert.deepEqual(parameter("Samsung 990 EVO Plus 2TB", "SSD meghajtó 2000 GB-os tárolókapacitás - M.2 (PCIe 4.0 4x NVMe)"), { quantity: 2, unit: "TB", amount: 2000, amountUnit: "GB" });
+  assert.equal(parameter("Kingston XS2000", "Külső merevlemez 2000 GB - SSD tárhely").unit, "TB");
+  // Flash disky a karty v GB
+  assert.deepEqual(parameter("Kingston Exodia 256GB", "Flash disk 256 GB - USB 3.2 Gen 1 (USB 3.0), konektor USB-A"), { quantity: 256, unit: "GB", amount: 256, amountUnit: "GB" });
+  assert.equal(parameter("Verbatim", "USB kľúč 16 GB – USB 2.0").unit, "GB");
+  assert.equal(parameter("SanDisk", "Pendrive 512 GB - USB 3.2 Gen 1 (USB 3.0)").quantity, 512);
+  assert.equal(parameter("Kingston", "Paměťová karta 128 GB - micro SDXC a micro SD, rychlost čtení až 200 MB/s").quantity, 128);
+  // RAM: moduly × kapacita
+  assert.deepEqual(parameter("Kingston FURY 32GB KIT DDR5", "Operační paměť - 2 × 16GB v balení, typ DDR5, frekvence 6000 MHz"), { quantity: 32, unit: "GB", amount: 32, amountUnit: "GB" });
+  assert.equal(parameter("Kingston", "Operačná pamäť – 2× 16 GB v balení").quantity, 32);
+  assert.equal(parameter("Kingston", "Operační paměť - 1x16GB, typ DDR4").quantity, 16);
+  assert.equal(parameter("Kingston", "RAM memória - 2 × 16GB a csomagban").quantity, 32);
+  // Powerbanky za 1000 mAh; bez kapacity v popisku nic
+  assert.deepEqual(parameter("Swissten", "Powerbanka bezdrátová 20000 mAh - MagSafe, celkový výkon 20 W"), { quantity: 20, unit: "1000 mAh", amount: 20000, amountUnit: "mAh" });
+  assert.equal(parameter("Hama", "Power bank 10000 mAh - 45 W teljes teljesítmény").quantity, 10);
+  assert.equal(parameter("AlzaPower Parade 10000mAh", "Powerbanka - s podporou rychlonabíjení, 2× USB-C a 1× USB-A"), null);
+  // Nabíjecí stanice ve Wh – "4" z "LiFePo4" není kapacita, mezera = oddělovač tisíců
+  assert.deepEqual(parameter("Anker SOLIX C300X", "Nabíjecí stanice - baterie LiFePo4 o kapacitě 288 Wh, nabíjecí výkon ze sítě 330 W"), { quantity: 288, unit: "Wh", amount: 288, amountUnit: "Wh" });
+  assert.equal(parameter("Anker", "Nabíjacia stanica – batéria LiFePO4 288 Wh, výkon 300 W").quantity, 288);
+  assert.equal(parameter("Anker", "Prídavná batéria – 2 048 Wh, LiFePO4").quantity, 2048);
+  assert.equal(parameter("Anker", "Hordozható töltőállomás - LiFePO4 akkumulátor 1024 Wh kapacitás, 1800 W").quantity, 1024);
+  // Pevné disky: kapacita jen v názvu
+  assert.deepEqual(parameter("WD Red Plus 4TB", "Pevný disk - 3.5\", SATA III, cache 256 MB, 5400 ot/min"), { quantity: 4, unit: "TB", amount: 4, amountUnit: "TB" });
+  assert.equal(parameter("Seagate Exos X18 16TB 512e", "Merevlemez - 3.5\", SATA III").quantity, 16);
+  assert.equal(parameter("WD Blue 500GB", "Pevný disk – 2.5\", SATA III").quantity, 0.5);
+  assert.equal(parameter("WD Red Plus", "Pevný disk - 3.5\", SATA III"), null);
+});
+
+test("getListingParameter: kde kapacita cenu neurčuje, nic nevrací", () => {
+  const parameter = (name, description) => AlzaCore.getListingParameter(name, description);
+  assert.equal(parameter("iPhone 17 256GB černá", "Mobilní telefon - 6,3\" OLED 2622 × 1206, 120Hz, procesor Apple A19, vnitřní paměť 256 GB"), null);
+  assert.equal(parameter("PlayStation 5", "Herní konzole k televizi - SSD 1024 GB, Blu-ray mechanika"), null);
+  assert.equal(parameter("Lenovo ThinkPad", "Notebook - Intel Core 5 210H, 16\" IPS, RAM 16GB DDR5, SSD 512GB, baterie 57 Wh"), null);
+  assert.equal(parameter("HP 90W", "Napájecí adaptér 90 W - vstupní napětí 100 – 240 V"), null);
+  assert.equal(parameter("Elektrokolo", "Elektrokolo - horské, baterie 500 Wh, motor 250 W"), null);
+  assert.equal(parameter("Synology DS225+", "NAS - pro domácnosti, 2 pozice, RAM 2 GB"), null);
+  assert.equal(parameter("Něco", ""), null);
+  assert.equal(parameter(null, null), null);
+});
+
+test("formatParameterPrice: od stovky bez desetinných míst, měna a jednotka podle domény", () => {
+  const clean = (text) => text.replace(/\s/g, " ");
+  assert.equal(clean(AlzaCore.formatParameterPrice(3997.5, "TB", "alza_cz")), "3 998 Kč/TB");
+  assert.equal(clean(AlzaCore.formatParameterPrice(3.117, "GB", "alza_cz")), "3,12 Kč/GB");
+  assert.equal(clean(AlzaCore.formatParameterPrice(74.9, "TB", "alza_sk")), "74,90 €/TB");
+  assert.equal(clean(AlzaCore.formatParameterPrice(29.95, "1000 mAh", "alza_cz")), "29,95 Kč/1000 mAh");
+});
+
+test("getListingEnergy: roční spotřeba lednic a mrazáků, spotřeba na 100 cyklů u praček a sušiček", () => {
+  const energy = (description) => plain(AlzaCore.getListingEnergy(description));
+  assert.deepEqual(energy("Lednice - kombinovaná, energetická třída C, chlazený prostor 180 l, hlučnost 39 dB, roční spotřeba 140 kWh/rok, mrazicí výkon 4 kg"), { kwh: 140, per: "year" });
+  assert.deepEqual(energy("Pultový mrazák - energetická třída E, roční spotřeba 295 kWh, objem 500 l"), { kwh: 295, per: "year" });
+  assert.deepEqual(energy("Mraznička - energetická trieda A, ročná spotreba 181,5 kWh, objem 200 l"), { kwh: 181.5, per: "year" });
+  assert.deepEqual(energy("Parní pračka - s předním plněním, energetická třída A, kapacita pračky 8 kg, váž. spotřeba energie 33 kWh/100 cyklů, váž. spotřeba vody na cyklus 41 l"), { kwh: 33, per: "cycles" });
+  assert.deepEqual(energy("Sušička prádla - kondenzační, hlučnost 66 dB spotřeba energie 102 kWh/100 cyklů 3DScan"), { kwh: 102, per: "cycles" });
+  assert.deepEqual(energy("Sušička bielizne - spotreba energie 176 kWh (na 100 cyklov), displej"), { kwh: 176, per: "cycles" });
+  // Stejný údaj dvakrát je v pořádku; dva různé (set, pračka se sušičkou) jsou nejednoznačné
+  assert.deepEqual(energy("Sušička - spotřeba energie 102 kWh/100 cyklů, 102 kWh/100 cyklů"), { kwh: 102, per: "cycles" });
+  assert.equal(energy("Set pračka a sušička - Pračka: spotřeba energie 49 kWh/100 cyklů, Sušička: spotřeba energie 176 kWh/100 cyklů"), null);
+  assert.equal(energy("Pračka se sušičkou - vážená spotřeba energie 49 a 300 kWh / 100 cyklů"), null);
+  assert.equal(energy("Set pračka a sušička - Pračka: s předním plněním, spotřeba energie 49 kWh/100 cyklů, Sušička: kondenzační"), null);
+  assert.equal(energy("Szett - mosógép 49 kWh/100 ciklus"), null);
+  assert.equal(energy("Kombinace - roční spotřeba 140 kWh/rok, spotřeba energie 49 kWh/100 cyklů"), null);
+  // Bez údaje, mimo rozsah, jiné jednotky
+  assert.equal(energy("Televize - OLED, 139cm, 4K Ultra HD, energetická třída F"), null);
+  assert.equal(energy("Lednice - roční spotřeba 2 kWh/rok"), null);
+  assert.equal(energy("Powerbanka 20000 mAh - 74 Wh"), null);
+  assert.equal(energy(null), null);
+});
+
+test("getDocumentEnergy: detail produktu – popisek, jinak parametry (televize v SDR režimu, lednice, pračka)", () => {
+  // Zjednodušená stránka: popisek pod názvem (.nameextc) a řádky parametrů (.typeName + .value v témže .row)
+  const page = (description, rows = []) => ({
+    querySelector: (selector) => (selector === ".nameextc" ? { textContent: description } : null),
+    querySelectorAll: (selector) =>
+      selector === ".typeName"
+        ? rows.map(([label, value]) => ({ textContent: label, closest: () => ({ querySelector: () => ({ textContent: value }) }) }))
+        : [],
+  });
+  const energy = (description, rows) => plain(AlzaCore.getDocumentEnergy(page(description, rows)));
+  assert.deepEqual(energy("Lednice - kombinovaná, roční spotřeba 140 kWh/rok", [["Roční spotřeba energie lednice", "999 kWh/annum"]]), { kwh: 140, per: "year" }); // popisek má přednost
+  assert.deepEqual(
+    energy("Televize - OLED, 139cm, 4K Ultra HD", [
+      ["Energetická třída v SDR režimu", "F"],
+      ["Spotřeba v SDR režimu", "75 kWh/1000h"],
+      ["Spotřeba v HDR režimu", "122 kWh/1000h"],
+      ["Stand-by spotřeba (pohotovostní)", "0,5 W"],
+    ]),
+    { kwh: 75, per: "hours" }
+  );
+  // Stejný parametr je na stránce dvakrát (hlavní parametry + úplný seznam)
+  assert.deepEqual(energy("Mrazák - šuplíkový", [["Roční spotřeba energie", "181,5 kWh/annum"], ["Roční spotřeba energie", "181,5 kWh/annum"]]), { kwh: 181.5, per: "year" });
+  assert.deepEqual(energy("Pračka - s předním plněním", [["Spotřeba energie (praní)", "33 kWh/100 c."]]), { kwh: 33, per: "cycles" });
+  // Myčka: Alza vede spotřebu jednoho cyklu jako „kWh/100 c.“ → 75 kWh/100 cyklů
+  assert.deepEqual(energy("Vestavná myčka - energetická třída C", [["Spotřeba energie (program ECO)", "0,75 kWh/100 c."]]), { kwh: 75, per: "cycles" });
+  // Dva různé údaje, set a stránka bez spotřeby
+  assert.equal(energy("Pračka se sušičkou", [["Spotřeba energie (praní)", "49 kWh/100 c."], ["Spotřeba energie (praní a sušení)", "300 kWh/100 c."]]), null);
+  assert.equal(energy("Set pračka a sušička - Pračka: s předním plněním", [["Spotřeba energie (praní)", "49 kWh/100 c."]]), null);
+  assert.equal(energy("Mobilní telefon - 6,1\"", [["Kapacita baterie", "4000 mAh"]]), null);
+});
+
+test("getEnergySettings: hodnoty z nastavení, neplatné nahradí výchozí; televize podle hodin denně", () => {
+  const settings = AlzaCore.getEnergySettings({ energyCost: true, energyPriceCZK: 7, energyYears: 99, energyCyclesPerWeek: 5, energyHoursPerDay: 0 }, "alza_cz");
+  assert.deepEqual(plain(settings), { enabled: true, price: 7, years: 10, cyclesPerWeek: 5, hoursPerDay: 4 });
+  // 75 kWh/1000 h × 4 h denně × 365 dní = 109,5 kWh ročně
+  const tv = AlzaCore.getEnergyCost({ kwh: 75, per: "hours" }, { price: 6, years: 10, cyclesPerWeek: 4, hoursPerDay: 4 });
+  assert.equal(tv.yearlyKwh, 109.5);
+  assert.equal(tv.cost, 6570);
+});
+
+test("getEnergyPrice + getEnergyCost: cena elektřiny podle měny domény, provoz za zvolený počet let", () => {
+  const settings = { ...AlzaCore.defaultSettings, energyPriceCZK: 7.5, energyPriceEUR: 0 };
+  assert.equal(AlzaCore.getEnergyPrice(settings, "alza_cz"), 7.5);
+  assert.equal(AlzaCore.getEnergyPrice(settings, "alza_sk"), AlzaCore.defaultSettings.energyPriceEUR); // neplatná → výchozí
+  assert.equal(AlzaCore.getEnergyPrice(settings, "alza_hu"), AlzaCore.defaultSettings.energyPriceHUF);
+  assert.deepEqual(plain(AlzaCore.getEnergyCost({ kwh: 140, per: "year" }, { price: 6, years: 10, cyclesPerWeek: 4 })), { yearlyKwh: 140, yearly: 840, cost: 8400 });
+  // 33 kWh/100 cyklů × 4 cykly týdně × 52 týdnů = 68,64 kWh ročně
+  const washer = AlzaCore.getEnergyCost({ kwh: 33, per: "cycles" }, { price: 6, years: 10, cyclesPerWeek: 4 });
+  assert.equal(Math.round(washer.yearlyKwh * 100) / 100, 68.64);
+  assert.equal(Math.round(washer.cost), 4118);
+});
+
+// === Moje nákupy ===
+const archiveItem = (id, extra = {}) => ({
+  commodityId: id,
+  commodityUrl: `https://www.alza.cz/zbozi-d${id}.htm`,
+  commodityName: `Zboží ${id}`,
+  imageUrl: `https://image.alza.cz/products/AB${id}/AB${id}.jpg?width=160&height=160`,
+  status: "Vyzvednuto",
+  count: 1,
+  purchasedPiecesCount: 1,
+  brand: "Značka",
+  categorySegment1: "Audio-Video",
+  categorySegment2: "Sluchátka",
+  categorySegment3: null,
+  ...extra,
+});
+const archiveOrder = (id, created, items, extra = {}) => ({ orderId: String(id), created, state: "Vyřízena", totalPrice: "7 709 Kč", items, ...extra });
+
+test("parseArchivePage: zboží s adresou, značkou a kategorií; služby a zrušené položky pryč", () => {
+  const page = AlzaCore.parseArchivePage(
+    {
+      paging: { size: 1114 },
+      value: [
+        archiveOrder(1000000001, "2026-08-17T16:18:13.49Z", [
+          archiveItem(111, { count: 3, purchasedPiecesCount: 7 }), // purchasedPiecesCount = součet za všechny objednávky
+          { commodityName: "Doprava", status: "Vyzvednuto", count: 1 }, // služba bez adresy
+          archiveItem(222, { status: "Zrušeno" }),
+          archiveItem(333, { commodityUrl: "https://evil.example/zbozi-d333.htm" }),
+        ]),
+        archiveOrder(1000000002, "2026-08-01T10:00:00Z", [archiveItem(444)], { state: "Zrušena" }),
+        archiveOrder("x", "2026-08-01T10:00:00Z", [archiveItem(555)]), // špatné číslo objednávky
+      ],
+    },
+    "alza_cz"
+  );
+  assert.equal(page.total, 1114);
+  assert.equal(page.count, 3);
+  assert.equal(page.orders.length, 2);
+  assert.deepEqual(plain(page.orders[0]), {
+    id: "1000000001",
+    t: Date.parse("2026-08-17T16:18:13.49Z"),
+    total: 7709,
+    cancelled: false,
+    items: [{ key: "alza_cz_111", url: "https://www.alza.cz/zbozi-d111.htm", name: "Zboží 111", image: "https://image.alza.cz/products/AB111/AB111.jpg?width=160&height=160", brand: "Značka", cat: ["Audio-Video", "Sluchátka"], n: 3 }],
+  });
+  assert.equal(page.orders[1].cancelled, true);
+  assert.equal(AlzaCore.parseArchivePage({ value: "x" }, "alza_cz"), null);
+  assert.equal(AlzaCore.parseArchivePage(null, "alza_cz"), null);
+});
+
+test("mergeOwnedOrders: nákupy podle objednávek, opakované načtení nic nepřidá, zrušená objednávka nákup odebere", () => {
+  const owned = {};
+  const orders = {};
+  const parse = (value) => AlzaCore.parseArchivePage({ value }, "alza_cz").orders;
+  const first = parse([archiveOrder(2, "2026-05-01T10:00:00Z", [archiveItem(111), archiveItem(222)]), archiveOrder(1, "2025-01-01T10:00:00Z", [archiveItem(111, { commodityName: "Starý název" })])]);
+  assert.equal(AlzaCore.mergeOwnedOrders(owned, orders, first, "alza_cz"), 3);
+  assert.equal(AlzaCore.mergeOwnedOrders(owned, orders, first, "alza_cz"), 0);
+  assert.deepEqual(plain(owned.alza_cz_111.buys), [
+    { t: Date.parse("2025-01-01T10:00:00Z"), n: 1, o: "1" },
+    { t: Date.parse("2026-05-01T10:00:00Z"), n: 1, o: "2" },
+  ]);
+  assert.equal(owned.alza_cz_111.name, "Zboží 111"); // název z nejnovějšího nákupu
+  assert.equal(owned.alza_cz_111.domain, "alza_cz");
+  assert.deepEqual(plain(orders), { 1: [Date.parse("2025-01-01T10:00:00Z"), 7709], 2: [Date.parse("2026-05-01T10:00:00Z"), 7709] });
+  // Objednávka 2 zrušena dodatečně: zboží 222 zmizí, zboží 111 zůstane se starším nákupem
+  AlzaCore.mergeOwnedOrders(owned, orders, parse([archiveOrder(2, "2026-05-01T10:00:00Z", [archiveItem(111)], { state: "Zrušena" })]), "alza_cz");
+  assert.equal(owned.alza_cz_222, undefined);
+  assert.equal(owned.alza_cz_111.buys.length, 1);
+  assert.deepEqual(Object.keys(orders), ["1"]);
+});
+
+test("parseOwnedDetails + applyOwnedDetails: cena kusu, reklamace a vrácení z detailu objednávky", () => {
+  const detailItem = (id, price, extra = {}) => ({ ...archiveItem(id), pricePerItem: `${price} Kč/ks`, price: `${price} Kč`, onClaimItemGuideClick: { enabled: true }, warrantyClaimMessageBanners: [], ...extra });
+  const detail = {
+    created: "2026-05-01T10:00:00Z",
+    parts: [
+      {
+        created: "2026-05-01T10:00:00Z",
+        items: [
+          detailItem(111, "5 990"),
+          detailItem(222, "1 290", { onClaimItemGuideClick: { enabled: false }, warrantyClaimMessageBanners: [{ warrantyClaimIconUri: "https://cdn.alza.cz/Foto/ImgGalery/Icons/warrantyClaims/ReturnGoods.svg" }] }),
+          detailItem(333, "99", { warrantyClaimMessageBanners: [{ warrantyClaimIconUri: "https://cdn.alza.cz/Foto/ImgGalery/Icons/warrantyClaims/WarrantyClaim.svg" }] }),
+        ],
+      },
+    ],
+  };
+  const details = AlzaCore.parseOwnedDetails(detail, "alza_cz");
+  assert.deepEqual(plain(details), {
+    alza_cz_111: { p: 5990, claim: true, ret: false, rma: false, n: 1 },
+    alza_cz_222: { p: 1290, claim: false, ret: true, rma: false, n: 1 },
+    alza_cz_333: { p: 99, claim: true, ret: false, rma: false, n: 1 }, // kus z výměny po reklamaci – reklamovat jde dál
+  });
+  const owned = {
+    alza_cz_111: { domain: "alza_cz", buys: [{ t: 1, n: 1, o: "7" }, { t: 2, n: 1, o: "8" }] },
+    alza_cz_999: { domain: "alza_cz", buys: [{ t: 1, n: 1, o: "7" }] }, // v detailu chybí – jen čas načtení
+    alza_sk_111: { domain: "alza_sk", buys: [{ t: 1, n: 1, o: "7" }] },
+  };
+  AlzaCore.applyOwnedDetails(owned, "7", details, "alza_cz", 500);
+  assert.deepEqual(plain(owned.alza_cz_111.buys), [{ t: 1, n: 1, o: "7", claim: true, ret: false, p: 5990, at: 500, dv: 2 }, { t: 2, n: 1, o: "8" }]);
+  assert.deepEqual(plain(owned.alza_cz_999.buys), [{ t: 1, n: 1, o: "7", at: 500, dv: 2 }]);
+  assert.deepEqual(plain(owned.alza_sk_111.buys), [{ t: 1, n: 1, o: "7" }]);
+});
+
+test("parseOwnedDetails: dobropis vrácené zboží neopakuje, reklamace bez další možnosti reklamovat", () => {
+  const banner = (icon) => [{ warrantyClaimIconUri: `https://cdn.alza.cz/Foto/ImgGalery/Icons/warrantyClaims/${icon}.svg` }];
+  const item = (id, price, claim, banners = []) => ({ ...archiveItem(id), pricePerItem: `${price} Kč/ks`, price: `${price} Kč`, onClaimItemGuideClick: { enabled: claim }, warrantyClaimMessageBanners: banners });
+  const discount = { commodityId: null, commodityUrl: null, commodityName: "Sleva 15% k položce", count: 1, pricePerItem: "-54 Kč/ks", price: "-54 Kč", onClaimItemGuideClick: { enabled: false }, warrantyClaimMessageBanners: [] };
+  // Faktura: vrácené pouzdro (se slevou 15 %) a ponechané; dobropis opakuje vrácené pouzdro i jeho slevu
+  const detail = {
+    created: "2026-10-17T18:00:00Z",
+    parts: [
+      { created: "2026-10-17T18:00:00Z", partName: "Faktura 1", items: [item(111, 358, false, banner("ReturnGoods")), item(222, 382, true), discount] },
+      { created: "2026-10-17T18:00:00Z", partName: "Dobropis 2", items: [item(111, 358, false), discount] },
+    ],
+  };
+  assert.deepEqual(plain(AlzaCore.getOrderGoodsParts(detail, "alza_cz").map((part) => part.partName)), ["Faktura 1"]);
+  assert.deepEqual(plain(AlzaCore.parseOwnedDetails(detail, "alza_cz")), {
+    alza_cz_111: { p: 304, claim: false, ret: true, rma: false, n: 1 },
+    alza_cz_222: { p: 382, claim: true, ret: false, rma: false, n: 1 },
+  });
+  // Dobropis před fakturou, dva řádky téhož zboží (jeden vrácený) a reklamované zboží
+  const mixed = {
+    created: "2026-10-17T18:00:00Z",
+    parts: [
+      { created: "2026-10-17T18:00:00Z", items: [item(111, 100, false)] },
+      { created: "2026-10-17T18:00:00Z", items: [item(111, 100, false, banner("ReturnGoods")), item(111, 100, true), item(333, 500, false, banner("WarrantyClaim")), item(444, 90, false)] },
+    ],
+  };
+  assert.deepEqual(plain(AlzaCore.parseOwnedDetails(mixed, "alza_cz")), {
+    alza_cz_111: { p: 100, claim: true, ret: false, rma: false, n: 2 },
+    alza_cz_333: { p: 500, claim: false, ret: false, rma: true, n: 1 },
+    alza_cz_444: { p: 90, claim: false, ret: false, rma: false, n: 1 }, // licence apod. – reklamovat nejde
+  });
+  // Reklamace vyřízená dobropisem (náhradní kus přišel jinou objednávkou): ikona vrácení, ale číslo případu není vratka
+  const series = (icon, name) => [{ warrantyClaimIconUri: `https://cdn.alza.cz/Foto/ImgGalery/Icons/warrantyClaims/${icon}.svg`, message: { actions: { warrantyClaimDetail: { name } } } }];
+  const replaced = {
+    created: "2026-08-31T10:00:00Z",
+    parts: [
+      { created: "2026-08-31T10:00:00Z", items: [item(666, 99988, false, series("ReturnGoods", "ASKU262000001")), item(777, 500, false, series("ReturnGoods", "AVRA262000002")), item(888, 300, false, series("WarrantyClaim", "ASRE262000003"))] },
+      { created: "2026-08-31T10:00:00Z", items: [item(666, 99988, false), item(888, 300, false)] },
+    ],
+  };
+  assert.deepEqual(plain(AlzaCore.parseOwnedDetails(replaced, "alza_cz")), {
+    alza_cz_666: { p: 99988, claim: false, ret: true, rma: true, n: 1 },
+    alza_cz_777: { p: 500, claim: false, ret: true, rma: false, n: 1 }, // vratka
+    alza_cz_888: { p: 300, claim: false, ret: true, rma: true, n: 1 }, // reklamace s dobropisem – peníze zpět
+  });
+  // Zaplacená objednávka vrácená bez převzetí: faktura i účetní dobropis bez banneru, reklamovat nejde nikde
+  const refunded = { created: "2026-10-09T10:00:00Z", parts: [{ created: "2026-10-09T10:00:00Z", items: [item(555, 91, false, [])] }, { created: "2026-10-09T10:00:00Z", items: [item(555, 91, false, [])] }] };
+  assert.deepEqual(plain(AlzaCore.parseOwnedDetails(refunded, "alza_cz")), { alza_cz_555: { p: 91, claim: false, ret: true, rma: false, n: 1, guess: true } });
+  const owned = { alza_cz_333: { domain: "alza_cz", buys: [{ t: 1, n: 4, o: "7" }] } }; // počet z archivu přepíše počet z detailu
+  AlzaCore.applyOwnedDetails(owned, "7", AlzaCore.parseOwnedDetails(mixed, "alza_cz"), "alza_cz", 500);
+  assert.deepEqual(plain(owned.alza_cz_333.buys), [{ t: 1, n: 1, o: "7", claim: false, ret: false, p: 500, rma: true, at: 500, dv: 2 }]);
+  // Další načtení už reklamaci nehlásí (vyřízeno výměnou, zboží jde zase reklamovat)
+  AlzaCore.applyOwnedDetails(owned, "7", { alza_cz_333: { p: 500, claim: true, ret: false, rma: false, n: 1 } }, "alza_cz", 600);
+  assert.deepEqual(plain(owned.alza_cz_333.buys), [{ t: 1, n: 1, o: "7", claim: true, ret: false, p: 500, at: 600, dv: 2 }]);
+});
+
+test("addMonths + getWarrantyState: v záruce, končí, po záruce, delší záruka, vráceno, nelze reklamovat", () => {
+  const at = (year, month, day) => new Date(year, month - 1, day, 12).getTime();
+  assert.equal(AlzaCore.addMonths(at(2024, 11, 16), 24), at(2026, 11, 16));
+  assert.equal(AlzaCore.addMonths(at(2024, 8, 31), 6), at(2025, 2, 28)); // únor nemá 31.
+  assert.equal(AlzaCore.addMonths(at(2026, 1, 15), -25), at(2023, 12, 15));
+  const now = at(2026, 11, 11);
+  const state = (buy) => AlzaCore.getWarrantyState(buy, now).state;
+  assert.equal(state({ t: at(2025, 6, 1) }), "active");
+  assert.deepEqual(plain(AlzaCore.getWarrantyState({ t: at(2024, 11, 16) }, now)), { state: "ending", until: at(2026, 11, 16), daysLeft: 5 });
+  assert.equal(state({ t: at(2024, 11, 5) }), "expired");
+  assert.equal(state({ t: at(2024, 11, 5), claim: true, at: at(2026, 11, 10) }), "extended"); // ověřeno po konci běžné záruky
+  assert.equal(state({ t: at(2024, 11, 5), claim: true, at: at(2026, 1, 1) }), "expired"); // ověřeno ještě v záruce – nic neříká
+  assert.equal(state({ t: at(2025, 6, 1), ret: true, claim: false, at: now }), "returned");
+  assert.equal(state({ t: at(2025, 6, 1), rma: true, claim: false, at: now }), "claimed");
+  assert.equal(state({ t: at(2025, 6, 1), rma: true, ret: true, claim: false, at: now }), "claimed"); // reklamace vyřízená vrácením
+  assert.equal(state({ t: at(2025, 6, 1), claim: false, at: now }), "none");
+});
+
+test("getOwnedDetailQueue: detaily jen nedávných objednávek, nejdřív končící záruky; po konci záruky jedno ověření", () => {
+  const at = (year, month, day) => new Date(year, month - 1, day, 12).getTime();
+  const now = at(2026, 11, 11);
+  const owned = {
+    a: { domain: "alza_cz", buys: [{ t: at(2026, 10, 1), n: 1, o: "nova" }] },
+    b: { domain: "alza_cz", buys: [{ t: at(2024, 12, 1), n: 1, o: "konci" }, { t: at(2026, 9, 1), n: 1, o: "starsi" }] },
+    c: { domain: "alza_cz", buys: [{ t: at(2020, 1, 1), n: 1, o: "davna" }] },
+    d: { domain: "alza_cz", buys: [{ t: at(2026, 10, 5), n: 1, o: "hotova", at: now, dv: 2 }] },
+    e: { domain: "alza_cz", buys: [{ t: at(2024, 11, 1), n: 1, o: "poZaruce", at: at(2026, 1, 1), claim: true }] },
+    f: { domain: "alza_cz", buys: [{ t: at(2024, 10, 20), n: 1, o: "overena", at: at(2026, 11, 1), claim: false, dv: 2 }] },
+    g: { domain: "alza_sk", buys: [{ t: at(2026, 10, 1), n: 1, o: "jinaDomena" }] },
+    // Detail načtený starší verzí čtení se načte znovu, aktuální verzí už ne
+    h: { domain: "alza_cz", buys: [{ t: at(2026, 8, 1), n: 1, o: "staraVerze", at: now, claim: true }, { t: at(2026, 7, 1), n: 1, o: "novaVerze", at: now, claim: false, dv: 2 }] },
+  };
+  assert.deepEqual(plain(AlzaCore.getOwnedDetailQueue(owned, "alza_cz", now)), ["konci", "poZaruce", "nova", "starsi", "staraVerze"]);
+});
+
+test("getWarrantyReminders: jen dražší zboží s načteným detailem, které jde reklamovat, a jen jednou", () => {
+  const at = (year, month, day) => new Date(year, month - 1, day, 12).getTime();
+  const now = at(2026, 11, 11);
+  const ending = at(2024, 11, 20);
+  const owned = {
+    drahe: { domain: "alza_cz", name: "Sluchátka", buys: [{ t: ending, n: 1, o: "1", p: 5990, claim: true, at: now }] },
+    levne: { domain: "alza_cz", buys: [{ t: ending, n: 1, o: "2", p: 57, claim: true, at: now }] },
+    bezDetailu: { domain: "alza_cz", buys: [{ t: ending, n: 1, o: "3" }] },
+    ohlasene: { domain: "alza_cz", buys: [{ t: ending, n: 1, o: "4", p: 9990, claim: true, at: now, notified: true }] },
+    vracene: { domain: "alza_cz", buys: [{ t: ending, n: 1, o: "5", p: 9990, claim: false, ret: true, at: now }] },
+    vZaruce: { domain: "alza_cz", buys: [{ t: at(2025, 6, 1), n: 1, o: "6", p: 9990, claim: true, at: now }] },
+    eura: { domain: "alza_sk", buys: [{ t: at(2024, 11, 14), n: 1, o: "7", p: 45, claim: true, at: now }] },
+  };
+  const reminders = AlzaCore.getWarrantyReminders(owned, now);
+  assert.deepEqual(plain(reminders.map(({ key }) => key)), ["eura", "drahe"]); // nejdřív dřívější konec
+  assert.equal(reminders[1].daysLeft, 9);
 });

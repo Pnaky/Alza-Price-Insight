@@ -139,7 +139,14 @@ Object.assign(AlzaPriceTracker, {
           await this.addToCartWithCode(withCode.item, withCode.code);
           this.showCartAdded(box, header, list, actions, withCode.code, close);
         } catch (error) {
-          console.error("Alza Price Tracker – vložení do košíku s kódem:", error);
+          // Do konzole jen stav odpovědi – Message Alzy může obsahovat kód
+          console.error("Alza Price Tracker – vložení do košíku s kódem:", error?.logInfo || error?.name || "Error");
+          // Nejasný výsledek (požadavek odešel, odpověď nečekaná) – zboží možná v košíku je, opakování by ho
+          // mohlo vložit dvakrát. Místo „zkusit znovu“ odkaz do košíku
+          if (error?.ambiguous) {
+            this.showCartUncertain(box, header, list, actions, withCode.code, close);
+            return;
+          }
           list.after(this.createEl("div", "alza-price-tracker-cart-warning-error", this.translate("cartAddFailed", error.message)));
           proceedButton.textContent = this.translate("cartWithCode");
           proceedButton.disabled = closeButton.disabled = false;
@@ -172,11 +179,13 @@ Object.assign(AlzaPriceTracker, {
   },
 
   // Vloží položku seznamu do košíku i se slevovým kódem – stejný požadavek jako tlačítko „Koupit s kódem“ na
-  // detailu produktu (Alza z kódu udělá v košíku slevový poukaz). Počet kusů podle seznamu. Chyba → výjimka
+  // detailu produktu (Alza z kódu udělá v košíku slevový poukaz). Počet kusů podle seznamu. Chyba → výjimka:
+  // message = text pro upozornění, logInfo = stav bez textu Alzy (do konzole), ambiguous = možná se vložilo
   async addToCartWithCode(item, code) {
+    const fail = (message, logInfo, ambiguous) => Object.assign(new Error(message), { logInfo, ambiguous });
     const href = item.querySelector(this.selectors.productLink)?.href || "";
     const id = Number(AlzaCore.getProductId(href));
-    if (!id) throw new Error("?");
+    if (!id) throw fail("?", "no product id", false);
     const count = parseInt(item.querySelector(this.selectors.quantityInput)?.value, 10) || 1;
     const body = {
       id,
@@ -201,16 +210,25 @@ Object.assign(AlzaPriceTracker, {
     };
     // Firefox: content.fetch posílá požadavek jako stránka Alzy (původ, cookies); Chrome to dělá i obyčejný fetch
     const pageFetch = typeof content !== "undefined" && typeof content?.fetch === "function" ? content.fetch.bind(content) : fetch;
-    const response = await pageFetch(`${window.location.origin}/Services/EShopService.svc/OrderCommodity`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json; charset=UTF-8", Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
-      body: JSON.stringify(body),
-    });
-    const result = (await response.json().catch(() => null))?.d;
-    if (!response.ok || !result || result.ErrorLevel > 0 || !(result.Id || result.ItemsCount)) {
-      throw new Error(result?.Message || `HTTP ${response.status}`);
+    let response;
+    try {
+      response = await pageFetch(`${window.location.origin}/Services/EShopService.svc/OrderCommodity`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json; charset=UTF-8", Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify(body),
+      });
+    } catch {
+      // Výpadek spojení – požadavek mohl dorazit a zboží se vložit
+      throw fail("network", "network error", true);
     }
+    const result = (await response.json().catch(() => null))?.d;
+    const status = `HTTP ${response.status}${typeof result?.ErrorLevel === "number" ? `, ErrorLevel ${result.ErrorLevel}` : ""}`;
+    // Alza vložení odmítla (chyba serveru, neplatný kód…) – nic se nevložilo, jde zkusit bez kódu
+    if (!response.ok) throw fail(`HTTP ${response.status}`, status, false);
+    if (result?.ErrorLevel > 0) throw fail(result.Message || status, status, false);
+    // Úspěšná odpověď bez očekávaného obsahu – nevíme, jestli se vložilo
+    if (!result || !(result.Id || result.ItemsCount)) throw fail(status, status, true);
     return result;
   },
 
@@ -225,6 +243,20 @@ Object.assign(AlzaPriceTracker, {
     closeButton.type = "button";
     closeButton.addEventListener("click", close);
     const cartLink = this.createEl("a", "alza-price-tracker-cart-warning-proceed", this.translate("cartGoToCart"));
+    cartLink.href = `${window.location.origin}/Order1.htm`;
+    actions.replaceChildren(closeButton, cartLink);
+    box.querySelector(".alza-price-tracker-cart-warning-error")?.remove();
+    cartLink.focus();
+  },
+
+  // Nejasný výsledek vložení s kódem: bez tlačítek, která by vložila znovu (s kódem i bez) – jen odkaz do košíku
+  showCartUncertain(box, header, list, actions, code, close) {
+    header.querySelector(".alza-price-tracker-cart-warning-title").textContent = this.translate("cartAddUncertainTitle");
+    list.replaceChildren(this.createEl("li", "alza-price-tracker-cart-warning-item", this.translate("cartAddUncertain", code)));
+    const closeButton = this.createEl("button", "alza-price-tracker-cart-warning-close", this.translate("cartWarningClose"));
+    closeButton.type = "button";
+    closeButton.addEventListener("click", close);
+    const cartLink = this.createEl("a", "alza-price-tracker-cart-warning-proceed", this.translate("cartCheckCart"));
     cartLink.href = `${window.location.origin}/Order1.htm`;
     actions.replaceChildren(closeButton, cartLink);
     box.querySelector(".alza-price-tracker-cart-warning-error")?.remove();

@@ -17,11 +17,23 @@ Object.assign(AlzaPriceTracker, {
     if (this.state.priceCardsReady) return;
     this.state.priceCardsReady = true;
     document.addEventListener("mouseover", (event) => {
+      // Prvek karty React mezitím odstranil (mouseleave už nepřijde) – karta by zůstala viset
+      if (this.state.priceCard && !this.state.priceCard.anchor.isConnected) this.hidePriceCard();
       const anchor = event.target.closest?.(this.tooltipSelector);
       if (anchor && !anchor.closest(this.tooltipIgnore)) this.showPriceCard(anchor);
     });
-    // Karta má pevnou polohu vůči oknu – při posunu stránky by ujela od prvku
-    window.addEventListener("scroll", () => this.hidePriceCard(), { passive: true, capture: true });
+    // Karta má pevnou polohu vůči oknu – při posunu stránky by ujela od prvku. Posun jiného bloku (karusel,
+    // seznam v panelu, karta sama) prvek neposune – jen posun stránky nebo bloku, ve kterém prvek je
+    window.addEventListener(
+      "scroll",
+      (event) => {
+        const anchor = this.state.priceCard?.anchor;
+        if (!anchor) return;
+        const target = event.target;
+        if (target === document || target === window || target === document.documentElement || target.contains?.(anchor)) this.hidePriceCard();
+      },
+      { passive: true, capture: true }
+    );
   },
 
   showPriceCard(price) {
@@ -33,6 +45,9 @@ Object.assign(AlzaPriceTracker, {
     let text = price.title || "";
     const code = price.dataset.code || null;
     if (!text && !code) return;
+    // Po dobu zobrazení je title v data atributu – appendTitle / showQuantityTotal pak doplní skutečný text
+    // (getTitle), ne prázdný
+    price.dataset.alzaPriceTrackerTitle = text;
     price.removeAttribute("title");
 
     const isPrice = price.matches(".alza-price-tracker-price");
@@ -86,8 +101,9 @@ Object.assign(AlzaPriceTracker, {
     // vedle karty vyskakoval i systémový tooltip a při pohybu myši mizel a objevoval se. Nový text si karta
     // vezme a title hned zase schová
     const titleWatch = new MutationObserver(() => {
-      if (!price.title) return;
+      if (!price.hasAttribute("title")) return;
       text = price.title;
+      price.dataset.alzaPriceTrackerTitle = text;
       price.removeAttribute("title");
     });
     titleWatch.observe(price, { attributes: true, attributeFilter: ["title"] });
@@ -99,6 +115,7 @@ Object.assign(AlzaPriceTracker, {
         price.removeEventListener("mouseleave", scheduleHide);
         titleWatch.disconnect();
         resizeWatch.disconnect();
+        delete price.dataset.alzaPriceTrackerTitle;
         if (text && !price.title) price.title = text;
       },
     };
@@ -179,11 +196,23 @@ Object.assign(AlzaPriceTracker, {
     const key = AlzaCore.getCashbackTermsKey(url, title);
     this.state.cashbackTerms ??= new Map();
     if (!this.state.cashbackTerms.has(key)) {
-      const request = Promise.resolve(chrome.runtime.sendMessage({ action: "cashbackTerms", url, title }))
+      // Osiřelá záložka (po aktualizaci rozšíření) – chrome.runtime hází výjimku
+      let sent;
+      try {
+        sent = AlzaCore.isContextAlive() ? Promise.resolve(chrome.runtime.sendMessage({ action: "cashbackTerms", url, title })) : Promise.resolve(null);
+      } catch {
+        sent = Promise.resolve(null);
+      }
+      const request = sent
         .catch(() => null)
         .then((terms) => {
-          this.state.cashbackTermsDone ??= new Map();
-          this.state.cashbackTermsDone.set(key, terms);
+          // Nezdar (null) se nepamatuje – další najetí myší se zeptá znovu
+          if (terms) {
+            this.state.cashbackTermsDone ??= new Map();
+            this.state.cashbackTermsDone.set(key, terms);
+          } else {
+            this.state.cashbackTerms.delete(key);
+          }
           return terms;
         });
       this.state.cashbackTerms.set(key, request);

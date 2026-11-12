@@ -19,6 +19,9 @@
         --ok: #2e7d32;
         --todo: #c62828;
         --info: #8a8a8a;
+        --alza-green: #5ed312; /* Tlačítko Do košíku na Alze – nové volby */
+        --alza-green-text: #398000; /* „Skladem“ na Alze – zelená, která je čitelná / kontrastní na bílé */
+        --new-bg: #f2fbea;
       }
 
       * {
@@ -381,6 +384,76 @@
         font-size: 13px;
       }
 
+      /* Druhý řádek volby (cena elektřiny pod cenou provozu) */
+      .option-row.sub {
+        margin-top: 10px;
+      }
+
+      .option-row.sub .option-label {
+        font-weight: 500;
+      }
+
+      /* Nová volba (vydání v AlzaCore.releases): zelená Alzy jako tlačítko Do košíku – pruh vlevo, světlé pozadí
+         a štítek Nové. Karta je bílá i v tmavém režimu (page.css), barvy proto platí v obou */
+      .option.is-new {
+        margin: 6px 0;
+        padding: 14px 16px 14px 14px;
+        border-top: 0;
+        border-left: 4px solid var(--alza-green);
+        border-radius: 10px;
+        background: var(--new-bg);
+      }
+
+      .new-badge {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--alza-green);
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        vertical-align: 2px;
+      }
+
+      .option.is-new .switch:checked {
+        background: var(--alza-green-text);
+      }
+
+      /* Novinky: odrážky po vydáních */
+      .release {
+        margin: 0 0 18px;
+      }
+
+      .release h3 {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .release ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .release li {
+        margin: 5px 0;
+        font-size: 14px;
+      }
+
+      #newsSettings h2 {
+        margin-top: 24px;
+      }
+
+      #newsOptions {
+        margin-top: 10px;
+      }
+
       select,
       input[type="time"],
       input[type="number"] {
@@ -570,7 +643,7 @@
 
         <!-- Krok 1: ověření na pozadí -->
         <section data-screen="check" hidden>
-          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepCategories"></span><span data-w="stepNotify"></span></div>
           <div class="step-of" data-step-of="1"></div>
           <h2 tabindex="-1" data-w="checkTitle"></h2>
           <div class="pick-title" id="pickTitle" data-w="pickTitle"></div>
@@ -599,7 +672,7 @@
 
         <!-- Krok 2: co a jak často hlídat -->
         <section data-screen="watch" hidden>
-          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepCategories"></span><span data-w="stepNotify"></span></div>
           <div class="step-of" data-step-of="2"></div>
           <h2 tabindex="-1" data-w="watchTitle"></h2>
           <p class="lead" data-w="watchLead"></p>
@@ -633,30 +706,94 @@
           </div>
           <div class="option">
             <div class="option-row">
+              <span class="option-label" data-o="watchPurchases"></span>
+              <input type="checkbox" class="switch" name="watchPurchases" />
+            </div>
+            <p class="option-help" data-w="watchPurchasesHelp"></p>
+          </div>
+          <div class="option">
+            <div class="option-row">
+              <span class="option-label" data-o="remindCashback"></span>
+              <span class="controls" data-needs="watchPurchases"><input type="checkbox" class="switch" name="remindCashback" /></span>
+            </div>
+            <p class="option-help" data-w="remindCashbackHelp"></p>
+          </div>
+          <div class="option" data-setting="ownedItems">
+            <div class="option-row">
+              <span class="option-label" data-o="ownedItems"></span>
+              <input type="checkbox" class="switch" name="ownedItems" />
+            </div>
+            <p class="option-help" data-o="ownedItemsTip"></p>
+          </div>
+          <div class="option" data-setting="remindWarranty">
+            <div class="option-row">
+              <span class="option-label" data-o="remindWarranty"></span>
+              <span class="controls" data-needs="ownedItems"><input type="checkbox" class="switch" name="remindWarranty" /></span>
+            </div>
+            <p class="option-help" data-o="remindWarrantyTip"></p>
+          </div>
+          <div class="nav">
+            <button type="button" data-go="check" data-w="back">← Zpět</button>
+            <span class="saved" data-saved role="status"></span>
+            <span class="spacer"></span>
+            <button type="button" class="primary" data-go="categories" data-w="next">Pokračovat →</button>
+          </div>
+        </section>
+
+        <!-- Krok 3: výpisy kategorií -->
+        <section data-screen="categories" hidden>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepCategories"></span><span data-w="stepNotify"></span></div>
+          <div class="step-of" data-step-of="3"></div>
+          <h2 tabindex="-1" data-w="categoriesTitle"></h2>
+          <p class="lead" data-w="categoriesLead"></p>
+          <div class="option" data-setting="categoryUnitPrice">
+            <div class="option-row">
               <span class="option-label" data-o="unitPrice"></span>
               <input type="checkbox" class="switch" name="categoryUnitPrice" />
             </div>
             <p class="option-help" data-o="unitPriceTip"></p>
           </div>
+          <div class="option" data-setting="categoryDiscountFilter">
+            <div class="option-row">
+              <span class="option-label" data-o="discountFilter"></span>
+              <input type="checkbox" class="switch" name="categoryDiscountFilter" />
+            </div>
+            <p class="option-help" data-o="discountFilterTip"></p>
+          </div>
+          <!-- Cena elektřiny v měně hlavní Alzy: políčko dostane název nastavení pro tuto měnu (energyPriceCZK…) – welcome.js -->
+          <div class="option" data-setting="energyCost">
+            <div class="option-row">
+              <span class="option-label" data-o="energyCost"></span>
+              <input type="checkbox" class="switch" name="energyCost" />
+            </div>
+            <p class="option-help" data-o="energyCostTip"></p>
+            <div class="option-row sub">
+              <span class="option-label" data-o="energyPrice"></span>
+              <span class="controls" data-needs="energyCost"
+                ><input type="number" data-energy-price min="0.01" max="99999" step="0.01" /> <span data-energy-unit>Kč/kWh</span></span
+              >
+            </div>
+            <p class="option-help" data-o="energyPriceTip"></p>
+          </div>
           <div class="nav">
-            <button type="button" data-go="check" data-w="back">← Zpět</button>
+            <button type="button" data-go="watch" data-w="back">← Zpět</button>
             <span class="saved" data-saved role="status"></span>
             <span class="spacer"></span>
             <button type="button" class="primary" data-go="notify" data-w="next">Pokračovat →</button>
           </div>
         </section>
 
-        <!-- Krok 3: notifikace -->
+        <!-- Krok 4: notifikace -->
         <section data-screen="notify" hidden>
-          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepNotify"></span></div>
-          <div class="step-of" data-step-of="3"></div>
+          <div class="steps"><span data-w="stepCheck"></span><span data-w="stepWatch"></span><span data-w="stepCategories"></span><span data-w="stepNotify"></span></div>
+          <div class="step-of" data-step-of="4"></div>
           <h2 tabindex="-1" data-w="notifyTitle"></h2>
           <p class="lead" data-w="notifyLead"></p>
           <div class="option">
             <div class="option-row">
               <span class="option-label" data-o="drops"></span>
               <span class="controls">
-                <span class="controls" id="dropRow"><span data-o="dropFrom"></span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span>
+                <span class="controls" data-needs="notifyDrops"><span data-o="dropFrom"></span> <input type="number" name="minDropPercent" min="0" max="99" step="1" /> %</span>
                 <input type="checkbox" class="switch" name="notifyDrops" />
               </span>
             </div>
@@ -684,7 +821,7 @@
             <div class="option-row">
               <span class="option-label" data-o="quietHours"></span>
               <span class="controls">
-                <span class="controls" id="quietRow"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
+                <span class="controls" data-needs="quietHours"><input type="time" name="quietFrom" />–<input type="time" name="quietTo" /></span>
                 <input type="checkbox" class="switch" name="quietHours" />
               </span>
             </div>
@@ -695,10 +832,29 @@
             <p class="option-help" data-o="testNotificationsTitle"></p>
           </div>
           <div class="nav">
-            <button type="button" data-go="watch" data-w="back">← Zpět</button>
+            <button type="button" data-go="categories" data-w="back">← Zpět</button>
             <span class="saved" data-saved role="status"></span>
             <span class="spacer"></span>
             <button type="button" class="primary" data-go="done" data-w="finish">Dokončit ✓</button>
+          </div>
+        </section>
+
+        <!-- Novinky po aktualizaci (background.js otevře #news u vydání s novou volbou; ručně z popupu a nastavení).
+             Odrážky z RELEASE_NEWS, nové volby jsou kopie voleb z kroků výše (welcome.js renderNews) -->
+        <section data-screen="news" hidden>
+          <h1 tabindex="-1" data-w="newsTitle"></h1>
+          <p class="lead" id="newsLead"></p>
+          <div id="newsReleases"></div>
+          <div id="newsSettings" hidden>
+            <h2 data-w="newsSettingsTitle"></h2>
+            <p class="option-help" data-w="newsSettingsLead"></p>
+            <div id="newsOptions"></div>
+          </div>
+          <div class="nav">
+            <button type="button" data-go="check" data-w="newsAll"></button>
+            <span class="saved" data-saved role="status"></span>
+            <span class="spacer"></span>
+            <button type="button" class="primary" id="newsClose" data-w="newsClose"></button>
           </div>
         </section>
 

@@ -1,9 +1,13 @@
 // Průvodce nastavením – otevře se po instalaci (background.js), znovu z nastavení. Úvod (od kdy se ceny ukládají a za
 // jakých podmínek), krok 1 ověří na pozadí přihlášení, ceny s DPH, notifikace a ikonu na liště (checklist s nápovědou),
-// kroky 2 a 3 nastaví hlídání a notifikace (stejné volby jako v nastavení), na konci odkaz na Alzu a stav hlídání.
+// kroky 2–4 nastaví hlídání (i po nákupu a Moje nákupy – čtení objednávek z Alzy), výpisy kategorií a notifikace
+// (stejné volby jako v nastavení), na konci odkaz na Alzu a stav hlídání.
+// #news = novinky po aktualizaci (background.js, popup, nastavení): odrážky vydání (RELEASE_NEWS) a nové volby
+// (AlzaCore.releases) – kopie voleb z kroků, zvýrazněné zeleně i v krocích, dokud je uživatel neviděl.
 const { settings: SETTINGS_KEY, watchLists: WATCH_LISTS_KEY, watchProducts: WATCH_PRODUCTS_KEY, targets: TARGETS_KEY } = AlzaCore.storageKeys;
-const SCREENS = ["intro", "check", "watch", "notify", "done"];
-const STEP_SCREENS = ["check", "watch", "notify"];
+const SCREENS = ["intro", "check", "watch", "categories", "notify", "done", "news"];
+const STEP_SCREENS = ["check", "watch", "categories", "notify"];
+const NEWS_KEY = AlzaCore.storageKeys.news;
 const DICTIONARY_LANG = { cs: "cz", sk: "sk", hu: "hu", en: "en" };
 const PAGE_TIMEOUT_MS = 20000;
 
@@ -14,6 +18,9 @@ let lastCheck = null; // Výsledek posledního ověření – při návratu do z
 let checking = false;
 let recheck = false; // Během ověřování se změnila hlavní Alza – po doběhnutí ověřit znovu
 let savedTimeoutId = null;
+let currentScreen = "intro"; // Zobrazená obrazovka (show) – podle ní titulek záložky a podtitul
+let newsReleases = []; // Vydání na stránce novinek: neviděná, jinak nejnovější
+let newSettings = new Set(); // Nové volby zvýrazněné zeleně (štítek Nové)
 
 // === Texty ===
 // data-w = text průvodce (WELCOME_TEXTS), data-o = text ze stránky nastavení (OPTIONS_TEXTS – popisky a nápovědy voleb)
@@ -34,6 +41,7 @@ const WELCOME_ICONS = {
   watchHowTarget: "target",
   openHelp: "help",
   openSettings: "settings",
+  newsAll: "settings",
   testNotifications: "bell",
 };
 
@@ -48,7 +56,7 @@ function applyTexts() {
   document.querySelectorAll("[data-o]").forEach((element) => setText(element, element.dataset.o, o(element.dataset.o)));
   AlzaIcons.decorate(document.querySelector(".app-header"));
   document.querySelectorAll("[data-step-of]").forEach((element) => (element.textContent = t("stepOf", element.dataset.stepOf)));
-  document.title = t("pageTitle");
+  renderHeader();
   // „Jazyk rozšíření“ jako v nastavení – bublina u ikony glóbu a název výběru pro čtečky
   document.getElementById("languageLabel").title = o("uiLanguage");
   document.getElementById("language").setAttribute("aria-label", o("uiLanguage"));
@@ -57,6 +65,8 @@ function applyTexts() {
   else resetChecks();
   renderDomainPick();
   renderOpenAlza();
+  renderNewsTexts();
+  markNew();
   renderWatching().catch(logError);
 }
 
@@ -64,8 +74,17 @@ const logError = (error) => console.error("Průvodce nastavením:", error);
 
 // === Obrazovky ===
 
+// Titulek záložky a podtitul v záhlaví podle obrazovky – novinky po aktualizaci nejsou „Vítejte“ ani průvodce
+function renderHeader() {
+  const news = currentScreen === "news";
+  document.title = t(news ? "newsPageTitle" : "pageTitle");
+  document.querySelector(".app-header .app-sub").textContent = t(news ? "newsSubtitle" : "subtitle");
+}
+
 function show(screen) {
   if (!SCREENS.includes(screen)) screen = "intro";
+  currentScreen = screen;
+  renderHeader();
   document.querySelectorAll("[data-screen]").forEach((section) => (section.hidden = section.dataset.screen !== screen));
   const index = STEP_SCREENS.indexOf(screen);
   document.querySelectorAll(`[data-screen="${screen}"] .steps span`).forEach((span, i) => {
@@ -77,6 +96,7 @@ function show(screen) {
   // Fokus na nadpis – tlačítko, které obrazovku přeplo, je teď skryté (klávesnice a čtečky by spadly na začátek)
   document.querySelector(`[data-screen="${screen}"] :is(h1, h2)`)?.focus({ preventScroll: true });
   if (screen === "done") renderWatching().catch(logError);
+  if (screen === "news") markNewsSeen();
 }
 
 document.addEventListener("click", (event) => {
@@ -248,17 +268,29 @@ function renderChecks({ domain, notifications, pinned }) {
   renderOpenAlza();
 }
 
-// === Volby (kroky 2 a 3) – každá změna se hned uloží ===
+// === Volby (kroky 2–4 a novinky) – každá změna se hned uloží ===
 
+// Ovládání, které potřebuje jinou volbu (data-needs = její název): připomínka cashbacku objednávky, připomínka záruky
+// Moje nákupy, cena elektřiny cenu provozu… Volba může být na stránce dvakrát (kopie v novinkách) – stačí první
 function updateDependentRows() {
-  const toggle = (rowId, enabled) => {
-    const row = document.getElementById(rowId);
+  form.querySelectorAll("[data-needs]").forEach((row) => {
+    const enabled = Boolean(form.querySelector(`[name="${row.dataset.needs}"]`)?.checked);
     row.classList.toggle("disabled", !enabled);
     row.querySelectorAll("input").forEach((input) => (input.disabled = !enabled));
-  };
-  toggle("dropRow", form.querySelector('[name="notifyDrops"]').checked);
-  toggle("quietRow", form.querySelector('[name="quietHours"]').checked);
-  form.querySelector('[name="checkTime"]').hidden = form.querySelector('[name="checkSchedule"]').value !== "daily";
+  });
+  const daily = form.querySelector('[name="checkSchedule"]').value === "daily";
+  form.querySelectorAll('[name="checkTime"]').forEach((input) => (input.hidden = !daily));
+}
+
+// Cena elektřiny se zadává v měně hlavní Alzy – políčko dostane název nastavení pro tuto měnu (energyPriceCZK…),
+// ostatní měny si nechají svou hodnotu (stejně jako v nastavení)
+function updateEnergyFields(settings) {
+  const { currency } = AlzaCore.domains[primaryDomain];
+  form.querySelectorAll("[data-energy-price]").forEach((input) => {
+    input.name = AlzaCore.energyPriceKeys[currency];
+    input.value = AlzaCore.getEnergyPrice(settings, primaryDomain);
+  });
+  form.querySelectorAll("[data-energy-unit]").forEach((unit) => (unit.textContent = `${currency}/kWh`));
 }
 
 async function loadSettings() {
@@ -272,15 +304,22 @@ async function loadSettings() {
     if (input.type === "checkbox") input.checked = Boolean(value);
     else input.value = value ?? "";
   });
+  updateEnergyFields(settings);
   updateDependentRows();
   applyTexts();
 }
 
+// Hodnota políčka k uložení; null = neplatná (uložená zůstane)
 function readValue(input) {
   if (input.type === "checkbox") return input.checked;
   if (input.name === "minDropPercent") {
     const percent = Math.round(Number(input.value));
     return Number.isFinite(percent) ? Math.min(99, Math.max(0, percent)) : 0;
+  }
+  // Cena elektřiny: stejný rozsah jako v nastavení a u importu zálohy (OptionsData.SETTING_RANGES)
+  if (input.hasAttribute("data-energy-price")) {
+    const price = Number(input.value);
+    return input.value !== "" && price >= 0.01 && price <= 99999 ? price : null;
   }
   return input.value || AlzaCore.defaultSettings[input.name];
 }
@@ -294,23 +333,41 @@ function showSaved(source, text, error = false) {
   savedTimeoutId = setTimeout(() => (info.textContent = ""), 2000);
 }
 
+// true = uloženo
 async function saveSetting(input) {
   const value = readValue(input);
-  if (input.name === "minDropPercent") input.value = value;
+  if (value === null) {
+    updateEnergyFields(await AlzaCore.getSettings()); // Neplatná cena elektřiny – vrátit uloženou
+    return false;
+  }
+  if (input.name === "minDropPercent") form.querySelectorAll('[name="minDropPercent"]').forEach((other) => (other.value = value));
   try {
     await AlzaStore.run({ type: "assign", key: SETTINGS_KEY, values: { [input.name]: value } });
     showSaved(input, t("saved"));
+    return true;
   } catch (error) {
     logError(error);
     showSaved(input, t("saveFailed"), true);
+    return false;
   }
 }
 
 form.addEventListener("change", (event) => {
   const input = event.target.closest("[name]");
   if (!input) return;
+  // Stejná volba v kroku i v novinkách – obě kopie ukazují totéž
+  form.querySelectorAll(`[name="${input.name}"]`).forEach((other) => {
+    if (other === input) return;
+    if (other.type === "checkbox") other.checked = input.checked;
+    else other.value = input.value;
+  });
   updateDependentRows();
-  saveSetting(input);
+  const turnedOnOwned = input.name === "ownedItems" && input.checked;
+  saveSetting(input).then((saved) => {
+    // Zapnuté Moje nákupy načíst hned (jako v nastavení), ne až po příští kontrole na pozadí – až po uložení volby,
+    // jinak by služba na pozadí viděla „vypnuto“. Odpověď (výsledek načítání) nečekáme
+    if (saved && turnedOnOwned) chrome.runtime.sendMessage({ action: "ownedSync" }).catch(() => {});
+  });
 });
 
 document.getElementById("language").addEventListener("change", async (event) => {
@@ -324,6 +381,7 @@ document.getElementById("language").addEventListener("change", async (event) => 
   }
   uiLanguage = AlzaCore.getUiLanguage({ ...settings, uiLanguage: value });
   primaryDomain = AlzaCore.getPrimaryDomain({ ...settings, uiLanguage: value }); // „automaticky“ jde za jazykem
+  updateEnergyFields(settings); // Hlavní Alza „automaticky“ mohla změnit měnu ceny elektřiny
   applyTexts();
 });
 
@@ -344,6 +402,7 @@ document.querySelectorAll(".domain").forEach((button) =>
     renderOpenAlza();
     try {
       await AlzaStore.run({ type: "assign", key: SETTINGS_KEY, values: { primaryDomain } });
+      updateEnergyFields(await AlzaCore.getSettings()); // Cena elektřiny v měně nové hlavní Alzy
     } catch (error) {
       logError(error);
       showSaved(button, t("saveFailed"), true);
@@ -386,6 +445,89 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && (changes[WATCH_LISTS_KEY] || changes[WATCH_PRODUCTS_KEY] || changes[TARGETS_KEY])) renderWatching().catch(logError);
 });
 
+// === Novinky (#news) ===
+
+// Které novinky ukázat: neviděná vydání (od alzaNews.seen po nainstalovanou verzi), jinak nejnovější (otevřeno ručně
+// z popupu nebo nastavení). Zeleně se zvýrazní nové volby neviděných vydání – i v krocích průvodce – a na stránce
+// novinek vždy. Volby v novinkách jsou kopie voleb z kroků (stejné názvy, change je drží v souladu)
+async function prepareNews() {
+  const { [NEWS_KEY]: news } = await chrome.storage.local.get(NEWS_KEY);
+  const current = chrome.runtime.getManifest().version;
+  const fresh = AlzaCore.getReleaseNews(news?.seen, current);
+  const released = AlzaCore.releases.filter(({ version }) => AlzaCore.compareVersions(version, current) <= 0);
+  newsReleases = fresh.length ? fresh : released.slice(0, 3);
+  newSettings = new Set(fresh.flatMap((release) => release.settings));
+
+  const keys = [...new Set(newsReleases.flatMap((release) => release.settings))];
+  const options = keys
+    .map((key) => form.querySelector(`[data-screen]:not([data-screen="news"]) [data-setting="${key}"]`))
+    .filter(Boolean)
+    .map((option) => option.cloneNode(true));
+  document.getElementById("newsOptions").replaceChildren(...options);
+  document.getElementById("newsSettings").hidden = options.length === 0;
+}
+
+function renderNewsTexts() {
+  document.getElementById("newsLead").textContent = t("newsLead", chrome.runtime.getManifest().version);
+  const lang = DICTIONARY_LANG[uiLanguage];
+  const blocks = newsReleases.map(({ version }) => {
+    const block = document.createElement("div");
+    block.className = "release";
+    const heading = document.createElement("h3");
+    heading.textContent = t("newsRelease", version);
+    const list = document.createElement("ul");
+    const items = RELEASE_NEWS[version]?.[lang] || RELEASE_NEWS[version]?.cz || [];
+    list.append(...items.map((text) => Object.assign(document.createElement("li"), { textContent: text })));
+    block.append(heading, list);
+    return block;
+  });
+  document.getElementById("newsReleases").replaceChildren(...blocks);
+}
+
+// Zelené zvýraznění a štítek Nové – po každém přepsání textů (popisek volby se přepisuje celý)
+function markNew() {
+  document.querySelectorAll(".new-badge").forEach((badge) => badge.remove());
+  form.querySelectorAll("[data-setting]").forEach((option) => {
+    const isNew = newSettings.has(option.dataset.setting) || Boolean(option.closest("#newsOptions"));
+    option.classList.toggle("is-new", isNew);
+    if (!isNew) return;
+    const badge = document.createElement("span");
+    badge.className = "new-badge";
+    badge.textContent = t("newBadge");
+    option.querySelector(".option-label")?.append(badge);
+  });
+}
+
+// Novinky jsou viděné, jakmile se stránka novinek ukáže – popup přestane ukazovat značku Novinky
+function markNewsSeen() {
+  const seen = newsReleases[0]?.version;
+  if (seen) AlzaStore.run({ type: "assign", key: NEWS_KEY, values: { seen } }).catch(logError);
+}
+
+// Hotovo = zavřít záložku (otevřelo ji rozšíření); kdyby to nešlo, aspoň okno
+document.getElementById("newsClose").addEventListener("click", async () => {
+  try {
+    const tab = await chrome.tabs.getCurrent();
+    if (tab?.id !== undefined) {
+      await chrome.tabs.remove(tab.id);
+      return;
+    }
+  } catch (error) {
+    logError(error);
+  }
+  window.close();
+});
+
+async function start() {
+  try {
+    await prepareNews();
+  } catch (error) {
+    logError(error);
+  }
+  if (!document.querySelector('[data-screen="news"]').hidden) markNewsSeen();
+  await loadSettings(); // Nastaví i kopie voleb v novinkách a znovu texty (applyTexts → novinky, štítky Nové)
+}
+
 applyTexts();
 show(location.hash.slice(1));
-loadSettings().catch(logError);
+start().catch(logError);

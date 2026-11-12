@@ -22,16 +22,18 @@ function t(key, ...params) {
 const formatDate = (ts) => new Date(ts).toLocaleDateString(ui.locale);
 
 // data-i18n = text, data-i18n-title = title, data-i18n-tip = bublina „?“ (data-tip) i aria-label,
-// data-i18n-placeholder = placeholder
+// data-i18n-placeholder = placeholder, data-i18n-label = aria-label (název řady záložek)
 // Ikony před texty (src/shared/icons.js) – emoji v textech nejsou, ikonu přidá setText podle klíče textu;
 // tone = ikona v barvě textu (výstrahy a mazání)
 const OPTIONS_ICONS = {
   helpLink: "help",
   welcomeLink: "explore",
+  newsLink: "news",
   tracking: "chart",
   notifications: "bell",
   testNotifications: "bell",
   categories: "cart",
+  general: "settings",
   language: "language",
   backup: "save",
   exportJson: "download",
@@ -46,6 +48,7 @@ const OPTIONS_ICONS = {
   wipeButtonConfirm: { icon: "delete", tone: true },
   tabLists: "list",
   tabProducts: "bell",
+  tabOwned: "bag",
   tabData: "storage",
   tabLog: "history",
   cleanupBannerStart: "cleaning",
@@ -71,6 +74,7 @@ function applyStaticTexts() {
   document.querySelectorAll("[data-i18n]").forEach((element) => setText(element, element.dataset.i18n));
   document.querySelectorAll("[data-i18n-title]").forEach((element) => (element.title = t(element.dataset.i18nTitle)));
   document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => (element.placeholder = t(element.dataset.i18nPlaceholder)));
+  document.querySelectorAll("[data-i18n-label]").forEach((element) => element.setAttribute("aria-label", t(element.dataset.i18nLabel)));
   document.querySelectorAll("[data-i18n-tip]").forEach((element) => {
     const text = t(element.dataset.i18nTip);
     element.dataset.tip = text;
@@ -94,6 +98,7 @@ function applyLanguage(settings) {
   renderLog().catch(logError);
   renderErrorSummary().catch(logError);
   refreshStoredProducts().catch(logError);
+  if (typeof renderOwned === "function") renderOwned().catch(logError); // options-owned.js se načítá až za tímto souborem
 }
 
 function renderVersion() {
@@ -111,7 +116,21 @@ function updateDependentRows() {
   toggle("dropRow", form.notifyDrops.checked);
   toggle("quietRow", form.quietHours.checked);
   toggle("cashbackRow", form.watchPurchases.checked); // Připomínka cashbacku potřebuje objednávky
+  toggle("warrantyRow", form.ownedItems.checked); // Připomínka konce záruky potřebuje Moje nákupy
+  toggle("energyRow", form.energyCost.checked);
+  toggle("energyUsageRow", form.energyCost.checked);
+  toggle("energyHoursRow", form.energyCost.checked);
   form.checkTime.hidden = form.checkSchedule.value !== "daily"; // Čas jen u kontroly jednou denně
+}
+
+// Cena elektřiny se zadává v měně hlavní Alzy – políčko dostane název nastavení pro tuto měnu (energyPriceCZK…),
+// ostatní měny si nechají svou hodnotu
+const energyPriceInput = document.getElementById("energyPrice");
+function updateEnergyField(settings) {
+  const { currency } = AlzaCore.domains[AlzaCore.getPrimaryDomain(settings)];
+  energyPriceInput.name = AlzaCore.energyPriceKeys[currency];
+  energyPriceInput.value = AlzaCore.getEnergyPrice(settings, AlzaCore.getPrimaryDomain(settings));
+  document.getElementById("energyPriceUnit").textContent = `${currency}/kWh`;
 }
 
 // Odkaz na nápovědu v hlavičce – v jazyce zvoleném v nastavení
@@ -135,6 +154,13 @@ async function loadSettings() {
   form.saveBrowsing.checked = settings.saveBrowsing;
   form.watchPurchases.checked = settings.watchPurchases;
   form.remindCashback.checked = settings.remindCashback;
+  form.ownedItems.checked = settings.ownedItems;
+  form.remindWarranty.checked = settings.remindWarranty;
+  form.energyCost.checked = settings.energyCost;
+  form.energyYears.value = settings.energyYears;
+  form.energyCyclesPerWeek.value = settings.energyCyclesPerWeek;
+  form.energyHoursPerDay.value = settings.energyHoursPerDay;
+  updateEnergyField(settings);
   form.uiLanguage.value = settings.uiLanguage;
   form.primaryDomain.value = Object.hasOwn(AlzaCore.domains, settings.primaryDomain) ? settings.primaryDomain : "auto";
   updateHelpLink(settings);
@@ -142,9 +168,9 @@ async function loadSettings() {
   updateDependentRows();
 }
 
-// „✓ Uloženo“ / chyba pod sloupcem, ve kterém se nastavení změnilo
+// „✓ Uloženo“ / chyba vpravo v řadě záložek nastavení
 function showSaved(source, text) {
-  const info = source.closest("section")?.querySelector("[data-saved]");
+  const info = source.closest("form")?.querySelector("[data-saved]");
   if (!info) return;
   document.querySelectorAll("[data-saved]").forEach((element) => (element.textContent = ""));
   info.textContent = text;
@@ -171,14 +197,35 @@ async function saveSettings(source) {
     saveBrowsing: form.saveBrowsing.checked,
     watchPurchases: form.watchPurchases.checked,
     remindCashback: form.remindCashback.checked,
+    ownedItems: form.ownedItems.checked,
+    remindWarranty: form.remindWarranty.checked,
+    energyCost: form.energyCost.checked,
     uiLanguage: form.uiLanguage.value,
     primaryDomain: form.primaryDomain.value,
   };
+  // Čísla ceny provozu: mimo rozsah nebo prázdné = zůstane uložená hodnota. Rozsahy jsou stejné jako u importu
+  // zálohy (OptionsData.SETTING_RANGES)
+  const within = (input, key) => (input.value === "" ? null : (OptionsData.sanitizeSettings({ [key]: Number(input.value) })[key] ?? null));
+  const energyPrice = within(energyPriceInput, energyPriceInput.name);
+  const energyYears = within(form.energyYears, "energyYears");
+  const energyCycles = within(form.energyCyclesPerWeek, "energyCyclesPerWeek");
+  const energyHours = within(form.energyHoursPerDay, "energyHoursPerDay");
+  settings.energyHoursPerDay = energyHours ?? settings.energyHoursPerDay;
+  if (energyPrice !== null && Object.hasOwn(AlzaCore.defaultSettings, energyPriceInput.name)) settings[energyPriceInput.name] = energyPrice;
+  settings.energyYears = energyYears ?? settings.energyYears;
+  settings.energyCyclesPerWeek = energyCycles ?? settings.energyCyclesPerWeek;
   await AlzaStore.run({ type: "assign", key: SETTINGS_KEY, values: settings });
   updateHelpLink(settings);
   applyLanguage(settings);
 
   form.minDropPercent.value = settings.minDropPercent;
+  // Do políček ceny provozu se vrací jen oprava neplatné hodnoty – jinak by uložení jedné změny přepsalo hodnotu,
+  // kterou uživatel mezitím napsal do vedlejšího pole. Změna hlavní Alzy přepne měnu políčka ceny elektřiny
+  if (energyYears === null) form.energyYears.value = settings.energyYears;
+  if (energyCycles === null) form.energyCyclesPerWeek.value = settings.energyCyclesPerWeek;
+  if (energyHours === null) form.energyHoursPerDay.value = settings.energyHoursPerDay;
+  const energyKey = AlzaCore.energyPriceKeys[AlzaCore.domains[AlzaCore.getPrimaryDomain(settings)].currency];
+  if (energyPrice === null || energyPriceInput.name !== energyKey) updateEnergyField(settings);
   updateDependentRows();
   showSaved(source, t("saved"));
 }
@@ -400,20 +447,27 @@ async function renderProducts() {
 }
 
 // === Záloha dat ===
-// Zálohují se jen data rozšíření se známým klíčem (ne stav běhů a log). Import kontroluje klíče i tvar
-// hodnot – adresy produktů z importu se stahují s cookies, ale služba na pozadí pouští jen https Alzu.
+// Zálohují se jen data rozšíření se známým klíčem (ne stav běhů, log, nákupy a slevové kódy – OptionsData v
+// options-backup.js). Import kontroluje klíče i tvar hodnot – adresy produktů z importu se stahují s cookies, ale
+// služba na pozadí pouští jen https Alzu.
 
 const BACKUP_FORMAT = "alza-wishlist-price-insights";
-const BROWSED_KEY = AlzaCore.storageKeys.browsed;
-const { history: HISTORY_PREFIX, price: PRICE_PREFIX, legacyPrices: LEGACY_PRICES_PREFIX } = AlzaCore.storagePrefixes;
-const DOMAIN_KEYS = Object.keys(AlzaCore.domains).join("|"); // alza_cz|alza_sk|alza_hu
-// Záznam ceny po produktech (alzaPrice_<doména>_<id>); starý formát alzaPrices_<doména> jen z importu starších záloh
-const PRICE_KEY_PATTERN = new RegExp(`^${PRICE_PREFIX}(${DOMAIN_KEYS})_(.+)$`);
-const LEGACY_PRICES_KEY_PATTERN = new RegExp(`^${LEGACY_PRICES_PREFIX}(${DOMAIN_KEYS})$`);
-const HISTORY_KEY_PATTERN = new RegExp(`^${HISTORY_PREFIX}(${DOMAIN_KEYS})_(.+)$`);
-const BACKUP_KEY_PATTERN = new RegExp(
-  `^(${LEGACY_PRICES_PREFIX}(${DOMAIN_KEYS})|${PRICE_PREFIX}(${DOMAIN_KEYS})_.+|${HISTORY_PREFIX}(${DOMAIN_KEYS})_.+|${[AlzaCore.storageKeys.watchLists, WATCH_PRODUCTS_KEY, TARGETS_KEY, BROWSED_KEY, SETTINGS_KEY].join("|")})$`
-);
+const { browsed: BROWSED_KEY, cashbackReminders: CASHBACK_REMINDERS_KEY } = AlzaCore.storageKeys;
+const { history: HISTORY_PREFIX, price: PRICE_PREFIX } = AlzaCore.storagePrefixes;
+const {
+  BACKUP_KEY_PATTERN,
+  PRICE_KEY_PATTERN,
+  LEGACY_PRICES_KEY_PATTERN,
+  HISTORY_KEY_PATTERN,
+  isPlainObject,
+  isOptionalString,
+  isKnownDomain,
+  toImportTime,
+  toImportImage,
+  sanitizeProductMap,
+  sanitizeCashbackReminders,
+  sanitizeSettings,
+} = OptionsData;
 const backupInfo = document.getElementById("backupInfo");
 
 function showBackupInfo(text, isError = false) {
@@ -453,9 +507,6 @@ async function getBackupData() {
   return Object.fromEntries(Object.entries(all).filter(([key]) => BACKUP_KEY_PATTERN.test(key)));
 }
 
-const isPlainObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
-const isOptionalString = (value) => value === undefined || value === null || typeof value === "string";
-const isKnownDomain = (domain) => AlzaCore.isKnownDomain(domain);
 // Typ ceny se používá i v názvu CSS třídy – jen písmena, číslice a podtržítko
 const PRICE_TYPE_PATTERN = /^\w+$/;
 const isPriceMap = (prices) =>
@@ -472,37 +523,7 @@ const isHistory = (value) =>
       (entry.n === undefined || typeof entry.n === "string")
   );
 
-// Čas ze zálohy: kladný a ne v budoucnosti (posunuté hodiny, ruční úprava) – jinak teď
 const MAX_IMPORT_BYTES = 200 * 1024 * 1024; // Větší soubor by stránku zamrazil – záloha tak velká nebývá
-const toImportTime = (time, now = Date.now()) => (Number.isFinite(time) && time > 0 && time <= now + AlzaCore.dayMs ? time : now);
-// Obrázek produktu jen z Alzy – cizí adresa by se načetla v dialogu historie (sledovací pixel)
-const toImportImage = (image) => (AlzaCore.isAlzaImageUrl(image) ? image : null);
-
-// Hlídané produkty, cílové ceny a procházené produkty: jen položky s adresou Alzy a doménou, která k adrese patří
-// (jinak by spadla kontrola na pozadí i tabulka v nastavení, nebo by měla špatnou měnu). Klíč se složí znovu
-// z domény a adresy – jinak by byl produkt hlídaný dvakrát (a "__proto__" by se tvářil jako položka)
-function sanitizeProductMap(value, requirePrice) {
-  return Object.fromEntries(
-    Object.values(value)
-      .filter(
-        (item) =>
-          isPlainObject(item) &&
-          AlzaCore.isAlzaUrl(item.url) &&
-          isKnownDomain(item.domain) &&
-          AlzaCore.getDomainKey(new URL(item.url).hostname) === item.domain &&
-          isOptionalString(item.name) &&
-          isOptionalString(item.image) &&
-          (!requirePrice || Number.isFinite(item.price))
-      )
-      .map((item) => {
-        const clean = { ...item, image: toImportImage(item.image) };
-        ["since", "seenAt"].forEach((field) => {
-          if (field in clean) clean[field] = toImportTime(clean[field]);
-        });
-        return [AlzaCore.getProductKey(item.domain, item.url), clean];
-      })
-  );
-}
 
 // Meta klíč záznamu ceny ve správném tvaru? Čas v budoucnosti (posunuté hodiny, ruční úprava zálohy) by
 // záznam držel „čerstvý“ navždy – seznam by produkt už nikdy nestáhl
@@ -556,22 +577,7 @@ function sanitizePriceRecords(value) {
   );
 }
 
-// Z importovaného nastavení jen známé volby se správným typem (zbytek zůstane podle stávajícího / výchozího)
-function sanitizeSettings(value) {
-  const defaults = AlzaCore.defaultSettings;
-  const valid = Object.entries(value).filter(([key, setting]) => {
-    if (!Object.hasOwn(defaults, key) || typeof setting !== typeof defaults[key]) return false;
-    if (key === "notifyAvailability") return ["all", "inStock", "off"].includes(setting);
-    if (key === "uiLanguage") return ["auto", ...AlzaCore.uiLanguages].includes(setting);
-    if (key === "primaryDomain") return setting === "auto" || Object.hasOwn(AlzaCore.domains, setting);
-    if (key === "quietFrom" || key === "quietTo" || key === "checkTime") return AlzaCore.timePattern.test(setting);
-    if (key === "checkSchedule") return Object.hasOwn(AlzaCore.checkSchedules, setting);
-    if (key === "minDropPercent") return Number.isFinite(setting) && setting >= 0 && setting <= 99; // jako formulář
-    if (typeof setting === "number") return Number.isFinite(setting) && setting >= 0;
-    return true;
-  });
-  return Object.fromEntries(valid);
-}
+// Importované nastavení kontroluje OptionsData.sanitizeSettings (známé volby, správný typ, rozsah jako formulář)
 
 // Hlídané seznamy bez products by rozbily popup i službu na pozadí; produkty jen s adresou Alzy
 function sanitizeWatchLists(value) {
@@ -686,6 +692,9 @@ importFile.addEventListener("change", async () => {
       } else if (key === TARGETS_KEY || key === WATCH_PRODUCTS_KEY || key === BROWSED_KEY) {
         valid[key] = sanitizeProductMap(value, key === TARGETS_KEY);
         skipped += Math.max(0, Object.keys(value).length - Object.keys(valid[key]).length);
+      } else if (key === CASHBACK_REMINDERS_KEY) {
+        valid[key] = sanitizeCashbackReminders(value);
+        skipped += Math.max(0, Object.keys(value).length - Object.keys(valid[key]).length);
       } else if (LEGACY_PRICES_KEY_PATTERN.test(key)) {
         valid[key] = sanitizePriceRecords(value);
       } else if (PRICE_KEY_PATTERN.test(key)) {
@@ -694,6 +703,13 @@ importFile.addEventListener("change", async () => {
         valid[key] = value; // historie – ověřená isHistory
       }
     });
+    // Připomínky cashbacku, které tu už jsou, mají přednost (aktuální Hotovo a odeslaná upozornění) – ze zálohy jen chybějící
+    if (valid[CASHBACK_REMINDERS_KEY]) {
+      const { [CASHBACK_REMINDERS_KEY]: current } = await chrome.storage.local.get(CASHBACK_REMINDERS_KEY);
+      const fresh = Object.entries(valid[CASHBACK_REMINDERS_KEY]).filter(([key]) => !(isPlainObject(current) && Object.hasOwn(current, key)));
+      if (fresh.length > 0) valid[CASHBACK_REMINDERS_KEY] = Object.fromEntries(fresh);
+      else delete valid[CASHBACK_REMINDERS_KEY];
+    }
     const count = Object.keys(valid).length;
     if (count === 0) throw new Error(t("importEmpty"));
 
@@ -1077,6 +1093,13 @@ async function buildDiagnostics() {
   const all = await chrome.storage.local.get(null);
   const histories = Object.entries(all).filter(([key]) => key.startsWith(HISTORY_PREFIX));
   const lists = Object.values(all[WATCH_LISTS_KEY] || {});
+  // Co kdo koupil, do diagnostiky nepatří: nové nákupy jen počtem, produkt hlídaný jen kvůli nákupu beze jména
+  const redacted = OptionsData.redactDiagnostics({
+    watchLog: all[WATCH_LOG_KEY],
+    watchState: all[WATCH_STATE_KEY],
+    errors: all[ERROR_LOG_KEY],
+    sensitive: getSensitiveTexts(all),
+  });
   return {
     format: `${BACKUP_FORMAT}-diagnostics`,
     version: chrome.runtime.getManifest().version,
@@ -1095,11 +1118,15 @@ async function buildDiagnostics() {
       priceRecords: Object.fromEntries(
         Object.keys(AlzaCore.domains).map((domain) => [domain, Object.keys(all).filter((key) => key.startsWith(`${PRICE_PREFIX}${domain}_`)).length])
       ),
+      // Jen počty – kódy, nákupy a připomínky cashbacku samotné do diagnostiky nepatří
+      codes: Object.keys(all[AlzaCore.storageKeys.codes] || {}).length,
+      purchases: Object.keys(all[AlzaCore.storageKeys.purchases] || {}).length,
+      cashbackReminders: Object.keys(all[CASHBACK_REMINDERS_KEY] || {}).length,
       bytesInUse: await getBytesInUse(all),
     },
-    watchState: all[WATCH_STATE_KEY] || null,
-    watchLog: (all[WATCH_LOG_KEY] || []).slice(0, 30), // Log je od nejnovějšího
-    errors: all[ERROR_LOG_KEY] || [],
+    watchState: redacted.watchState,
+    watchLog: redacted.watchLog.slice(0, 30), // Log je od nejnovějšího
+    errors: redacted.errors,
   };
 }
 
@@ -1114,41 +1141,36 @@ const REPORT_BUG_URL = "https://github.com/Pnaky/Alza-Price-Insight/issues/new";
 const REPORT_BUG_ERRORS = 5;
 const REPORT_BUG_MAX_URL = 7500;
 
-// Hlášení je veřejné – z chyb pryč adresy produktů (zůstane jen doména) a identifikátor instalace ve Firefoxu
-function redactForReport(text) {
-  return String(text)
-    .replace(/moz-extension:\/\/[0-9a-f-]+/gi, "moz-extension://…")
-    .replace(/^[0-9a-f]{8}-[0-9a-f-]{27}(?=\/)/i, "extension")
-    .replace(/https?:\/\/[^\s)"']+/g, (match) => {
-      try {
-        return new URL(match).hostname;
-      } catch {
-        return "…";
-      }
-    });
-}
+// Hlášení je veřejné – adresy, slevové kódy a názvy koupeného zboží z chyb pryč (OptionsData.redactForReport)
+const { redactForReport, getSensitiveTexts } = OptionsData;
 
 function getBrowserName() {
   const ua = navigator.userAgent;
-  // Edge a Opera mají v textu i "Chrome/" (dřív) – nejdřív hledat je
-  const match = ua.match(/(Edg|OPR|Firefox)\/(\d+)/) || ua.match(/(Chrome)\/(\d+)/);
+  // Edge a Opera mají v textu i "Chrome/" (dřív) – nejdřív hledat je. Safari se hlásí "Version/27.2 Safari/605.1.15"
+  // bez "Chrome/" (Chrome má "Safari/537.36", ale ne "Version/")
+  const safari = ua.match(/Version\/(\d+)[\d.]* Safari\//);
+  const match = ua.match(/(Edg|OPR|Firefox)\/(\d+)/) || ua.match(/(Chrome)\/(\d+)/) || (safari && [safari[0], "Safari", safari[1]]);
   const name = { Edg: "Edge", OPR: "Opera" }[match?.[1]] || match?.[1] || "?";
   const os = /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "";
   return [match ? `${name} ${match[2]}` : name, os].filter(Boolean).join(", ");
 }
 
 document.getElementById("reportBug").addEventListener("click", async () => {
-  const { [ERROR_LOG_KEY]: log = [] } = await chrome.storage.local.get(ERROR_LOG_KEY);
+  // Kódy a názvy koupeného zboží (hlídání po nákupu, připomínky cashbacku, Moje nákupy) – z chyb se začerní
+  const stored = await chrome.storage.local.get([ERROR_LOG_KEY, ...OptionsData.SENSITIVE_KEYS]);
+  const log = Array.isArray(stored[ERROR_LOG_KEY]) ? stored[ERROR_LOG_KEY] : [];
+  const sensitive = getSensitiveTexts(stored);
   const settings = await AlzaCore.getSettings();
   const version = chrome.runtime.getManifest().version;
   const errors = log.slice(-REPORT_BUG_ERRORS).map(
     (entry) =>
-      `- ${new Date(entry.t).toISOString().slice(0, 16).replace("T", " ")} UTC ${entry.version || ""} [${redactForReport(entry.source)}] ${redactForReport(String(entry.message).replace(/\s+/g, " ")).slice(0, 300)}`
+      `- ${new Date(entry.t).toISOString().slice(0, 16).replace("T", " ")} UTC ${entry.version || ""} [${redactForReport(entry.source, sensitive)}] ${redactForReport(String(entry.message).replace(/\s+/g, " "), sensitive).slice(0, 300)}`
   );
   const primary = new URL(AlzaCore.domains[AlzaCore.getPrimaryDomain(settings)].origin).hostname.replace(/^www\./, "");
   const buildUrl = (lines) => {
     const body = t("reportBugBody", version, getBrowserName(), AlzaCore.getUiLanguage(settings), primary, lines.join("\n") || t("reportBugNoErrors"));
-    return `${REPORT_BUG_URL}?${new URLSearchParams({ title: `[${version}] `, body })}`;
+    // Bez předvyplněného názvu – GitHub název vyžaduje, takže ho uživatel napíše sám (verze je v textu)
+    return `${REPORT_BUG_URL}?${new URLSearchParams({ body })}`;
   };
   // Hotová adresa (po zakódování) pod limitem GitHubu – ubírat nejstarší chyby
   let url = buildUrl(errors);
@@ -1165,7 +1187,8 @@ document.getElementById("clearErrorLog").addEventListener("click", async () => {
 });
 
 // === Smazání všech dat ===
-// Jen po napsání potvrzovacího slova a vždy s automatickou zálohou předem. Nastavení a log chyb zůstanou.
+// Jen po napsání potvrzovacího slova a vždy s automatickou zálohou předem. Co se smaže a co zůstane (nastavení,
+// log chyb), určuje OptionsData.getWipeKeys – nákupy, slevové kódy a cashbacky se smažou taky, i když v záloze nejsou
 
 // Potvrzovací slovo je v jazyce stránky (SMAZAT / ZMAZAŤ / TÖRLÉS / DELETE) – stejné jako v poznámce nad políčkem
 const wipeConfirm = document.getElementById("wipeConfirm");
@@ -1202,12 +1225,13 @@ wipeButton.addEventListener("click", async () => {
     }
     // Číslo na ikoně se týká mazaných produktů – vynulovat (služba na pozadí neodpovídá)
     await chrome.runtime.sendMessage({ action: "watchSeen" }).catch(() => {});
-    // Jen to, co je v záloze – co mezitím přibylo, zůstane
-    const keys = [...Object.keys(wipeBackup).filter((key) => key !== SETTINGS_KEY), WATCH_STATE_KEY, WATCH_LOG_KEY, AlzaCore.storageKeys.vatCheck];
+    // Produkty jen ze zálohy (co mezitím přibylo, zůstane), k tomu všechny přehledy rozšíření kromě nastavení a logu chyb
+    const keys = OptionsData.getWipeKeys(wipeBackup);
+    const count = Object.keys(await chrome.storage.local.get(keys)).length;
     await AlzaStore.run({ type: "remove", keys });
     wipeConfirm.value = "";
     resetWipe();
-    showBackupInfo(t("wipeDone", keys.length));
+    showBackupInfo(t("wipeDone", count));
     renderProducts();
     chrome.runtime.sendMessage({ action: "cleanupRefresh" }).catch(() => {});
   } catch (error) {
@@ -1422,6 +1446,14 @@ function createRunDetail(run) {
   };
   const addNote = (text) => detail.appendChild(Object.assign(document.createElement("div"), { className: "watch-log-note", textContent: text }));
 
+  // Obsah hlídaných seznamů z API (položky přidané / odebrané jinde, např. v mobilní aplikaci)
+  const names = (list, count) => list.join(", ") + (count > list.length ? ", …" : "");
+  (Array.isArray(run.lists) ? run.lists : []).forEach((list) => {
+    // Objednávky (hlídání po nákupu) – stejný tvar záznamu, vlastní texty
+    if (list.problem) return addEntry(list, t(list.orders ? "logOrdersProblem" : "logListProblem", list.problem), "watch-problem");
+    if (list.addedCount) addEntry(list, t(list.orders ? "logOrdersAdded" : "logListAdded", list.addedCount, names(list.added || [], list.addedCount)), "watch-log-change");
+    if (list.removedCount) addEntry(list, t("logListRemoved", list.removedCount, names(list.removed || [], list.removedCount)), "watch-log-change");
+  });
   run.changed.forEach((item) => addEntry(item, item.lines.map((text) => AlzaCore.upgradePriceDropText(text, item.url)).join(" · "), "watch-log-change"));
   run.failed.forEach((item) => addEntry(item, item.problem, "watch-problem"));
   if (run.unchanged.length) addNote(t("logUnchanged", run.unchanged.length, run.unchanged.map((item) => item.name).join(", ")));
@@ -1441,9 +1473,67 @@ renderLists().catch((error) => console.error("Hlídané seznamy se nepodařilo n
 renderLog().catch((error) => console.error("Log běhů se nepodařilo načíst:", error));
 
 // === Záložky ===
-// Vybraná záložka je v adrese (#lists, #products, #data, #log) – po obnovení stránky zůstane otevřená
+// Nastavení: vybraná záložka se pamatuje v prohlížeči (localStorage – jen pohodlí, bez něj se otevře první)
+const SETTINGS_TABS = ["tracking", "notifications", "categories", "general"];
+const SETTINGS_TAB_KEY = "alzaSettingsTab";
 
-const TABS = ["lists", "products", "data", "log"];
+// Vybraná záložka: aria-selected a jako jediná v pořadí tabulátoru (ostatní šipkami – setupTabKeys)
+function markSelectedTab(buttons, isSelected) {
+  buttons.forEach((button) => {
+    const selected = isSelected(button);
+    button.setAttribute("aria-selected", String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  });
+}
+
+// Klávesnice v řadě záložek: šipky vlevo / vpravo (dokola), Home a End přejdou na záložku a rovnou ji otevřou
+function setupTabKeys(tablist) {
+  tablist.addEventListener("keydown", (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+    const index = tabs.indexOf(event.target.closest('[role="tab"]'));
+    if (index < 0) return;
+    const next = { ArrowLeft: index - 1, ArrowRight: index + 1, Home: 0, End: tabs.length - 1 }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    const tab = tabs[(next + tabs.length) % tabs.length];
+    tab.focus();
+    tab.click();
+  });
+}
+document.querySelectorAll('[role="tablist"]').forEach(setupTabKeys);
+
+function showSettingsTab(name) {
+  const tab = SETTINGS_TABS.includes(name) ? name : SETTINGS_TABS[0];
+  markSelectedTab(document.querySelectorAll("[data-settings-tab]"), (button) => button.dataset.settingsTab === tab);
+  SETTINGS_TABS.forEach((panel) => (document.getElementById(`settings-${panel}`).hidden = panel !== tab));
+  return tab;
+}
+
+// Otevře záložku nastavení a zapamatuje ji
+function selectSettingsTab(name) {
+  const tab = showSettingsTab(name);
+  try {
+    localStorage.setItem(SETTINGS_TAB_KEY, tab);
+  } catch {
+    // Volba se jen nezapamatuje
+  }
+}
+
+document.querySelectorAll("[data-settings-tab]").forEach((button) => button.addEventListener("click", () => selectSettingsTab(button.dataset.settingsTab)));
+try {
+  showSettingsTab(localStorage.getItem(SETTINGS_TAB_KEY));
+} catch {
+  showSettingsTab(SETTINGS_TABS[0]);
+}
+
+// Data: vybraná záložka je v adrese (#lists, #products, #data, #log) – po obnovení stránky zůstane otevřená.
+// Přímý odkaz na záložku nastavení: #s-<záložka> (#s-tracking, #s-notifications, #s-categories, #s-general) –
+// otevře ji a zapamatuje jako po kliknutí; v adrese pak zase zůstane záložka dat (applyHash)
+
+const TABS = ["lists", "products", "owned", "data", "log"]; // owned = Moje nákupy (options-owned.js)
+const SETTINGS_HASH_PREFIX = "s-";
+let currentTab = TABS[0];
 
 function showTab(name) {
   // #cleanup (odkaz z popupu) = uložená data s filtrem navržených ke smazání
@@ -1452,8 +1542,9 @@ function showTab(name) {
     if (storedProducts.length > 0) renderFirstPage();
   }
   const tab = name === "cleanup" ? "data" : TABS.includes(name) ? name : TABS[0];
-  document.querySelectorAll(".tab").forEach((button) => button.setAttribute("aria-selected", String(button.dataset.tab === tab)));
-  document.querySelectorAll(".tab-panel").forEach((panel) => (panel.hidden = panel.id !== `tab-${tab}`));
+  currentTab = tab;
+  markSelectedTab(document.querySelectorAll(".tab[data-tab]"), (button) => button.dataset.tab === tab);
+  TABS.forEach((panel) => (document.getElementById(`tab-${panel}`).hidden = panel !== tab));
   if (location.hash !== `#${tab}`) history.replaceState(null, "", `#${tab}`);
   if (tab === "data" && storedProductsDirty) scheduleStoredProductsRefresh();
 }
@@ -1462,9 +1553,21 @@ function setTabCount(id, count) {
   document.getElementById(id).textContent = `(${count})`;
 }
 
-document.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => showTab(button.dataset.tab)));
-window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
-showTab(location.hash.slice(1));
+// Adresa → záložky. #s-<záložka> patří nastavení (záložka dat zůstane, jak je), cokoli jiného záložkám dat
+function applyHash() {
+  const name = location.hash.slice(1);
+  if (!name.startsWith(SETTINGS_HASH_PREFIX)) return showTab(name);
+  const settingsTab = name.slice(SETTINGS_HASH_PREFIX.length);
+  if (SETTINGS_TABS.includes(settingsTab)) {
+    selectSettingsTab(settingsTab);
+    form.scrollIntoView({ block: "nearest" });
+  }
+  showTab(currentTab);
+}
+
+document.querySelectorAll(".tab[data-tab]").forEach((button) => button.addEventListener("click", () => showTab(button.dataset.tab)));
+window.addEventListener("hashchange", applyHash);
+applyHash();
 
 renderErrorSummary().catch((error) => console.error("Log chyb se nepodařilo načíst:", error));
 

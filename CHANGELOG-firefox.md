@@ -2,6 +2,25 @@
 
 ## Nevydáno
 
+## 2026.11.12
+
+- Moje nákupy (volitelné): všechno koupené na Alze – datum a cena nákupu, stav a délka záruky, vrácené a reklamované zboží, odkaz na objednávku, graf výdajů po letech a měsících se srovnáním, filtr podle roku a měsíce se součtem
+- Připomínka konce záruky měsíc předem u dražšího zboží; na detailu produktu „Koupili jste…“
+- Cena provozu: v kategoriích u lednic, mrazáků, praček a sušiček s řazením „S provozem“, na detailu produktu i u televizí, monitorů a myček; cena elektřiny, počet let, praní týdně a hodiny televize v nastavení
+- Cena za parametr v kategoriích a vyhledávání: Kč/TB a Kč/GB u disků a pamětí, za 1000 mAh u powerbanek, za Wh u nabíjecích stanic; řazení „Za jednotku“ i podle ní
+- Co je nového: po aktualizaci stránka s novinkami (sama jen u nové volby), značka Novinky v popupu
+- Nastavení po záložkách (Sledování cen, Notifikace, Výpisy kategorií, Obecné), ovladatelné i šipkami a čtečkou obrazovky; průvodce má krok Kategorie, Moje nákupy a připomínku konce záruky
+- Hlídané seznamy se před každou kontrolou aktualizují z Alzy – i položky přidané v mobilní aplikaci
+- Hlídání po nákupu: nová objednávka se načte už při kontrole na pozadí; zlevnění hned po nákupu se ohlásí; zboží mimo hlídané seznamy hlásí jen zlevnění pod nákupní cenu; vrácené a zrušené zboží se přestane hlídat
+- Filtr slev u velkých výpisů filtruje načtené produkty a další dávku přidá „Načíst dalších 480“; správně počítá ceny člena AlzaPlus+
+- Běžná cena se přeškrtne, jen když jde opravdu zaplatit míň – ne u samotného cashbacku nebo výkupu
+- Šetrněji k Alze: prodlevy mezi dotazy na objednávky, přerušení po odmítnutí
+- Zlevnění zjištěné těsně před zavřením prohlížeče se ohlásí po dalším spuštění
+- Nahlásit chybu: název napíšete sami; hlášení i diagnostika bez adres, kódů, názvů koupeného zboží a čísel objednávek
+- Záloha obsahuje i připomínky cashbacku; Smazat všechna data smaže i nákupy, kódy a připomínky
+- Firefox: kontrola na pozadí se neuspí při načítání seznamů a objednávek; po aktualizaci se uklidí stará cenová karta a výpis nezůstane seřazený
+- Opravy: sleva k položce v objednávce s víc zbožím, zdánlivé zlevnění po nákupu s kódem, připomínky cashbacku (tiché hodiny, maďarská data, eura), slevový kód z textu, košík po překreslení, Přidat s kódem bez dvojího přidání, cenová karta po překreslení stránky, ceny při načítání seznamu, jedno upozornění pro produkt pod dvěma adresami, texty chyb v jazyce rozhraní
+
 ## 2026.11.9
 
 - Popup: trezor slevových kódů (kód, cena s kódem, Kopírovat), sbalený na jeden řádek; upozornění na nový kód hlídaného produktu obsahuje kód

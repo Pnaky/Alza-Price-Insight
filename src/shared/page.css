@@ -87,6 +87,11 @@
   margin-right: 0;
 }
 
+/* Atribut hidden skryje prvek vždy – i ten, kterému styl stránky nastavuje display (řada tlačítek .buttons je flex) */
+[hidden] {
+  display: none !important;
+}
+
 html {
   min-height: 100%;
   background: var(--page-bg);

@@ -11,6 +11,8 @@ const POPUP_TEXTS = {
     cleanupReview: "Prohlédnout a smazat",
     cleanupSnooze: "Připomenout za měsíc",
     openOptionsTitle: "Nastavení, hlídané produkty, cílové ceny, záloha",
+    newsTitle: "Co je nového",
+    newsBadge: "Novinky",
     changes: "Změny cen",
     changesNew: "Nové změny cen ({0})",
     changesRecent: "Poslední změny cen",
@@ -53,6 +55,8 @@ const POPUP_TEXTS = {
     cleanupReview: "Pozrieť a zmazať",
     cleanupSnooze: "Pripomenúť o mesiac",
     openOptionsTitle: "Nastavenia, sledované produkty, cieľové ceny, záloha",
+    newsTitle: "Čo je nové",
+    newsBadge: "Novinky",
     changes: "Zmeny cien",
     changesNew: "Nové zmeny cien ({0})",
     changesRecent: "Posledné zmeny cien",
@@ -95,6 +99,8 @@ const POPUP_TEXTS = {
     cleanupReview: "Megtekintés és törlés",
     cleanupSnooze: "Emlékeztessen egy hónap múlva",
     openOptionsTitle: "Beállítások, figyelt termékek, célárak, biztonsági mentés",
+    newsTitle: "Újdonságok",
+    newsBadge: "Újdonságok",
     changes: "Árváltozások",
     changesNew: "Új árváltozások ({0})",
     changesRecent: "Legutóbbi árváltozások",
@@ -137,6 +143,8 @@ const POPUP_TEXTS = {
     cleanupReview: "Review and delete",
     cleanupSnooze: "Remind me in a month",
     openOptionsTitle: "Settings, watched products, target prices, backup",
+    newsTitle: "What's new",
+    newsBadge: "What's new",
     changes: "Price changes",
     changesNew: "New price changes ({0})",
     changesRecent: "Recent price changes",
@@ -221,6 +229,29 @@ function sendToBackground(message) {
 
 document.getElementById("openOptions").addEventListener("click", () => chrome.runtime.openOptionsPage());
 
+// === Novinky po aktualizaci ===
+// Ikona v záhlaví otevře novinky v průvodci (#news); dokud uživatel neviděl novinky nainstalované verze, je zelená
+// s textem Novinky (background.js otevře novinky sám jen u vydání s novou volbou)
+const NEWS_KEY = AlzaCore.storageKeys.news;
+
+async function renderNews() {
+  const button = document.getElementById("openNews");
+  const { [NEWS_KEY]: news } = await chrome.storage.local.get(NEWS_KEY);
+  const unseen = AlzaCore.getReleaseNews(news?.seen, chrome.runtime.getManifest().version).length > 0;
+  button.classList.toggle("unseen", unseen);
+  button.querySelector(".news-label")?.remove();
+  if (unseen) button.append(Object.assign(document.createElement("span"), { className: "news-label", textContent: t("newsBadge") }));
+}
+
+document.getElementById("openNews").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("src/welcome/welcome.html#news") });
+  window.close();
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes[NEWS_KEY]) renderNews().catch(showError);
+});
+
 // === Domény Alzy ===
 // Data jsou oddělená po doménách, popup ukazuje všechny dohromady. Doména otevřené záložky (null = jiná
 // stránka než Alza) určuje odkaz na Alzu; štítek domény se ukáže, jen když hlídáte víc domén
@@ -285,6 +316,8 @@ const WATCH_STATE_KEY = AlzaCore.storageKeys.watchState;
 const CODES_KEY = AlzaCore.storageKeys.codes;
 const CODES_MAX_AGE_MS = 30 * AlzaCore.dayMs; // Trezor ukazuje kódy viděné za posledních 30 dní
 const CASHBACK_REMINDERS_KEY = AlzaCore.storageKeys.cashbackReminders;
+const PURCHASES_KEY = AlzaCore.storageKeys.purchases;
+const SETTINGS_KEY = AlzaCore.storageKeys.settings;
 
 const toggleWatchButton = document.getElementById("toggleWatch");
 const runWatchNowButton = document.getElementById("runWatchNow");
@@ -327,7 +360,8 @@ function renderToggle() {
 }
 
 async function renderWatch() {
-  const data = await chrome.storage.local.get([WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY]);
+  const data = await chrome.storage.local.get([WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY, PURCHASES_KEY]);
+  const settings = await AlzaCore.getSettings();
   const lists = data[WATCH_LISTS_KEY] || {};
   const targetCount = Object.keys(data[TARGETS_KEY] || {}).length;
   const productCount = Object.keys(data[WATCH_PRODUCTS_KEY] || {}).length;
@@ -397,8 +431,11 @@ async function renderWatch() {
   } else {
     addLine(t("noRunYet"));
   }
-  // Kdy proběhne další kontrola na pozadí (frekvence podle nastavení) – jen když je co hlídat
-  const watching = Object.keys(lists).length > 0 || targetCount > 0 || productCount > 0;
+  // Kdy proběhne další kontrola na pozadí (frekvence podle nastavení) – jen když je co hlídat (i jen koupené
+  // zboží ve lhůtě pro vrácení – background.js getWatchedProducts)
+  const now = Date.now();
+  const watchingPurchases = Boolean(settings.watchPurchases) && Object.values(data[PURCHASES_KEY] || {}).some((purchase) => purchase?.returnUntil > now);
+  const watching = Object.keys(lists).length > 0 || targetCount > 0 || productCount > 0 || watchingPurchases;
   if (!state.running && watching && nextAlarm?.scheduledTime) addLine(t("nextRun", formatTime(nextAlarm.scheduledTime)), null, POPUP_ICONS.nextRun);
   if (state.pendingNotifications?.length) addLine(t("pending", state.pendingNotifications.length), null, POPUP_ICONS.pending);
   // Název produktu s problémem je odkaz – rychle se na produkt podívat
@@ -415,7 +452,7 @@ async function renderWatch() {
     link.textContent = problem.name;
     line.append(link, `: ${problem.message}`);
   });
-  runWatchNowButton.disabled = Boolean(state.running) || (Object.keys(lists).length === 0 && targetCount === 0 && productCount === 0);
+  runWatchNowButton.disabled = Boolean(state.running) || !watching;
   renderChanges(state.recent || [], showDomains);
   renderCleanup(data[CLEANUP_KEY] || {});
 }
@@ -561,7 +598,16 @@ function createProductPanel(products, showDomains = false) {
   return panel;
 }
 
-// Přehled posledních změn – nové (číslo na ikoně při otevření popupu) zvýrazněné nahoře
+// Název produktu z adresy („…/oppo-reno-12-d123.htm“ → „oppo reno 12“). Špatné % v adrese nesmí shodit trezor
+function getNameFromUrl(url) {
+  const slug = new URL(url).pathname.split("/").pop().replace(/-d\d+\.htm$/, "").replace(/-/g, " ");
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
 // Trezor slevových kódů (AlzaCore.storageKeys.codes): produkt, kód, cena s kódem a Kopírovat – nejnovější kódy nahoře
 async function renderCodes() {
   const { [CODES_KEY]: registry = {}, [AlzaCore.storageKeys.browsed]: browsed = {}, [WATCH_PRODUCTS_KEY]: watched = {} } = await chrome.storage.local.get([
@@ -597,7 +643,7 @@ async function renderCodes() {
       const title = document.createElement("div");
       title.className = "change-title";
       const name = document.createElement("a");
-      name.textContent = browsed[key]?.name || watched[key]?.name || decodeURIComponent(new URL(entry.url).pathname.split("/").pop().replace(/-d\d+\.htm$/, "").replace(/-/g, " "));
+      name.textContent = browsed[key]?.name || watched[key]?.name || getNameFromUrl(entry.url);
       name.title = name.textContent;
       name.href = entry.url;
       name.target = "_blank";
@@ -615,9 +661,18 @@ async function renderCodes() {
       copy.className = "code-copy";
       copy.textContent = t("codeCopy");
       copy.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(entry.code).catch(() => {});
-        copy.textContent = t("codeCopied");
-        setTimeout(() => (copy.textContent = t("codeCopy")), 1500);
+        try {
+          await navigator.clipboard.writeText(entry.code);
+          copy.textContent = t("codeCopied");
+          setTimeout(() => (copy.textContent = t("codeCopy")), 1500);
+        } catch {
+          // Schránka nedostupná – kód aspoň označit, ať jde zkopírovat ručně (Ctrl+C)
+          const range = document.createRange();
+          range.selectNodeContents(pill);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       });
       line.append(pill, price, copy);
       body.append(title, line);
@@ -631,10 +686,16 @@ async function renderCodes() {
 // odkaz na podmínky akce a Hotovo (už nepřipomínat) – nejbližší lhůta nahoře
 async function renderCashbacks() {
   const { [CASHBACK_REMINDERS_KEY]: reminders = {} } = await chrome.storage.local.get(CASHBACK_REMINDERS_KEY);
+  // Vypnuté připomínky cashbacku v nastavení – sekce se neukazuje
+  const enabled = (await AlzaCore.getSettings()).remindCashback;
   const now = Date.now();
-  const items = Object.entries(reminders || {})
-    .filter(([, reminder]) => reminder && !reminder.done && AlzaCore.isAlzaUrl(reminder.url) && AlzaCore.getCashbackReminderStep(reminder, now) !== "expired")
-    .sort(([, a], [, b]) => (a.registerUntil || Infinity) - (b.registerUntil || Infinity));
+  // Bez lhůty registrace na konec (Infinity − Infinity by dalo NaN a řazení by bylo náhodné)
+  const deadline = (reminder) => (reminder.registerUntil > 0 ? reminder.registerUntil : Number.MAX_SAFE_INTEGER);
+  const items = !enabled
+    ? []
+    : Object.entries(reminders && typeof reminders === "object" ? reminders : {})
+        .filter(([, reminder]) => reminder && !reminder.done && AlzaCore.isAlzaUrl(reminder.url) && AlzaCore.getCashbackReminderStep(reminder, now) !== "expired")
+        .sort(([, a], [, b]) => deadline(a) - deadline(b));
   const section = document.getElementById("cashbacks");
   section.hidden = items.length === 0;
   if (items.length === 0) return;
@@ -686,7 +747,8 @@ async function renderCashbacks() {
       done.title = t("cashbackDoneTitle");
       done.addEventListener("click", () => {
         done.disabled = true;
-        AlzaStore.run({ type: "patchMap", key: CASHBACK_REMINDERS_KEY, merge: { [key]: { done: true } } }).catch(showError);
+        // existingOnly: připomínku mezitím smazanou službou na pozadí (lhůta prošla) nevytvoří znovu
+        AlzaStore.run({ type: "patchMap", key: CASHBACK_REMINDERS_KEY, merge: { [key]: { done: true } }, existingOnly: true }).catch(showError);
       });
       line.appendChild(done);
       body.append(title, line);
@@ -788,8 +850,8 @@ runWatchNowButton.addEventListener("click", () => {
 
 chrome.storage.onChanged.addListener(async (changes, area) => {
   if (area === "local" && changes[CODES_KEY]) renderCodes().catch(showError);
-  if (area === "local" && changes[CASHBACK_REMINDERS_KEY]) renderCashbacks().catch(showError);
-  if (area !== "local" || ![WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY].some((key) => changes[key])) return;
+  if (area === "local" && (changes[CASHBACK_REMINDERS_KEY] || changes[SETTINGS_KEY])) renderCashbacks().catch(showError);
+  if (area !== "local" || ![WATCH_LISTS_KEY, WATCH_STATE_KEY, TARGETS_KEY, WATCH_PRODUCTS_KEY, CLEANUP_KEY, PURCHASES_KEY, SETTINGS_KEY].some((key) => changes[key])) return;
   // Změny z kontroly doběhlé při otevřeném popupu (např. tlačítko Zkontrolovat) – zvýraznit a hned označit viděné
   const unseen = changes[WATCH_STATE_KEY]?.newValue?.unseen || [];
   // I znovu změněný, už zvýrazněný produkt – jinak by po zavření zůstalo číslo na ikoně (markSeen zapíše [] → bez smyčky)
@@ -811,6 +873,7 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   ui = UI_LANGUAGES[uiLanguage];
   primaryDomain = AlzaCore.getPrimaryDomain(settings);
   applyStaticTexts();
+  renderNews().catch(showError);
 
   // Otevřený popup = změny viděny – vynulovat číslo na ikoně, ale v přehledu je nechat zvýrazněné
   const { [WATCH_STATE_KEY]: initialState = {} } = await chrome.storage.local.get(WATCH_STATE_KEY);
@@ -819,7 +882,6 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   activeDomain = await getActiveTabDomain();
   watchState = await sendToActiveTab({ action: "getWatchState" });
   renderToggle();
-  await renderWatch();
-  await renderCodes();
-  await renderCashbacks();
+  // Každá sekce zvlášť – chyba jedné (stav kontroly, trezor kódů, cashbacky) nesmí schovat ostatní
+  await Promise.all([renderWatch().catch(showError), renderCodes().catch(showError), renderCashbacks().catch(showError)]);
 })().catch(showError);

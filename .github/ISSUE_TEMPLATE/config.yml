@@ -1,0 +1,6 @@
+# Prázdné issue musí zůstat povolené – tlačítko 🐞 Nahlásit chybu v nastavení otevírá /issues/new s předvyplněným textem
+blank_issues_enabled: true
+contact_links:
+  - name: Bezpečnostní chyba
+    url: https://github.com/Pnaky/Alza-Price-Insight/security/advisories/new
+    about: Zranitelnosti hlaste neveřejně, ne přes issue.

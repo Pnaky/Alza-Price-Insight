@@ -177,6 +177,23 @@
         background: var(--head-btn-hover-bg);
       }
 
+      /* Neviděné novinky (popup.js renderNews): zelená Alzy jako tlačítko Do košíku a text Novinky */
+      .news-button.unseen {
+        width: auto;
+        gap: 4px;
+        padding: 0 9px 0 7px;
+        border-color: #4fb80c;
+        background: #5ed312;
+        color: #1e1e1e;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .news-button.unseen:hover {
+        border-color: #3f9a08;
+        background: #54c50f;
+      }
+
       .actions {
         display: flex;
         gap: 6px;
@@ -553,6 +570,7 @@
         <h1 data-i18n="title">Alza Price Insight</h1>
       </div>
       <a id="openAlza" class="alza-link" href="https://www.alza.cz/" target="_blank"></a>
+      <button id="openNews" class="icon-button news-button" data-i18n-title="newsTitle" title="Co je nového" data-icon="news"></button>
       <button id="openOptions" class="icon-button" data-i18n-title="openOptionsTitle" title="Nastavení, hlídané produkty, cílové ceny, záloha" data-icon="settings"></button>
     </header>
 

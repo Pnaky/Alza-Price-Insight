@@ -37,9 +37,91 @@ Object.assign(AlzaPriceTracker, {
       AlzaCore.storageKeys.targets,
       this.getHistoryKey(product.url),
     ];
+    // Moje nákupy: záznam o koupi tohoto produktu – po načtení objednávek nebo přepnutí volby znovu
+    const ownedKeys = [AlzaCore.storageKeys.owned, AlzaCore.storageKeys.settings];
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === "local" && keys.some((key) => changes[key])) this.scheduleProductPanel();
+      if (area !== "local") return;
+      if (ownedKeys.some((key) => changes[key])) {
+        this.loadOwnedProduct()
+          .then(() => this.scheduleProductPanel())
+          .catch((error) => console.error("Error loading owned product:", error));
+      } else if (keys.some((key) => changes[key])) this.scheduleProductPanel();
     });
+    await this.loadOwnedProduct().catch((error) => console.error("Error loading owned product:", error));
+    if (this.state.ownedProduct) this.scheduleProductPanel();
+    this.setupWarranty().catch((error) => console.error("Error saving warranty:", error));
+  },
+
+  // Moje nákupy: záruka z detailu produktu (AlzaCore.getDocumentWarranty) k záznamu ceny a ke koupeným kusům –
+  // konec záruky se pak nepočítá z pevných 24 měsíců. Firemnímu účtu ji Alza dokreslí až po načtení stránky
+  // („Pro firemní nákupy: Záruka 24 měsíců“), proto pár pokusů
+  async setupWarranty() {
+    if (!(await AlzaCore.getSettings()).ownedItems) return;
+    for (const delay of [0, 2000, 4000, 8000]) {
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+      if (!AlzaCore.isContextAlive()) return;
+      const warranty = AlzaCore.getDocumentWarranty(document);
+      if (!warranty) continue;
+      await AlzaStore.run({ type: "setWarranty", domain: this.getAlzaDomain(), url: this.state.product.url, warranty });
+      return;
+    }
+  },
+
+  // Nákupy tohoto produktu z přehledu Moje nákupy (jen se zapnutou volbou ownedItems); null = nekoupeno / vypnuto
+  async loadOwnedProduct() {
+    const key = AlzaCore.storageKeys.owned;
+    const settings = await AlzaCore.getSettings();
+    const owned = settings.ownedItems ? (await chrome.storage.local.get(key))[key] : null;
+    const productKey = this.getProductKey(this.state.product.url);
+    const product = owned && typeof owned === "object" && Object.hasOwn(owned, productKey) ? owned[productKey] : null;
+    this.state.ownedProduct = product && Array.isArray(product.buys) ? product : null;
+  },
+
+  // „Provoz 10 let: 8 400 Kč · s pořizovací cenou 16 790 Kč“ (volba energyCost) – výpočet v bublině; null = stránka
+  // spotřebu neuvádí nebo je volba vypnutá. price = cena k zaplacení (null = produkt se neprodává)
+  async createEnergyNote(price) {
+    const energy = AlzaCore.getDocumentEnergy(document);
+    if (!energy) return null;
+    const domainKey = this.getAlzaDomain();
+    const settings = AlzaCore.getEnergySettings(await AlzaCore.getSettings(), domainKey);
+    if (!settings.enabled) return null;
+    const { yearlyKwh, yearly, cost } = AlzaCore.getEnergyCost(energy, settings);
+    const { locale, currency } = AlzaCore.domains[domainKey];
+    const number = (value, digits = 0) => value.toLocaleString(locale, { maximumFractionDigits: digits });
+    const plural = settings.years === 1 ? "One" : settings.years <= 4 ? "Few" : "Many";
+    const parts = [this.translate(`productEnergy${plural}`, settings.years, this.formatPrice(cost))];
+    if (price > 0) parts.push(this.translate("productEnergyTotal", this.formatPrice(price + cost)));
+    const usage = {
+      year: () => this.translate("productEnergyUseYear", number(energy.kwh, 1)),
+      cycles: () => this.translate("productEnergyUseCycles", number(energy.kwh, 1), settings.cyclesPerWeek, number(yearlyKwh)),
+      hours: () => this.translate("productEnergyUseHours", number(energy.kwh, 1), number(settings.hoursPerDay, 1), number(yearlyKwh)),
+    }[energy.per]();
+    const note = this.createEl("div", "alza-price-tracker-product-note", parts.join(" · "));
+    note.title = `${usage} × ${number(settings.price, 2)} ${currency}/kWh × ${settings.years} = ${this.formatPrice(cost)}\n${this.translate("productEnergyHint", this.formatPrice(yearly))}`;
+    return AlzaIcons.prepend(note, "bolt");
+  },
+
+  // „Koupili jste 12. 3. 2025 za 5 990 Kč · celkem 3× · záruka asi do 12. 3. 2027 · Objednávka“ – poslední nevrácený
+  // nákup; null = produkt koupený není
+  createOwnedNote() {
+    const buys = (this.state.ownedProduct?.buys || []).filter((buy) => Number.isFinite(buy?.t) && !buy.ret);
+    const last = buys.at(-1);
+    if (!last) return null;
+    const lang = this.state.uiLanguage || this.state.language || "cz";
+    const date = (time) => AlzaCore.formatTextDate(time, lang, true);
+    const parts = [last.p > 0 ? this.translate("productOwnedPrice", date(last.t), this.formatPrice(last.p)) : this.translate("productOwned", date(last.t))];
+    if (buys.length > 1) parts.push(this.translate("productOwnedTimes", buys.length));
+    const warranty = AlzaCore.getWarrantyState(last);
+    if (warranty.state === "active" || warranty.state === "ending") parts.push(this.translate("productOwnedWarranty", date(warranty.until)));
+    if (warranty.state === "extended") parts.push(this.translate("productOwnedClaimable"));
+    const note = this.createEl("div", "alza-price-tracker-product-note", `${parts.join(" · ")} · `);
+    const orderUrl = AlzaCore.getOrderUrl(this.getAlzaDomain(), last.o);
+    if (orderUrl) {
+      const link = this.createEl("a", "alza-price-tracker-product-order", this.translate("productOwnedOrder"));
+      Object.assign(link, { href: orderUrl, target: "_blank", rel: "noopener" });
+      note.appendChild(link);
+    } else note.textContent = parts.join(" · ");
+    return AlzaIcons.prepend(note, "bag");
   },
 
   // Cashback: pod Alzin řádek „Cena s CashBack“ (do jeho rámečku) termíny akce – konec nákupu a lhůta registrace
@@ -154,8 +236,8 @@ Object.assign(AlzaPriceTracker, {
   },
   quantityTiersAttribute: "data-alza-price-tracker-tiers", // Banner pod naší bublinou (main.css)
   quantityTiersScopeAttribute: "data-alza-price-tracker-tiers-scope", // Blok ceny jako základ polohy bubliny (main.css)
-  quantityTiersGap: 14,
-  quantityTiersOffsetX: 1, // Alzina bublina je o 1 px vpravo od tlačítka // Mezera pro šipku mezi bublinou a tlačítkem (jako u Alzy)
+  quantityTiersGap: 14, // Mezera pro šipku mezi bublinou a tlačítkem (jako u Alzy)
+  quantityTiersOffsetX: 1, // Alzina bublina je o 1 px vpravo od tlačítka
 
   scheduleProductPanel() {
     clearTimeout(this.state.productPanelTimeout);
@@ -210,9 +292,10 @@ Object.assign(AlzaPriceTracker, {
     await this.recordPriceHistory(url, prices, availability, this.state.productData);
   },
 
-  // Důvod, proč se ceny neukládají – text kontroly na pozadí bez dovětku „kontrola přerušena“ (na detailu nic neběží)
+  // Důvod, proč se ceny neukládají – text kontroly na pozadí bez dovětku „kontrola přerušena“ (na detailu nic neběží).
+  // Text je ve slovníku jádra (AlzaCore.texts), jazyk rozhraní jako ostatní texty karty
   getSaveProblemNote(key) {
-    return AlzaCore.translate(this.state.language || "cz", key).replace(/,\s*(kontrola přerušena|kontrola prerušená|ellenőrzés megszakítva|check stopped)$/, "");
+    return AlzaCore.translate(this.state.uiLanguage || this.state.language || "cz", key).replace(/,\s*(kontrola přerušena|kontrola prerušená|ellenőrzés megszakítva|check stopped)$/, "");
   },
 
   async setProductWatched(enabled) {
@@ -352,6 +435,14 @@ Object.assign(AlzaPriceTracker, {
       card.appendChild(this.createEl("div", "alza-price-tracker-product-note", this.getCheaperConditionsText(cheaperConditions)));
     }
 
+    // Cena provozu (lednice, pračky, sušičky, televize, monitory): spotřeba ze stránky × cena elektřiny z nastavení
+    const energyNote = await this.createEnergyNote(AlzaCore.getPayNowPrice(priceMap));
+    if (energyNote) card.appendChild(energyNote);
+
+    // Moje nákupy: tento produkt už máte – kdy a za kolik, záruka, odkaz na objednávku
+    const ownedNote = this.createOwnedNote();
+    if (ownedNote) card.appendChild(ownedNote);
+
 
     if (target) {
       const status = this.getTargetStatus(target, lowestNow);
@@ -435,7 +526,7 @@ Object.assign(AlzaPriceTracker, {
   // a nejnižší za 30 dní (z historie), odkaz na produkt
   buildOfferText(product, prices, verdict, lowest30) {
     const entries = AlzaCore.getPriceEntries(prices || {});
-    const conditional = this.conditionalPriceTypes || ["discount", "applus", "cashback", "scrappage"];
+    const conditional = this.conditionalPriceTypes; // list-toolbar.js
     const regular = entries.filter(({ type }) => !conditional.includes(type));
     const lines = [product.name];
     if (regular.length > 0) lines.push(this.translate("offerPrice", this.formatPrice(regular[0].price)));

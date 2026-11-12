@@ -57,3 +57,73 @@ test("průvodce: každé políčko voleb je nastavení se stejným názvem", () 
   assert.ok(names.length >= 10);
   names.forEach((name) => assert.ok(Object.hasOwn(AlzaCore.defaultSettings, name), `nastavení ${name}`));
 });
+
+// Volby nastavení, které v průvodci nejsou – podrobnosti výpočtu ceny provozu zůstávají jen v nastavení. Nová volba
+// musí být v průvodci, nebo tady (s důvodem) – průvodce se tak s nastavením nerozejde
+const NOT_IN_WIZARD = {
+  energyYears: "podrobnost výpočtu ceny provozu – jen v nastavení",
+  energyCyclesPerWeek: "podrobnost výpočtu ceny provozu – jen v nastavení",
+  energyHoursPerDay: "podrobnost výpočtu ceny provozu – jen v nastavení",
+};
+
+test("průvodce: každá volba nastavení je v průvodci, nebo na seznamu výjimek", () => {
+  const { AlzaCore } = loadCore();
+  const names = new Set([...html.matchAll(/<(?:input|select)\b[^>]*\sname="([^"]+)"/g)].map(([, name]) => name));
+  if (html.includes("data-energy-price")) Object.values(AlzaCore.energyPriceKeys).forEach((key) => names.add(key)); // Název podle měny
+  if (html.includes('id="language"')) names.add("uiLanguage"); // Výběr jazyka v záhlaví
+  if (html.includes("data-domain=")) names.add("primaryDomain"); // Výběr hlavní Alzy v kroku 1
+  const missing = Object.keys(AlzaCore.defaultSettings).filter((key) => !names.has(key) && !Object.hasOwn(NOT_IN_WIZARD, key));
+  assert.deepEqual(missing, []);
+  Object.keys(NOT_IN_WIZARD).forEach((key) => assert.ok(Object.hasOwn(AlzaCore.defaultSettings, key), `výjimka ${key} není nastavení`));
+});
+
+test("novinky: vydání jsou seřazená, nové volby jsou nastavení s volbou v průvodci", () => {
+  const { AlzaCore } = loadCore();
+  assert.ok(AlzaCore.releases.length > 0);
+  AlzaCore.releases.forEach(({ version, settings }, index) => {
+    assert.match(version, /^\d{4}\.\d{1,2}\.\d{1,2}$/, `verze ${version}`);
+    if (index > 0) assert.ok(AlzaCore.compareVersions(AlzaCore.releases[index - 1].version, version) > 0, `${version} není starší než předchozí`);
+    settings.forEach((key) => {
+      assert.ok(Object.hasOwn(AlzaCore.defaultSettings, key), `${version}: ${key} není nastavení`);
+      assert.ok(html.includes(`data-setting="${key}"`), `${version}: ${key} nemá v průvodci volbu data-setting`);
+    });
+  });
+});
+
+test("novinky: odrážky má každé vydání ve všech jazycích ve stejném počtu", () => {
+  const { AlzaCore } = loadCore();
+  const NEWS = vm.runInContext("RELEASE_NEWS", context);
+  assert.deepEqual(Object.keys(NEWS).sort(), [...AlzaCore.releases.map(({ version }) => version)].sort());
+  Object.entries(NEWS).forEach(([version, texts]) => {
+    assert.deepEqual(Object.keys(texts).sort(), [...LANGUAGES].sort(), version);
+    LANGUAGES.forEach((lang) => {
+      assert.equal(texts[lang].length, texts.cz.length, `${version} ${lang} – počet odrážek`);
+      texts[lang].forEach((text) => assert.ok(typeof text === "string" && text.trim().length > 0, `${version} ${lang} – prázdná odrážka`));
+    });
+  });
+});
+
+test("novinky: porovnání verzí a neviděná vydání", () => {
+  const { AlzaCore } = loadCore();
+  assert.ok(AlzaCore.compareVersions("2026.11.12", "2026.11.9") > 0);
+  assert.ok(AlzaCore.compareVersions("2026.11.12", "2026.11.12.1") < 0);
+  assert.equal(AlzaCore.compareVersions("2026.11.12", "2026.11.12.0"), 0);
+  assert.ok(AlzaCore.compareVersions("2027.1.1", "2026.12.31.9") > 0);
+  const original = AlzaCore.releases;
+  AlzaCore.releases = [
+    { version: "2026.12.1", settings: [] },
+    { version: "2026.11.12", settings: ["ownedItems"] },
+    { version: "2026.11.9", settings: [] },
+  ];
+  try {
+    const versions = (since, current) => [...AlzaCore.getReleaseNews(since, current)].map(({ version }) => version);
+    assert.deepEqual(versions("2026.11.9", "2026.11.12"), ["2026.11.12"]); // Aktualizace z obchodu
+    assert.deepEqual(versions("2026.11.9", "2026.11.12.2"), ["2026.11.12"]); // Vývojová verze téhož dne
+    assert.deepEqual(versions("2026.11.12.1", "2026.11.12.2"), []); // Obnovení při vývoji – nic nového
+    assert.deepEqual(versions("2026.11.7", "2026.12.1"), ["2026.12.1", "2026.11.12", "2026.11.9"]); // Přeskočené verze
+    assert.deepEqual(versions("2026.12.1", "2026.12.1"), []);
+    assert.deepEqual(versions(undefined, "2026.12.1"), []); // Neznámo odkud – nic
+  } finally {
+    AlzaCore.releases = original;
+  }
+});

@@ -137,7 +137,10 @@
   margin-right: 10px !important;
 }
 
-.alza-price-tracker-price:last-child {
+/* Poslední cena – i když za ní je spinner načítání (absolutně mimo layout), jinak by dostala pravý okraj a ceny
+   řádku by při načítání uskočily doleva */
+.alza-price-tracker-price:last-child,
+.alza-price-tracker-price:has(+ .alza-price-tracker-spinner-container:last-child) {
   margin-right: 0 !important;
   padding-right: 0 !important;
 }
@@ -149,7 +152,14 @@
 .alza-price-tracker-price-applus:last-child,
 .alza-price-tracker-price-benefit:last-child,
 .alza-price-tracker-price-b2b:last-child,
-.alza-price-tracker-price-blackfriday:last-child {
+.alza-price-tracker-price-blackfriday:last-child,
+.alza-price-tracker-price-discount:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-scrappage:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-cashback:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-applus:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-benefit:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-b2b:has(+ .alza-price-tracker-spinner-container:last-child),
+.alza-price-tracker-price-blackfriday:has(+ .alza-price-tracker-spinner-container:last-child) {
   padding-right: 12px !important;
 }
 
@@ -627,6 +637,12 @@ select.alza-price-tracker-history-target-currency {
   margin-top: 8px;
   font-size: 13px;
   color: #616161;
+}
+
+/* Odkaz na objednávku v poznámce „Koupili jste…“ (Moje věci) */
+.alza-price-tracker-product-order {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .alza-price-tracker-product-note--warning {
@@ -1210,6 +1226,30 @@ select.alza-price-tracker-history-target-currency {
 /* Oba štítky na jednom řádku – přesahují pod tlačítko "Do košíku", kde je volno */
 .unit-price:has(.alza-price-tracker-unit-price) {
   white-space: nowrap;
+}
+
+/* Cena za parametr (Kč/TB, Kč/GB, Kč/Wh…) tam, kde Alza cenu za jednotku neukazuje (category.js) – řádek pod
+   cenovým boxem a štítek ve vzhledu Alziny ceny za jednotku (.unit-price, .unit-price__label) */
+.alza-price-tracker-param-price {
+  padding-top: 3px;
+  white-space: nowrap;
+}
+
+.alza-price-tracker-param-price-label {
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #212121;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  cursor: help;
+}
+
+/* Blok ceny má u Alzy pevnou výšku 100 px – s řádkem navíc by štítek přetekl přes "Skladem" */
+#boxes .price:has(.alza-price-tracker-param-price) {
+  height: auto !important;
+  min-height: 100px;
 }
 
 /* Blok ceny má u Alzy pevnou výšku – s benefitní cenou (přeškrtnutá cena pod ní) se nevejde a cena za

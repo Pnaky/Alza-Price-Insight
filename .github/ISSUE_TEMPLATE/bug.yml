@@ -1,0 +1,59 @@
+name: Nahlásit chybu
+description: Něco nefunguje, jak má. Rychlejší je tlačítko 🐞 Nahlásit chybu v nastavení rozšíření – předvyplní verzi i poslední chyby.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Díky za nahlášení! Hlášení je veřejné – nevkládejte slevové kódy, adresy, čísla objednávek ani názvy koupeného zboží.
+  - type: textarea
+    id: what
+    attributes:
+      label: Co se stalo
+      description: Co nefunguje a jak to zopakovat.
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Na které stránce Alzy (odkaz)
+      placeholder: https://www.alza.cz/...
+  - type: textarea
+    id: expected
+    attributes:
+      label: Co jste čekali
+  - type: input
+    id: version
+    attributes:
+      label: Verze rozšíření
+      description: V nastavení rozšíření nahoře pod názvem, nebo v chrome://extensions / about:addons.
+      placeholder: "2026.11.12"
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Prohlížeč
+      options:
+        - Chrome
+        - Firefox
+        - Edge
+        - Safari (experimentální)
+        - jiný
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Alza
+      options:
+        - alza.cz
+        - alza.sk
+        - alza.hu
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Snímek obrazovky, diagnostika
+      description: Vložte snímek, případně soubor z Nastavení → Obecné → Diagnostika → Stáhnout diagnostiku.

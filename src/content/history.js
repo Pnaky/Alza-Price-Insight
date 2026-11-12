@@ -231,7 +231,13 @@ Object.assign(AlzaPriceTracker, {
   // Další řádek tooltipu (first = na začátek)
   appendTitle(element, text, { first = false } = {}) {
     if (!text) return;
-    element.title = element.title ? (first ? `${text}\n${element.title}` : `${element.title}\n${text}`) : text;
+    const current = this.getTitle(element);
+    element.title = current ? (first ? `${text}\n${current}` : `${current}\n${text}`) : text;
+  },
+
+  // Text tooltipu i po dobu zobrazení karty (price-card.js title schová do data atributu)
+  getTitle(element) {
+    return element.title || element.dataset.alzaPriceTrackerTitle || "";
   },
 
   // Dlaždice s popiskem, hodnotou a podtitulkem (dialog historie: prefix "history", panel produktu: "product").

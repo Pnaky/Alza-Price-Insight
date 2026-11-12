@@ -92,6 +92,7 @@ const AlzaPriceTracker = {
     product: null, // Detail produktu: { url, name, image }
     productData: null, // Uložený záznam ceny ze seznamu (je-li)
     productPanelTimeout: null,
+    productSaveProblem: null, // Důvod, proč se ceny z detailu neukládají (resolveSaveProblem); null = ukládají se
   },
 
   // === Selektory na jednom místě ===
@@ -115,6 +116,11 @@ const AlzaPriceTracker = {
     // jen seznamy (Order1.htm) a detail produktu (*-d<číslo>.htm). Ostatní stránky nechat být
     const isListPage = this.config.targetUrlPattern.test(window.location.href);
     const isProductPage = !isListPage && Boolean(AlzaCore.getProductId(window.location.pathname + window.location.search)) && AlzaCore.isProductDocument(document);
+    // Firefox po aktualizaci rozšíření vloží skript do otevřené stránky znovu – plovoucí prvky předchozí verze
+    // (karta tooltipu, bublina množstevní slevy, upozornění u košíku) by zůstaly viset bez posluchačů
+    document
+      .querySelectorAll(".alza-price-tracker-price-card, .alza-price-tracker-tiers-bubble, .alza-price-tracker-cart-warning")
+      .forEach((element) => element.remove());
     // Jinde (výpisy kategorií, vyhledávání, úvodní stránka) jen naše tooltipy – štítky ceny za kus a lišta
     // kategorie (category.js) mají nápovědu v title; místo systémového tooltipu karta jako na seznamu
     if (!isListPage && !isProductPage) {
@@ -786,7 +792,7 @@ const AlzaPriceTracker = {
   },
 
   // Helper for creating a price display element
-  createPriceDisplayElement(priceObj, hasMultiplePrices) {
+  createPriceDisplayElement(priceObj, strikeOriginal) {
     const formattedPrice = this.formatPrice(priceObj.price);
     const priceElement = document.createElement("span");
 
@@ -801,8 +807,8 @@ const AlzaPriceTracker = {
       if (priceObj.title) priceElement.dataset.cashbackTitle = priceObj.title;
     }
 
-    // Přidat třídu pro original pouze pokud existuje více cen
-    if (priceObj.type === "original" && hasMultiplePrices) {
+    // Přeškrtnutá běžná cena (třída original) jen, když jde zaplatit míň (AlzaCore.isOriginalSuperseded)
+    if (priceObj.type === "original" && strikeOriginal) {
       priceElement.classList.add(`alza-price-tracker-price-${priceObj.type}`);
     } else if (priceObj.type !== "original") {
       priceElement.classList.add(`alza-price-tracker-price-${priceObj.type}`);
@@ -844,14 +850,14 @@ const AlzaPriceTracker = {
       // Use the prices parameter if provided (for fresh fetches), otherwise use stored prices
       const formattedPrices = prices && prices.length > 0 ? prices : AlzaCore.getPriceEntries(productData);
 
-      // Check if there are multiple prices
-      const hasMultiplePrices = formattedPrices.length > 1;
+      // Běžná cena přeškrtnutá jen, když jde zaplatit míň – u samotného cashbacku / výkupu dál platí
+      const strikeOriginal = AlzaCore.isOriginalSuperseded(Object.fromEntries(formattedPrices.map(({ type, price }) => [type, price])));
 
       // Render all prices (ascending), remember the last (highest) element
       let lastSpanEl = null;
       formattedPrices.forEach((priceObj, index) => {
         const isLast = index === formattedPrices.length - 1;
-        const priceElement = this.createPriceDisplayElement(priceObj, hasMultiplePrices);
+        const priceElement = this.createPriceDisplayElement(priceObj, strikeOriginal);
         priceContainer.appendChild(priceElement);
 
         // keep discount deltas on each price
@@ -951,7 +957,7 @@ const AlzaPriceTracker = {
     const lowestElement = priceContainer.querySelector(".alza-price-tracker-price");
     const previousText = lowestElement?.dataset.alzaPriceTrackerTotalText;
     if (previousText) {
-      lowestElement.title = lowestElement.title.split("\n").filter((line) => line !== previousText).join("\n");
+      lowestElement.title = this.getTitle(lowestElement).split("\n").filter((line) => line !== previousText).join("\n");
       delete lowestElement.dataset.alzaPriceTrackerTotalText;
     }
     if (quantity <= 1) return;

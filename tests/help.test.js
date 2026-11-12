@@ -84,10 +84,18 @@ test("nápověda: přepínač jazyků odkazuje na ostatní tři a zvýrazní vla
 // v jazyce nápovědy (bez úvodního emoji a „…“), ať uživatel hledá to, co opravdu vidí
 const REFERENCED_LABELS = [
   "testNotifications",
+  // Záložky nastavení, které nápověda jmenuje (Notifikace jako název záložky nezmiňuje)
+  "tracking",
   "categories",
+  "general",
   "unitPrice",
   "discountFilter",
+  "energyCost",
   "saveBrowsing",
+  "watchPurchases",
+  "remindCashback",
+  "ownedItems",
+  "remindWarranty",
   "exportJson",
   "importJson",
   "exportCsv",
@@ -95,6 +103,9 @@ const REFERENCED_LABELS = [
   "wipeSummary",
   "wipeWord",
   "diagnostics",
+  "reportBug",
+  "tabLists",
+  "tabOwned",
   "tabData",
 ];
 const bareLabel = (text) => text.replace(/^[^\p{L}]+|…$/gu, "").trim();
